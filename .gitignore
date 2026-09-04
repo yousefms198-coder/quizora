@@ -1,0 +1,8 @@
+node_modules/
+public/config.json
+gen-og.js
+start.bat
+start.ps1
+launch.js
+launch.log
+*.log

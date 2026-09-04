@@ -1,0 +1,16 @@
+{
+  "name": "quizora",
+  "version": "1.0.0",
+  "description": "Quizora — The Room Is Your Game Show",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "localtunnel": "^2.0.2",
+    "qrcode": "^1.5.3",
+    "ws": "^8.16.0"
+  }
+}

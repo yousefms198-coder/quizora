@@ -20,6 +20,15 @@ const LOCAL_IP = getLocalIP();
 const PORT = process.env.PORT || 3000;
 const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || null;
 
+function resolveBase(req) {
+  const host = req.headers.host || '';
+  if (host.endsWith('onrender.com')) return `${req.protocol}://${host}`;
+  if (PUBLIC_BASE_URL) return PUBLIC_BASE_URL;
+  if (/^(localhost|127\.0\.0\.1)/.test(host)) return `http://${LOCAL_IP}:${PORT}`;
+  if (host) return `${req.protocol}://${host}`;
+  return `http://${LOCAL_IP}:${PORT}`;
+}
+
 const app = express();
 app.set('trust proxy', 1);
 const server = http.createServer(app);
@@ -521,11 +530,11 @@ function advanceQuestion(room) {
 app.get('/api/ping', (req, res) => res.json({ ok: true }));
 
 app.get('/api/config', async (req, res) => {
-  const localUrl = `http://${LOCAL_IP}:${PORT}`;
+  const localUrl = resolveBase(req);
   let publicUrl = null;
   try {
     const config = JSON.parse(require('fs').readFileSync(path.join(__dirname, 'public', 'config.json'), 'utf8'));
-    if (config.publicUrl) {
+    if (config.publicUrl && config.publicUrl !== localUrl) {
       try {
         const ctrl = new AbortController();
         const to = setTimeout(() => ctrl.abort(), 4000);
@@ -546,7 +555,7 @@ app.get('/join/:code', (req, res) => {
 
 app.get('/qr/:code', async (req, res) => {
   const code = req.params.code.toUpperCase();
-  const baseUrl = PUBLIC_BASE_URL || `http://${LOCAL_IP}:${PORT}`;
+  const baseUrl = resolveBase(req);
   const url = `${baseUrl}/join/${code}`;
   try {
     const qr = await QRCode.toDataURL(url, {

@@ -6,3 +6,6 @@ start.ps1
 launch.js
 launch.log
 *.log
+ghlogin.txt
+ghlogin.txt.err
+gh_login.json

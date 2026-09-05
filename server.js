@@ -35,6 +35,7 @@ const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
 
 const rooms = new Map();
 
@@ -4816,6 +4817,19 @@ wss.on('connection', (ws) => {
       room.answeredThisRound = {};
       broadcastAll(room, { type: 'back_to_lobby', players: room.players, scores: room.scores });
     }
+
+    if (msg.type === 'end_game') {
+      const room = rooms.get(ws.roomCode);
+      if (!room || !ws.isHost) return;
+      clearInterval(room.timerInterval);
+      room.timerInterval = null;
+      broadcast(room, { type: 'host_disconnected' });
+      rooms.delete(room.code);
+      room.clients.forEach(client => {
+        try { client.send(JSON.stringify({ type: 'room_closed' })); } catch {}
+        try { client.close(); } catch {}
+      });
+    }
   });
 
   ws.on('close', () => {
@@ -4984,6 +4998,231 @@ app.get('/qr/:code', async (req, res) => {
   } catch {
     res.status(500).json({ error: 'Failed to generate QR' });
   }
+});
+
+/* ======================== ACCOUNTS & PRACTICE ======================== */
+const fs = require('fs');
+const DATA_DIR = path.join(__dirname, 'data');
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
+
+function loadUsers() {
+  try { return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8')); }
+  catch { return {}; }
+}
+function saveUsers(db) {
+  try {
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+    fs.writeFileSync(USERS_FILE, JSON.stringify(db, null, 2));
+  } catch (e) { console.error('saveUsers failed:', e.message); }
+}
+
+const usersDB = loadUsers();
+const sessions = new Map();
+
+function hashPassword(password, salt) {
+  return crypto.scryptSync(String(password), salt, 64).toString('hex');
+}
+
+function cleanUser(u) {
+  return {
+    username: u.username,
+    email: u.email,
+    avatar: u.avatar || '😎',
+    lang: u.lang || 'en',
+    createdAt: u.createdAt,
+    stats: u.stats || { tests: 0, scoreSum: 0, correctTot: 0, answerTot: 0 },
+    examStats: u.examStats || {},
+  };
+}
+
+function authUser(req) {
+  const auth = req.headers.authorization || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  const email = token ? sessions.get(token) : null;
+  if (!email || !usersDB[email]) return null;
+  return usersDB[email];
+}
+
+app.post('/api/auth/register', (req, res) => {
+  const { username, email, password } = req.body || {};
+  const uname = String(username || '').trim();
+  const em = String(email || '').trim().toLowerCase();
+  if (uname.length < 2 || uname.length > 16) return res.status(400).json({ error: 'Username must be 2-16 characters', errorTr: 'Kullanıcı adı 2-16 karakter olmalı' });
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return res.status(400).json({ error: 'Enter a valid email' });
+  if (String(password || '').length < 4) return res.status(400).json({ error: 'Password must be at least 4 characters', errorTr: 'Parola en az 4 karakter olmalı' });
+  if (usersDB[em]) return res.status(409).json({ error: 'That email is already registered', errorTr: 'Bu e-posta zaten kayıtlı' });
+  if (Object.values(usersDB).some(u => u.username.toLowerCase() === uname.toLowerCase())) return res.status(409).json({ error: 'That username is taken', errorTr: 'Bu kullanıcı adı alınmış' });
+  const salt = crypto.randomBytes(16).toString('hex');
+  const user = {
+    username: uname,
+    email: em,
+    passSalt: salt,
+    passHash: hashPassword(password, salt),
+    avatar: '😎',
+    lang: 'en',
+    createdAt: new Date().toISOString(),
+    stats: { tests: 0, scoreSum: 0, correctTot: 0, answerTot: 0 },
+    examStats: {},
+  };
+  usersDB[em] = user;
+  saveUsers(usersDB);
+  const token = crypto.randomBytes(32).toString('hex');
+  sessions.set(token, em);
+  res.json({ ok: true, token, user: cleanUser(user) });
+});
+
+app.post('/api/auth/login', (req, res) => {
+  const { email, password } = req.body || {};
+  const em = String(email || '').trim().toLowerCase();
+  const user = usersDB[em];
+  if (!user || user.passHash !== hashPassword(String(password || ''), user.passSalt)) {
+    return res.status(401).json({ error: 'Wrong email or password', errorTr: 'E-posta veya parola hatalı' });
+  }
+  const token = crypto.randomBytes(32).toString('hex');
+  sessions.set(token, em);
+  res.json({ ok: true, token, user: cleanUser(user) });
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  const auth = req.headers.authorization || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  if (token) sessions.delete(token);
+  res.json({ ok: true });
+});
+
+app.get('/api/auth/me', (req, res) => {
+  const user = authUser(req);
+  if (!user) return res.status(401).json({ error: 'Not logged in' });
+  res.json({ user: cleanUser(user) });
+});
+
+app.post('/api/auth/update', (req, res) => {
+  const user = authUser(req);
+  if (!user) return res.status(401).json({ error: 'Not logged in' });
+  const b = req.body || {};
+  if (b.username) {
+    const uname = String(b.username).trim();
+    if (uname.length < 2 || uname.length > 16) return res.status(400).json({ error: 'Username must be 2-16 characters' });
+    if (Object.values(usersDB).some(u => u.username.toLowerCase() === uname.toLowerCase() && u.email !== user.email)) return res.status(409).json({ error: 'That username is taken' });
+    user.username = uname;
+  }
+  if (typeof b.avatar === 'string' && /^[\p{Extended_Pictographic}\u200d]?$/u.test(b.avatar) && b.avatar.length <= 6) user.avatar = b.avatar || user.avatar;
+  if (b.lang === 'en' || b.lang === 'ar' || b.lang === 'tr') user.lang = b.lang;
+  if (b.newPassword) {
+    if (String(b.newPassword).length < 4) return res.status(400).json({ error: 'Password must be at least 4 characters' });
+    user.passSalt = crypto.randomBytes(16).toString('hex');
+    user.passHash = hashPassword(b.newPassword, user.passSalt);
+  }
+  saveUsers(usersDB);
+  res.json({ user: cleanUser(user) });
+});
+
+const practiceTests = new Map();
+
+app.post('/api/practice/start', (req, res) => {
+  const user = authUser(req);
+  if (!user) return res.status(401).json({ error: 'Not logged in' });
+  const { categories, numQuestions, mode, timerSeconds } = req.body || {};
+  const cats = Array.isArray(categories) ? categories.filter(c => EXAMS[c]) : [];
+  if (cats.length === 0) return res.status(400).json({ error: 'Pick at least one exam' });
+  const n = Math.min(Math.max(parseInt(numQuestions, 10) || 5, 1), 15);
+  const thisMode = mode === 'report' ? 'report' : 'instant';
+  const pool = cats.flatMap(c => EXAMS[c].questions.map(q => ({ ...q, category: c })));
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const picked = pool.slice(0, n);
+  const testId = crypto.randomBytes(12).toString('hex');
+  practiceTests.set(testId, {
+    email: user.email,
+    questions: picked,
+    mode: thisMode,
+    timerSeconds: timerSeconds === 0 ? 0 : (parseInt(timerSeconds, 10) || 20),
+    startedAt: Date.now(),
+    answered: new Array(picked.length).fill(null),
+  });
+  res.json({
+    testId,
+    mode: thisMode,
+    timerSeconds: practiceTests.get(testId).timerSeconds,
+    questions: picked.map((q, i) => ({
+      index: i,
+      q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q,
+      options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options,
+      category: q.category,
+    })),
+  });
+});
+
+function getPractice(req, res) {
+  const user = authUser(req);
+  if (!user) return { user: null, err: res.status(401).json({ error: 'Not logged in' }) };
+  const testId = req.body && req.body.testId;
+  const t = testId ? practiceTests.get(testId) : null;
+  if (!t || t.email !== user.email) return { user, err: res.status(404).json({ error: 'Test not found' }) };
+  return { user, t };
+}
+
+app.post('/api/practice/check', (req, res) => {
+  const { user, t, err } = getPractice(req, res);
+  if (!t) return err;
+  const index = parseInt(req.body.index, 10);
+  const answer = parseInt(req.body.answer, 10);
+  if (!t.questions[index]) return res.status(400).json({ error: 'Bad index' });
+  const q = t.questions[index];
+  const correct = answer === q.correct;
+  if (typeof answer === 'number' && answer >= 0) {
+    t.answered[index] = answer;
+    practiceTests.set(t.testId, t);
+  }
+  res.json({ index, correct, correctAnswer: q.options[q.correct], correctIndex: q.correct });
+});
+
+app.post('/api/practice/finish', (req, res) => {
+  const { user, t, err } = getPractice(req, res);
+  if (!t) return err;
+  const answers = req.body.answers || t.answered;
+  let correct = 0;
+  const details = [];
+  const catStats = {};
+  t.questions.forEach((q, i) => {
+    const ans = answers[i];
+    const ok = typeof ans === 'number' && ans === q.correct;
+    if (ok) correct++;
+    details.push({ index: i, category: q.category, correct: ok, correctAnswer: q.options[q.correct], correctIndex: q.correct, question: q.q, options: q.options });
+    catStats[q.category] = catStats[q.category] || { correct: 0, total: 0 };
+    catStats[q.category].total++;
+    if (ok) catStats[q.category].correct++;
+  });
+  const total = t.questions.length;
+  const wrong = total - correct;
+  const percentage = total ? Math.round((correct / total) * 100) : 0;
+  if (user) {
+    const s = user.stats;
+    s.tests++;
+    s.scoreSum += percentage;
+    s.correctTot += correct;
+    s.answerTot += total;
+    const perCat = {};
+    t.questions.forEach((q, i) => {
+      const ok = typeof answers[i] === 'number' && answers[i] === q.correct;
+      perCat[q.category] = perCat[q.category] || { correct: 0, total: 0 };
+      perCat[q.category].total++;
+      if (ok) perCat[q.category].correct++;
+    });
+    Object.entries(perCat).forEach(([cat, pc]) => {
+      const es = user.examStats[cat] || { best: 0, correct: 0, tot: 0 };
+      es.tot = (es.tot || 0) + pc.total;
+      es.correct = (es.correct || 0) + pc.correct;
+      const pct = Math.round((pc.correct / pc.total) * 100);
+      es.best = Math.max(es.best || 0, pct);
+      user.examStats[cat] = es;
+    });
+    saveUsers(usersDB);
+    practiceTests.delete(t.testId);
+  }
+  res.json({ total, correct, wrong, percentage, catStats, details });
 });
 
 server.listen(PORT, () => {

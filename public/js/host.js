@@ -35,6 +35,13 @@ let state = {
   totalQuestions: 10,
   frozenTimers: {},
   activeDoubles: new Set(),
+  user: null,
+  practiceView: 'setup',
+  practice: null,
+  practiceTimer: null,
+  inputAnswer: null,
+  settingsOpen: false,
+  pendingAvatar: undefined,
 };
 
 const app = document.getElementById('app');
@@ -90,9 +97,11 @@ function render() {
     player_waiting: renderPlayerWaiting,
     player_answer: renderPlayerAnswer,
     player_result: renderPlayerResult,
+    practice: renderPractice,
   };
   const fn = screens[state.screen];
   if (fn) app.appendChild(fn());
+  if (state.settingsOpen) app.appendChild(renderSettings());
 }
 
 function renderLangToggle(container) {
@@ -220,6 +229,8 @@ function renderLanding() {
   panel.appendChild(h('div', 'section-label', [L('Game Settings', 'إعدادات اللعبة', 'Oyun Ayarları')], { style: 'margin-bottom:10px;margin-top:8px' }));
   appendSettingsRow(panel);
   c.appendChild(panel);
+
+  renderAuthPanel(c);
 
   const actions = h('div', 'landing-actions');
   actions.appendChild(h('button', 'btn-primary', [L('Create a Game', 'إنشاء لعبة', 'Oyun Oluştur')], {
@@ -383,6 +394,23 @@ function renderGame() {
     }
     quickbar.appendChild(h('button', 'host-qb-btn glass', [L('⏭ Skip', '⏭ تخطي', '⏭ Geç')], {
       onclick: () => { sound.skip(); ws.send(JSON.stringify({ type: 'skip_question' })); }
+    }));
+    quickbar.appendChild(h('button', 'host-qb-btn glass', [L('⏹ End Game', '⏹ إنهاء اللعبة', '⏹ Oyunu Bitir')], {
+      style: 'color:#f87171',
+      onclick: () => {
+        sound.click();
+        removeRevealOverlay();
+        try { ws.send(JSON.stringify({ type: 'end_game' })); } catch {}
+        state.screen = 'landing';
+        state.roomCode = null;
+        state.players = [];
+        state.questions = [];
+        state.scores = {};
+        state.streaks = {};
+        state.playerStats = {};
+        state.phase = 'lobby';
+        render();
+      }
     }));
     c.appendChild(quickbar);
   }
@@ -731,6 +759,23 @@ function renderPlayerAnswer() {
 
   const bottom = h('div', 'controller-bottom');
   bottom.appendChild(h('div', 'controller-score', [L('Score:', 'النقاط:', 'Puan:'), ` `, h('span', '', [String(state.scores[state.playerName] || 0)])]));
+  bottom.appendChild(h('button', 'btn-ghost', [L('Leave', 'مغادرة', 'Ayrıl')], {
+    style: 'margin-top:12px;font-size:12px;padding:6px 16px',
+    onclick: () => {
+      sound.click();
+      removeRevealOverlay();
+      if (ws) { try { ws.close(); } catch {} }
+      state.screen = 'landing';
+      state.isHost = true;
+      state.roomCode = null;
+      state.playerName = '';
+      state.myPowerup = null;
+      state.players = [];
+      state.scores = {};
+      state.streaks = {};
+      render();
+    }
+  }));
   c.appendChild(bottom);
 
   return c;
@@ -743,6 +788,24 @@ function renderPlayerResult() {
   c.appendChild(h('div', 'state-sub', [L('Your answer is locked in', 'تم تأكيد إجابتك', 'Cevabın kilitlendi')]));
   c.appendChild(h('div', '', [], { style: 'margin-top:16px' }));
   c.appendChild(h('div', 'controller-score', [L('Score:', 'النقاط:', 'Puan:'), ` `, h('span', '', [String(state.scores[state.playerName] || 0)])]));
+
+  c.appendChild(h('button', 'btn-ghost', [L('Leave', 'مغادرة', 'Ayrıl')], {
+    style: 'margin-top:16px;font-size:12px;padding:6px 16px',
+    onclick: () => {
+      sound.click();
+      removeRevealOverlay();
+      if (ws) { try { ws.close(); } catch {} }
+      state.screen = 'landing';
+      state.isHost = true;
+      state.roomCode = null;
+      state.playerName = '';
+      state.myPowerup = null;
+      state.players = [];
+      state.scores = {};
+      state.streaks = {};
+      render();
+    }
+  }));
 
   if (state.showReveal && state.revealData) {
     setTimeout(() => showRevealOverlay(state.revealData), 200);
@@ -960,6 +1023,7 @@ function handleHostMessage(msg) {
       state.answered = {};
       state.showReveal = false;
       state.revealData = null;
+      removeRevealOverlay();
       state.scores = msg.scores || state.scores;
       state.timeLeft = msg.timerSeconds !== undefined ? msg.timerSeconds : state.timerSeconds;
       state.scoreChanges = {};
@@ -985,6 +1049,7 @@ function handleHostMessage(msg) {
       state.scores = msg.scores;
       state.playerStats = msg.playerStats || {};
       state.totalQuestions = msg.totalQuestions || 10;
+      removeRevealOverlay();
       state.screen = 'gameover';
       sound.win();
       fireConfetti();
@@ -994,10 +1059,23 @@ function handleHostMessage(msg) {
     case 'back_to_lobby':
       state.players = msg.players;
       state.scores = msg.scores;
+      removeRevealOverlay();
       state.screen = 'lobby';
       state.phase = 'lobby';
       render();
       setTimeout(loadQR, 100);
+      break;
+
+    case 'room_closed':
+      removeRevealOverlay();
+      state.screen = 'landing';
+      state.roomCode = null;
+      state.players = [];
+      state.scores = {};
+      state.streaks = {};
+      state.playerStats = {};
+      if (ws) { try { ws.close(); } catch {} }
+      render();
       break;
 
     case 'error':
@@ -1080,6 +1158,7 @@ function handlePlayerMessage(msg) {
       state.playerAnswer = null;
       state.showReveal = false;
       state.revealData = null;
+      removeRevealOverlay();
       state.paused = false;
       state.timeLeft = msg.timerSeconds || state.timerSeconds;
       state.screen = 'player_answer';
@@ -1102,6 +1181,7 @@ function handlePlayerMessage(msg) {
 
     case 'game_over':
       state.scores = msg.scores;
+      removeRevealOverlay();
       state.screen = 'player_waiting';
       render();
       break;
@@ -1109,7 +1189,23 @@ function handlePlayerMessage(msg) {
     case 'back_to_lobby':
       state.players = msg.players;
       state.scores = msg.scores;
+      removeRevealOverlay();
       state.screen = 'player_waiting';
+      render();
+      break;
+
+    case 'room_closed':
+      removeRevealOverlay();
+      state.screen = 'landing';
+      state.roomCode = null;
+      state.players = [];
+      state.scores = {};
+      state.streaks = {};
+      state.playerStats = {};
+      state.playerName = '';
+      state.myPowerup = null;
+      state.isHost = true;
+      if (ws) { try { ws.close(); } catch {} }
       render();
       break;
 
@@ -1167,9 +1263,479 @@ function fireConfetti() {
   })();
 }
 
+/* ======================== ACCOUNT: API + SESSION ======================== */
+function api(endpoint, method, body) {
+  const headers = { 'Content-Type': 'application/json' };
+  let token = null;
+  try { token = localStorage.getItem('quizora_token'); } catch {}
+  if (token) headers.Authorization = 'Bearer ' + token;
+  return fetch(endpoint, {
+    method: method || 'POST',
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+  }).then(async r => {
+    let j = {};
+    try { j = await r.json(); } catch {}
+    j._status = r.status;
+    return j;
+  });
+}
+
+function restoreSession() {
+  let token = null;
+  try { token = localStorage.getItem('quizora_token'); } catch {}
+  if (!token) return;
+  api('/api/auth/me', 'GET').then(res => {
+    if (res.user) {
+      state.user = res.user;
+      if (res.user.lang && res.user.lang !== appLang) setLang(res.user.lang);
+    } else {
+      try { localStorage.removeItem('quizora_token'); } catch {}
+    }
+  }).catch(() => {});
+}
+
+function logout() {
+  sound.click();
+  api('/api/auth/logout', 'POST', {});
+  try { localStorage.removeItem('quizora_token'); } catch {}
+  state.user = null;
+  render();
+}
+
+function renderAuthPanel(c) {
+  const box = h('div', 'glass', [], { style: 'width:100%;max-width:440px;padding:16px;border-radius:16px;margin:8px 0' });
+  if (state.user) {
+    box.appendChild(h('div', '', [
+      h('span', '', [state.user.avatar]),
+      h('span', '', [' ' + state.user.username + ' '], { style: 'font-weight:800' }),
+      h('span', '', [state.user.email], { style: 'color:#64748b;font-size:11px' }),
+    ], { style: 'margin-bottom:10px' }));
+    const stats = state.user.stats || {};
+    const avg = stats.tests ? Math.round(stats.scoreSum / stats.tests) : 0;
+    const statRow = h('div', 'profile-stats', []);
+    [[stats.tests, L('tests', 'اختبارات', 'test')], [avg + '%', L('avg', 'متوسط', 'ortalama')], [stats.correctTot || 0, L('correct', 'صحيحة', 'doğru')]].forEach(([v, lab]) => {
+      const d = h('div', 'glass-strong', [], { style: 'padding:8px 12px;border-radius:10px;text-align:center' });
+      d.appendChild(h('div', '', [String(v)], { style: 'font-weight:800;font-size:18px;color:#38bdf8' }));
+      d.appendChild(h('div', '', [lab], { style: 'font-size:11px;color:#64748b' }));
+      statRow.appendChild(d);
+    });
+    box.appendChild(statRow);
+    const btnRow = h('div', '', [], { style: 'display:flex;gap:8px;margin-top:12px;flex-wrap:wrap' });
+    btnRow.appendChild(h('button', 'btn-success', [L('📝 Practice Now', '📝 اختبر نفسك الآن', '📝 Hemen Deneyin')], {
+      style: 'flex:1',
+      onclick: () => {
+        sound.click();
+        state.practice = { pick: { categories: ['yks'], num: 5, mode: 'instant', timer: 0 } };
+        state.practiceView = 'setup';
+        state.screen = 'practice';
+        render();
+      }
+    }));
+    btnRow.appendChild(h('button', 'btn-ghost', ['⚙️'], { style: 'flex:0 0 auto', title: L('Settings', 'الإعدادات', 'Ayarlar'), onclick: () => { sound.click(); state.pendingAvatar = undefined; state.settingsOpen = true; render(); } }));
+    btnRow.appendChild(h('button', 'btn-ghost', [L('Logout', 'تسجيل الخروج', 'Çıkış')], { style: 'flex:0 0 auto', onclick: logout }));
+    box.appendChild(btnRow);
+  } else {
+    box.appendChild(h('div', 'section-label', [L('Login / Sign Up', 'تسجيل الدخول / إنشاء حساب', 'Giriş / Kayıt Ol')], { style: 'margin-bottom:6px;font-weight:800;color:#38bdf8;font-size:13px' }));
+    box.appendChild(h('div', '', [L('Log in or create an account to take practice tests and track your scores.', 'سجّل الدخول أو أنشئ حساباً لدخول اختبارات الممارسة وتتبع نتائجك.', 'Pratik testleri çözmek ve puanlarınızı takip etmek için giriş yapın veya hesap oluşturun.')], { style: 'color:#64748b;font-size:12px;margin-bottom:10px' }));
+
+    let mode = 'login';
+    const tabs = h('div', 'mode-tabs', []);
+    const fields = h('div', '', []);
+    const errEl = h('div', 'join-error', [], { style: 'margin-top:6px;font-size:12px' });
+    let nameInput = null, emailInput = null, passInput = null;
+
+    const mkFields = () => {
+      fields.innerHTML = '';
+      nameInput = null; emailInput = null; passInput = null;
+      if (mode === 'register') {
+        nameInput = h('input', 'text-input', [], { placeholder: L('Username', 'اسم المستخدم', 'Kullanıcı adı'), style: 'width:100%;margin:4px 0;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:14px' });
+        fields.appendChild(nameInput);
+      }
+      emailInput = h('input', 'text-input', [], { placeholder: L('Email', 'البريد الإلكتروني', 'E-posta'), type: 'email', style: 'width:100%;margin:4px 0;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:14px' });
+      passInput = h('input', 'text-input', [], { placeholder: L('Password (min 4)', 'كلمة المرور (4 أحرف على الأقل)', 'Parola (en az 4 karakter)'), type: 'password', style: 'width:100%;margin:4px 0;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:14px' });
+      fields.appendChild(emailInput);
+      fields.appendChild(passInput);
+    };
+    const mkTabs = () => {
+      tabs.innerHTML = '';
+      [['login', L('Login', 'دخول', 'Giriş')], ['register', L('Sign Up', 'تسجيل', 'Kayıt')]].forEach(([m, lab]) => {
+        tabs.appendChild(h('button', `mode-btn ${mode === m ? 'active' : ''}`, [lab], { style: 'flex:1', onclick: () => { sound.click(); mode = m; mkTabs(); mkFields(); } }));
+      });
+    };
+    mkTabs();
+    mkFields();
+    box.appendChild(tabs);
+    box.appendChild(fields);
+
+    const submitBtn = h('button', 'btn-primary', [L('Continue', 'متابعة', 'Devam')], {
+      style: 'width:100%;margin-top:10px;padding:12px;font-size:14px;border-radius:10px',
+      onclick: async () => {
+        errEl.textContent = '';
+        const email = emailInput && emailInput.value.trim();
+        const password = passInput && passInput.value;
+        const uname = nameInput ? nameInput.value.trim() : '';
+        if (!email || !password) { errEl.textContent = L('Enter email and password', 'أدخل البريد وكلمة المرور', 'E-posta ve parola girin'); return; }
+        const body = mode === 'register' ? { username: uname, email, password } : { email, password };
+        const res = await api('/api/auth/' + mode, 'POST', body);
+        if (res.token) {
+          try { localStorage.setItem('quizora_token', res.token); } catch {}
+          state.user = res.user;
+          if (res.user.lang && res.user.lang !== appLang) setLang(res.user.lang);
+          sound.win();
+          render();
+        } else {
+          errEl.textContent = res.errorTr || res.error || L('Something went wrong', 'حدث خطأ', 'Bir şeyler ters gitti');
+        }
+      }
+    });
+    box.appendChild(submitBtn);
+    box.appendChild(errEl);
+  }
+  c.appendChild(box);
+}
+
+/* ======================== ACCOUNT: SETTINGS ======================== */
+function renderSettings() {
+  const overlay = h('div', 'modal-overlay', [], {
+    onclick: (e) => { if (e.target === overlay) { state.settingsOpen = false; state.pendingAvatar = undefined; render(); } }
+  });
+  const card = h('div', 'glass-strong', [], { style: 'width:100%;max-width:420px;padding:20px;border-radius:16px' });
+
+  card.appendChild(h('div', 'section-label', [L('⚙️ Account Settings', '⚙️ إعدادات الحساب', '⚙️ Hesap Ayarları')], { style: 'font-weight:800;color:#38bdf8;font-size:14px;margin-bottom:12px' }));
+
+  const errEl = h('div', 'join-error', [], { style: 'margin-top:6px;font-size:12px' });
+  const avatars = ['😎', '🦊', '🐱', '🚀', '🔥', '⭐', '💎', '🎯'];
+  const avatar = state.pendingAvatar || state.user.avatar || '😎';
+  const avRow = h('div', '', [], { style: 'display:flex;gap:6px;flex-wrap:wrap;margin:6px 0' });
+  avatars.forEach(a => {
+    avRow.appendChild(h('button', `mode-btn ${avatar === a ? 'active' : ''}`, [a], {
+      style: 'flex:0 0 auto;padding:6px 10px;font-size:16px',
+      onclick: () => { sound.click(); state.pendingAvatar = a; render(); }
+    }));
+  });
+
+  const nameInput = h('input', 'text-input', [], { placeholder:'', value: state.user.username, style: 'width:100%;margin:6px 0;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:14px' });
+  const langSel = h('select', 'setting-select', [], { style: 'width:100%;margin:6px 0;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:14px' });
+  [['en', 'English'], ['tr', 'Türkçe'], ['ar', 'العربية']].forEach(([v, lab]) => {
+    const opt = h('option', '', [lab], { value: v });
+    if (v === appLang) opt.selected = true;
+    langSel.appendChild(opt);
+  });
+  const passInput = h('input', 'text-input', [], { placeholder: L('New password (optional)', 'كلمة مرور جديدة (اختياري)', 'Yeni parola (isteğe bağlı)'), type: 'password', style: 'width:100%;margin:6px 0;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:14px' });
+
+  card.appendChild(h('div', 'section-label', [L('Avatar', 'الصورة الرمزية', 'Avatar')], { style: 'font-size:11px;color:#64748b;margin-top:8px' }));
+  card.appendChild(avRow);
+  card.appendChild(h('div', 'section-label', [L('Username', 'اسم المستخدم', 'Kullanıcı adı')], { style: 'font-size:11px;color:#64748b;margin-top:8px' }));
+  card.appendChild(nameInput);
+  card.appendChild(h('div', 'section-label', [L('Language', 'اللغة', 'Dil')], { style: 'font-size:11px;color:#64748b;margin-top:8px' }));
+  card.appendChild(langSel);
+  card.appendChild(h('div', 'section-label', [L('Password', 'كلمة المرور', 'Parola')], { style: 'font-size:11px;color:#64748b;margin-top:8px' }));
+  card.appendChild(passInput);
+
+  const btnRow = h('div', '', [], { style: 'display:flex;gap:8px;margin-top:14px;flex-wrap:wrap' });
+  btnRow.appendChild(h('button', 'btn-success', [L('Save', 'حفظ', 'Kaydet')], {
+    style: 'flex:1',
+    onclick: async () => {
+      errEl.textContent = '';
+      const body = { avatar, username: nameInput ? nameInput.value.trim() : undefined, lang: langSel.value, newPassword: passInput && passInput.value ? passInput.value : undefined };
+      const res = await api('/api/auth/update', 'POST', body);
+      if (res.user) {
+        state.user = res.user;
+        state.pendingAvatar = undefined;
+        setLang(res.user.lang);
+        state.settingsOpen = false;
+        sound.win();
+        render();
+      } else {
+        errEl.textContent = res.errorTr || res.error || 'Error';
+      }
+    }
+  }));
+  btnRow.appendChild(h('button', 'btn-ghost', [L('Cancel', 'إلغاء', 'İptal')], { onclick: () => { sound.click(); state.settingsOpen = false; state.pendingAvatar = undefined; render(); } }));
+  card.appendChild(btnRow);
+  card.appendChild(errEl);
+  card.appendChild(h('button', 'btn-ghost', [L('Logout', 'تسجيل الخروج', 'Çıkış')], {
+    style: 'margin-top:10px;width:100%;color:#f87171',
+    onclick: logout
+  }));
+  overlay.appendChild(card);
+  return overlay;
+}
+
+/* ======================== PRACTICE ======================== */
+function renderPractice() {
+  const c = h('div', 'practice-container', [], { style: 'min-height:100vh;padding:20px;display:flex;flex-direction:column;align-items:center;gap:14px;max-width:720px;margin:0 auto' });
+  const top = h('div', '', [], { style: 'width:100%;display:flex;justify-content:space-between;align-items:center' });
+  top.appendChild(h('div', 'font-display', [L('Practice Tests', 'اختبارات الممارسة', 'Pratik Testleri')], { style: 'font-weight:800;font-size:18px' }));
+  top.appendChild(h('button', 'btn-ghost', ['← ' + L('Back', 'رجوع', 'Geri')], {
+    onclick: () => { quitPractice(); state.screen = 'landing'; render(); }
+  }));
+  c.appendChild(top);
+
+  if (!state.practice) state.practice = { pick: { categories: ['yks'], num: 5, mode: 'instant', timer: 0 } };
+
+  if (state.practiceView === 'setup') buildPracticeSetup(c);
+  else if (state.practiceView === 'question') buildPracticeQuestion(c);
+  else if (state.practiceView === 'report') buildPracticeReport(c);
+  return c;
+}
+
+function quitPractice() {
+  if (state.practiceTimer) { clearInterval(state.practiceTimer); state.practiceTimer = null; }
+  state.practice = null;
+  state.practiceView = 'setup';
+}
+
+function buildPracticeSetup(c) {
+  const pick = state.practice.pick;
+  c.appendChild(h('div', '', [L('Pick one or more exams. Choose the number of questions and how you get feedback.', 'اختر امتحاناً أو أكثر. حدد عدد الأسئلة وطريقة عرض النتيجة.', 'Bir veya daha fazla sınav seçin. Soru sayısını ve geri bildirim şeklini seçin.')], { style: 'color:#94a3b8;font-size:13px;text-align:center' }));
+
+  const grid = h('div', 'category-grid', [], { style: 'width:100%;margin:8px 0' });
+  Object.entries(EXAM_CATEGORIES).forEach(([key, cat]) => {
+    const on = pick.categories.includes(key);
+    grid.appendChild(h('button', `cat-btn ${on ? 'selected' : 'unselected'}`, [`${cat.emoji} ${L(cat.name, cat.nameAr, cat.nameTr)}`], {
+      style: on ? cat.css : '',
+      onclick: () => { sound.click(); if (on) { if (pick.categories.length > 1) pick.categories.splice(pick.categories.indexOf(key), 1); } else pick.categories.push(key); render(); }
+    }));
+  });
+  c.appendChild(grid);
+
+  const row1 = h('div', 'settings-grid', [], { style: 'width:100%;margin:6px 0' });
+
+  const qBox = h('div', 'setting-box glass');
+  qBox.appendChild(h('div', 'setting-label', [L('Questions', 'عدد الأسئلة', 'Sorular')]));
+  const qSel = h('select', 'setting-select');
+  [5, 10, 15].forEach(n => { const o = h('option', '', [String(n)], { value: n }); if (n === pick.num) o.selected = true; qSel.appendChild(o); });
+  qSel.onchange = e => { pick.num = +e.target.value; render(); };
+  qBox.appendChild(qSel);
+  row1.appendChild(qBox);
+
+  const tBox = h('div', 'setting-box glass');
+  tBox.appendChild(h('div', 'setting-label', [L('Timer', 'المؤقت', 'Süre')]));
+  const tSel = h('select', 'setting-select');
+  [[0, L('Off', 'بدون', 'Kapalı')], [10, '10'], [15, '15'], [20, '20'], [30, '30']].forEach(([v, lab]) => { const o = h('option', '', [lab], { value: v }); if (v === pick.timer) o.selected = true; tSel.appendChild(o); });
+  tSel.onchange = e => { pick.timer = +e.target.value; render(); };
+  tBox.appendChild(tSel);
+  row1.appendChild(tBox);
+  c.appendChild(row1);
+
+  const modeRow = h('div', '', [], { style: 'width:100%;display:flex;gap:8px;margin:4px 0' });
+  [['instant', L('⚡ Instant Feedback', '⚡ تغذية فورية', '⚡ Anında Geri Bildirim')], ['report', L('📊 Final Report', '📊 تقرير نهائي', '📊 Sonuç Raporu')]].forEach(([m, lab]) => {
+    modeRow.appendChild(h('button', `mode-btn ${pick.mode === m ? 'active' : ''}`, [lab], {
+      style: 'flex:1',
+      onclick: () => { sound.click(); pick.mode = m; render(); }
+    }));
+  });
+  c.appendChild(modeRow);
+
+  c.appendChild(h('button', 'btn-success', [L('Start Test', 'ابدأ الاختبار', 'Testi Başlat')], {
+    style: 'width:100%;padding:14px;font-size:16px;border-radius:12px',
+    onclick: () => { beginPractice(); }
+  }));
+}
+
+async function beginPractice() {
+  const pick = state.practice.pick;
+  if (!pick.categories.length) { alert(L('Pick at least one exam', 'اختر امتحاناً واحداً على الأقل', 'En az bir sınav seç')); return; }
+  const res = await api('/api/practice/start', 'POST', { categories: pick.categories, numQuestions: pick.num, mode: pick.mode, timerSeconds: pick.timer });
+  if (res.testId) {
+    state.practice = {
+      pick,
+      testId: res.testId,
+      mode: res.mode,
+      timerSeconds: res.timerSeconds,
+      questions: res.questions,
+      current: 0,
+      chosen: null,
+      locked: false,
+      lastCheck: null,
+      answers: new Array(res.questions.length).fill(null),
+      result: null,
+    };
+    state.practiceView = 'question';
+    render();
+  } else {
+    alert(res.errorTr || res.error || 'Error');
+  }
+}
+
+function buildPracticeQuestion(c) {
+  const t = state.practice;
+  if (!t || !t.questions[t.current]) return c;
+  const q = t.questions[t.current];
+  const lq = Lq(q);
+  const meta = EXAM_CATEGORIES[q.category] || { name: q.category, emoji: '📘', css: 'background:#475569' };
+
+  if (state.practiceTimer) { clearInterval(state.practiceTimer); state.practiceTimer = null; }
+  if (t.timerSeconds > 0) {
+    t.timerLeft = t.timerSeconds;
+    state.practiceTimer = setInterval(() => {
+      t.timerLeft--;
+      const el = document.getElementById('practice-timer-fill');
+      if (el) el.style.width = Math.max(0, (t.timerLeft / t.timerSeconds) * 100) + '%';
+      if (t.timerLeft <= 0) { if (state.practiceTimer) clearInterval(state.practiceTimer); state.practiceTimer = null; advancePractice(); }
+    }, 1000);
+  }
+
+  c.appendChild(h('div', '', [L('Question', 'سؤال', 'Soru') + ' ' + (t.current + 1) + ' / ' + t.questions.length], { style: 'color:#94a3b8;font-size:13px;width:100%' }));
+  if (t.timerSeconds > 0) {
+    const bar = h('div', '', [], { style: 'width:100%;height:6px;background:#1e293b;border-radius:4px;overflow:hidden' });
+    bar.appendChild(h('div', '', [], { id: 'practice-timer-fill', style: `width:100%;height:100%;background:linear-gradient(90deg,#38bdf8,#8b5cf6)` }));
+    c.appendChild(bar);
+  }
+
+  c.appendChild(h('div', 'category-badge', [`${meta.emoji} ${L(meta.name, meta.nameAr, meta.nameTr)}`], { style: meta.css + ';color:white;align-self:flex-start' }));
+  c.appendChild(h('div', 'question-card glass', [h('div', '', [lq.text], { style: 'font-size:20px;font-weight:700' })], { style: 'width:100%' }));
+
+  const options = h('div', 'options-grid', [], { style: 'width:100%' });
+  const letters = ['A', 'B', 'C', 'D'];
+  const showCheck = t.mode === 'instant' && t.lastCheck !== null;
+  lq.options.forEach((opt, i) => {
+    let cls = 'option-btn';
+    let locked = false;
+    if (showCheck) {
+      if (i === t.lastCheck.correctIndex) cls += ' correct';
+      else if (i === t.chosen) cls += ' wrong';
+      else cls += ' dimmed';
+      locked = true;
+    } else if (t.mode === 'report' && t.answers[t.current] === i) {
+      cls += ' selected';
+    }
+    const btn = h('button', cls, [
+      h('div', 'option-letter', [letters[i]]),
+      h('span', '', [opt])
+    ], locked || (t.mode === 'instant' && t.locked) ? {} : {
+      onclick: () => {
+        sound.lockIn();
+        if (t.mode === 'instant') submitPractice(i);
+        else { t.answers[t.current] = i; render(); }
+      }
+    });
+    options.appendChild(btn);
+  });
+  c.appendChild(options);
+
+  const bottom = h('div', '', [], { style: 'width:100%;display:flex;justify-content:center;margin-top:16px' });
+  if (showCheck || t.mode === 'report') {
+    const last = t.current >= t.questions.length - 1;
+    bottom.appendChild(h('button', 'btn-primary', [last ? L('Finish 🏁', 'إنهاء 🏁', 'Bitir 🏁') : L('Next →', 'التالي ←', 'Sonraki →')], {
+      style: 'padding:12px 32px;font-size:15px;border-radius:12px',
+      onclick: () => { sound.click(); advancePractice(); }
+    }));
+  }
+  c.appendChild(bottom);
+  return c;
+}
+
+async function submitPractice(i) {
+  const t = state.practice;
+  if (!t || t.locked) return;
+  t.locked = true;
+  t.chosen = i;
+  t.answers[t.current] = i;
+  const res = await api('/api/practice/check', 'POST', { testId: t.testId, index: t.current, answer: i });
+  t.lastCheck = (res && typeof res.correct === 'boolean') ? { correct: res.correct, correctIndex: res.correctIndex, correctAnswer: res.correctAnswer } : null;
+  render();
+}
+
+function advancePractice() {
+  const t = state.practice;
+  if (!t) return;
+  if (state.practiceTimer) { clearInterval(state.practiceTimer); state.practiceTimer = null; }
+  if (t.current < t.questions.length - 1) {
+    t.current++;
+    t.chosen = null;
+    t.locked = false;
+    t.lastCheck = null;
+    render();
+  } else {
+    finishPractice();
+  }
+}
+
+async function finishPractice() {
+  const t = state.practice;
+  if (!t) return;
+  if (state.practiceTimer) { clearInterval(state.practiceTimer); state.practiceTimer = null; }
+  const res = await api('/api/practice/finish', 'POST', { testId: t.testId, answers: t.answers });
+  if (typeof res.total === 'number') {
+    t.result = res;
+    state.practiceView = 'report';
+    const me = await api('/api/auth/me', 'GET');
+    if (me.user) state.user = me.user;
+    sound.win();
+    render();
+  } else {
+    alert(res.errorTr || res.error || 'Error');
+  }
+}
+
+function buildPracticeReport(c) {
+  const t = state.practice;
+  const r = t.result;
+  const pct = r.percentage;
+
+  const ringSize = 160;
+  const ring = h('div', 'report-ring', [], { style: `width:${ringSize}px;height:${ringSize}px;margin:8px auto;position:relative` });
+  ring.style.background = `conic-gradient(${pct >= 50 ? '#22c55e' : pct >= 30 ? '#f59e0b' : '#ef4444'} ${pct * 3.6}deg, #1e293b 0deg)`;
+  ring.appendChild(h('div', '', [String(pct) + '%'], { style: 'position:absolute;inset:16px;border-radius:50%;background:#0f172a;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:800;color:#38bdf8' }));
+  c.appendChild(ring);
+
+  c.appendChild(h('div', 'font-display', [pct >= 70 ? L('Great job! 🎉', 'عمل رائع! 🎉', 'Harikasın! 🎉') : pct >= 40 ? L('Not bad — keep going 💪', 'ليس سيئاً — استمر 💪', 'Fena değil — devam 💪') : L('Keep practising! 📚', 'واصل التدريب! 📚', 'Pratike devam! 📚')], { style: 'font-size:20px;font-weight:800' }));
+
+  const stats = h('div', '', [], { style: 'width:100%;display:flex;gap:8px;justify-content:center;flex-wrap:wrap' });
+  [[r.correct, L('Correct', 'صحيحة', 'Doğru'), '#22c55e'], [r.wrong, L('Wrong', 'خاطئة', 'Yanlış'), '#ef4444'], [r.total, L('Total', 'المجموع', 'Toplam'), '#38bdf8']].forEach(([v, lab, col]) => {
+    const d = h('div', 'glass-strong', [], { style: 'padding:10px 16px;border-radius:10px;text-align:center' });
+    d.appendChild(h('div', '', [String(v)], { style: 'font-weight:800;font-size:20px;color:' + col }));
+    d.appendChild(h('div', '', [lab], { style: 'font-size:11px;color:#64748b' }));
+    stats.appendChild(d);
+  });
+  c.appendChild(stats);
+
+  const catKeys = Object.keys(r.catStats || {});
+  if (catKeys.length) {
+    const catBox = h('div', 'glass', [], { style: 'width:100%;padding:14px;border-radius:12px' });
+    catBox.appendChild(h('div', 'section-label', [L('By Exam', 'حسب الامتحان', 'Sınava Göre')], { style: 'font-weight:800;color:#38bdf8;font-size:12px;margin-bottom:8px' }));
+    catKeys.forEach(k => {
+      const meta = EXAM_CATEGORIES[k] || { name: k, emoji: '📘' };
+      const cs = r.catStats[k];
+      catBox.appendChild(h('div', '', [`${meta.emoji} ${L(meta.name, meta.nameAr, meta.nameTr)} — ${cs.correct}/${cs.total}`], { style: 'padding:4px 0;font-size:13px;border-bottom:1px solid #1e293b' }));
+    });
+    c.appendChild(catBox);
+  }
+
+  const wrongs = r.details.filter(d => !d.correct);
+  if (wrongs.length) {
+    const wBox = h('div', 'glass', [], { style: 'width:100%;padding:14px;border-radius:12px' });
+    wBox.appendChild(h('div', 'section-label', [L('Review Mistakes', 'مراجعة الأخطاء', 'Hatalarını Gözden Geçir')], { style: 'font-weight:800;color:#f87171;font-size:12px;margin-bottom:8px' }));
+    wrongs.forEach(d => {
+      const meta = EXAM_CATEGORIES[d.category] || { name: d.category, emoji: '📘' };
+      const wrow = h('div', '', [], { style: 'padding:8px 0;border-bottom:1px solid #1e293b' });
+      wrow.appendChild(h('div', '', [`${meta.emoji} ${d.question}`], { style: 'font-size:13px;font-weight:700' }));
+      wrow.appendChild(h('div', '', [d.options[d.correctIndex] || d.correctAnswer], { style: 'font-size:12px;color:#22c55e;margin-top:2px' }));
+      wBox.appendChild(wrow);
+    });
+    c.appendChild(wBox);
+  }
+
+  const btns = h('div', '', [], { style: 'width:100%;display:flex;gap:8px;margin-top:8px' });
+  btns.appendChild(h('button', 'btn-success', [L('Retry', 'إعادة', 'Tekrar Dene')], {
+    style: 'flex:1;padding:12px;font-size:14px;border-radius:10px',
+    onclick: () => { sound.click(); state.practiceView = 'setup'; render(); }
+  }));
+  btns.appendChild(h('button', 'btn-ghost', [L('Back', 'رجوع', 'Geri')], {
+    style: 'flex:1;padding:12px;font-size:14px;border-radius:10px',
+    onclick: () => { quitPractice(); state.screen = 'landing'; render(); }
+  }));
+  c.appendChild(btns);
+  return c;
+}
+
 /* ======================== HOST OR PLAYER? ======================== */
 function checkRoute() {
   initLang();
+  restoreSession();
   const path = window.location.pathname;
   if (path.startsWith('/join/')) {
     const code = path.split('/join/')[1];

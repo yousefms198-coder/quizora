@@ -702,24 +702,54 @@ function renderJoin() {
 
   const form = h('div', 'join-form');
   form.appendChild(h('input', 'input-field join-input', [], {
-    placeholder: L('CODE', 'الرمز'), maxlength: '5', id: 'join-code',
+    placeholder: L('CODE', 'الرمز'), maxlength: '5', id: 'join-code', autocomplete: 'off', autocapitalize: 'characters',
     value: state.inputCode || '',
-    oninput: (e) => { state.inputCode = e.target.value.toUpperCase(); e.target.value = state.inputCode; }
+    oninput: (e) => {
+      state.inputCode = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      e.target.value = state.inputCode;
+      updateJoinBtn();
+    }
   }));
-  form.appendChild(h('input', 'input-field join-name-input', [], { placeholder: L('Your name', 'اسمك'), maxlength: '12', id: 'join-name' }));
+  form.appendChild(h('input', 'input-field join-name-input', [], { placeholder: L('Your name', 'اسمك'), maxlength: '12', id: 'join-name', autocomplete: 'name', oninput: () => updateJoinBtn(), onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('join-submit')?.click(); } } }));
   form.appendChild(h('div', 'join-error', [], { id: 'join-error' }));
 
-  const ready = state.inputCode.length >= 4;
-  form.appendChild(h('button', `join-btn ${ready ? 'ready' : 'disabled'}`, [L('Join Game', 'دخول اللعبة')], {
-    onclick: () => { if (ready) attemptJoin(); }
-  }));
+  const joinBtn = h('button', 'join-btn disabled', [L('Join Game', 'دخول اللعبة')], {
+    id: 'join-submit',
+    onclick: () => {
+      const name = document.getElementById('join-name')?.value?.trim();
+      if (state.inputCode.length >= 4 && name) attemptJoin();
+      else {
+        const err = document.getElementById('join-error');
+        if (err) err.textContent = L('Enter code and name to join', 'أدخل الرمز واسمك للدخول');
+      }
+    }
+  });
+  form.appendChild(joinBtn);
   card.appendChild(form);
   c.appendChild(card);
+
+  const codeInput = document.getElementById('join-code');
+  if (codeInput) codeInput.focus();
+  updateJoinBtn();
   return c;
+}
+
+function updateJoinBtn() {
+  const btn = document.getElementById('join-submit');
+  if (!btn) return;
+  const code = document.getElementById('join-code')?.value?.trim();
+  const name = document.getElementById('join-name')?.value?.trim();
+  const ready = (code && code.length >= 4) && !!name;
+  btn.className = `join-btn ${ready ? 'ready' : 'disabled'}`;
 }
 
 function attemptJoin() {
   const code = state.inputCode;
+  if (!code || code.length < 4) {
+    const err = document.getElementById('join-error');
+    if (err) err.textContent = L('Enter the room code', 'أدخل رمز الغرفة');
+    return;
+  }
   const name = document.getElementById('join-name')?.value?.trim();
   const err = document.getElementById('join-error');
   if (!name) {

@@ -1,8 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&family=Cairo:wght@400;500;600;700;800;900&display=swap');
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { overscroll-behavior: none; background: #030712; color: #e2e8f0; font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; overflow-x: hidden; }
-.font-display { font-family: 'Space Grotesk', system-ui, sans-serif; }
+body { overscroll-behavior: none; background: #030712; color: #e2e8f0; font-family: 'Inter', 'Cairo', system-ui, sans-serif; min-height: 100vh; overflow-x: hidden; }
+.font-display { font-family: 'Space Grotesk', 'Cairo', system-ui, sans-serif; }
+html[dir="rtl"] body, html[dir="rtl"] .font-display { font-family: 'Cairo', system-ui, sans-serif; }
+
+.lang-row { display: flex; justify-content: center; margin: 14px auto 4px; }
+.lang-toggle { display: inline-flex; gap: 4px; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 999px; padding: 4px; }
+.lang-btn { background: transparent; border: none; color: #94a3b8; font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 999px; cursor: pointer; transition: all 0.2s; }
+.lang-btn:hover { color: #e2e8f0; }
+.lang-btn.active { background: linear-gradient(135deg, #38bdf8, #a78bfa); color: #0f172a; }
 
 :root {
   --accent: #38bdf8;

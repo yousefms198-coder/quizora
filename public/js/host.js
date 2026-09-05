@@ -93,31 +93,48 @@ function render() {
   if (fn) app.appendChild(fn());
 }
 
+function renderLangToggle(container) {
+  const seg = h('div', 'lang-toggle');
+  const en = h('button', `lang-btn ${appLang === 'en' ? 'active' : ''}`, ['🌍 English'], {
+    onclick: () => { setLang('en'); sound.click(); render(); }
+  });
+  const ar = h('button', `lang-btn ${appLang === 'ar' ? 'active' : ''}`, ['🌐 العربية'], {
+    onclick: () => { setLang('ar'); sound.click(); render(); }
+  });
+  seg.appendChild(en);
+  seg.appendChild(ar);
+  container.appendChild(seg);
+}
+
 /* ======================== LANDING ======================== */
 function renderLanding() {
   const c = h('div', 'landing-container');
   c.appendChild(h('div', 'font-display landing-title', ['QUIZORA']));
   c.appendChild(h('div', 'landing-subtitle', ['THE ROOM IS YOUR GAME SHOW']));
-  c.appendChild(h('div', 'landing-tagline', ['Create a game. Invite everyone. Then let the chaos begin.']))
+  c.appendChild(h('div', 'landing-tagline', [L('Create a game. Invite everyone. Then let the chaos begin.', 'أنشئ لعبة. ادعُ الجميع. ثم دع الفوضى تبدأ!')]))
+
+  const langRow = h('div', 'lang-row');
+  renderLangToggle(langRow);
+  c.appendChild(langRow);
 
   const actions = h('div', 'landing-actions');
-  actions.appendChild(h('button', 'btn-primary', ['Create a Game'], {
+  actions.appendChild(h('button', 'btn-primary', [L('Create a Game', 'إنشاء لعبة')], {
     onclick: () => { sound.click(); startCreate(); }
   }));
-  actions.appendChild(h('button', 'btn-ghost', ['Join a Game'], {
+  actions.appendChild(h('button', 'btn-ghost', [L('Join a Game', 'الانضمام إلى لعبة')], {
     onclick: () => { sound.click(); state.screen = 'join'; state.isHost = false; state.inputCode = ''; render(); }
   }));
   c.appendChild(actions);
 
   const badges = h('div', 'landing-badges');
-  [['👨‍👩‍👧‍👦', 'Friends & Family'], ['🎓', 'Classmates'], ['🎉', 'Party Time']].forEach(([icon, label]) => {
+  [['👨‍👩‍👧‍👦', L('Friends & Family', 'أصدقاء وعائلة')], ['🎓', L('Classmates', 'زملاء الدراسة')], ['🎉', L('Party Time', 'وقت الحفلات')]].forEach(([icon, label]) => {
     const b = h('div', 'badge glass');
     b.appendChild(h('span', 'badge-icon', [icon]));
     b.appendChild(document.createTextNode(label));
     badges.appendChild(b);
   });
   c.appendChild(badges);
-  c.appendChild(h('div', 'landing-footer', ['Built with AI — Family Build-Off 2026']));
+  c.appendChild(h('div', 'landing-footer', [L('Built with AI — Family Build-Off 2026', 'صُنع بالذكاء الاصطناعي — مسابقة بناء العائلات 2026')]));
   return c;
 }
 
@@ -125,28 +142,28 @@ function renderLanding() {
 function renderLobby() {
   const c = h('div', 'lobby-container', [], { style: 'padding:20px;gap:12px' });
   c.appendChild(h('div', '', ['🎮'], { style: 'font-size:40px;margin-bottom:4px' }));
-  c.appendChild(h('h2', 'font-display', ['Waiting for Players'], { style: 'font-size:1.5rem;font-weight:800;margin-bottom:2px' }));
-  c.appendChild(h('p', '', ['Scan QR or enter code on your phone'], { style: 'color:#64748b;font-size:13px;margin-bottom:12px' }));
+  c.appendChild(h('h2', 'font-display', [L('Waiting for Players', 'بانتظار اللاعبين')], { style: 'font-size:1.5rem;font-weight:800;margin-bottom:2px' }));
+  c.appendChild(h('p', '', [L('Scan QR or enter code on your phone', 'امسح الرمز أو أدخل رمز الغرفة من هاتفك')], { style: 'color:#64748b;font-size:13px;margin-bottom:12px' }));
 
   const codeDisplay = h('div', 'room-code-display', [], { style: 'margin:8px 0' });
-  codeDisplay.appendChild(h('div', 'room-code-label', ['ROOM CODE']));
+  codeDisplay.appendChild(h('div', 'room-code-label', [L('ROOM CODE', 'رمز الغرفة')]));
   codeDisplay.appendChild(h('div', 'room-code-value font-display', [state.roomCode || '-----']));
   c.appendChild(codeDisplay);
 
   const qrBox = h('div', 'qr-container glass-strong', [], { style: 'width:160px;height:160px;margin:8px auto' });
   qrBox.id = 'qr-container';
-  qrBox.appendChild(h('div', '', ['Loading QR...'], { style: 'display:flex;align-items:center;justify-content:center;height:100%;color:#475569;font-size:12px' }));
+  qrBox.appendChild(h('div', '', [L('Loading QR...', 'جارٍ تحميل رمز الدخول…')], { style: 'display:flex;align-items:center;justify-content:center;height:100%;color:#475569;font-size:12px' }));
   c.appendChild(qrBox);
 
-  const urlDisplay = h('div', 'join-url-box', [], { id: 'join-url', title: 'Click to copy', onclick: () => {
+  const urlDisplay = h('div', 'join-url-box', [], { id: 'join-url', title: L('Click to copy', 'اضغط للنسخ'), onclick: () => {
     if (state.joinUrl) { navigator.clipboard.writeText(state.joinUrl); sound.click(); }
-  } }, ['Loading...']);
+  } }, [L('Loading...', 'جارٍ التحميل…')]);
   c.appendChild(urlDisplay);
 
   const onlineBox = h('div', 'online-share-box', [], { id: 'online-share' }, ['']);
   c.appendChild(onlineBox);
 
-  c.appendChild(h('div', 'player-count', [`${state.players.length} player${state.players.length !== 1 ? 's' : ''} connected`], { style: 'margin:8px 0' }));
+  c.appendChild(h('div', 'player-count', [L(`${state.players.length} player${state.players.length !== 1 ? 's' : ''} connected`, `${state.players.length} ${state.players.length !== 1 ? 'لاعبون متصلون' : 'لاعب متصل'}`)], { style: 'margin:8px 0' }));
 
   const pGrid = h('div', 'player-grid', [], { style: 'margin-bottom:12px' });
   state.players.forEach(p => {
@@ -158,12 +175,12 @@ function renderLobby() {
   c.appendChild(pGrid);
 
   const settingsPanel = h('div', 'glass', [], { style: 'width:100%;max-width:420px;padding:16px;border-radius:16px;margin:8px 0' });
-  settingsPanel.appendChild(h('div', 'section-label', ['Game Settings'], { style: 'margin-bottom:10px' }));
+  settingsPanel.appendChild(h('div', 'section-label', [L('Game Settings', 'إعدادات اللعبة')], { style: 'margin-bottom:10px' }));
 
   const catGrid = h('div', 'category-grid', [], { style: 'margin-bottom:12px' });
   Object.entries(CATEGORIES).forEach(([key, cat]) => {
     const sel = state.selectedCategories.includes(key);
-    const btn = h('button', `cat-btn ${sel ? 'selected' : 'unselected'}`, [`${cat.emoji} ${cat.name}`], {
+    const btn = h('button', `cat-btn ${sel ? 'selected' : 'unselected'}`, [`${cat.emoji} ${L(cat.name, cat.nameAr)}`], {
       style: sel ? cat.css : '',
       onclick: () => {
         sound.click();
@@ -179,7 +196,7 @@ function renderLobby() {
 
   const settRow = h('div', 'settings-grid', [], { style: 'margin-bottom:0' });
   const qBox = h('div', 'setting-box glass');
-  qBox.appendChild(h('div', 'setting-label', ['Questions']));
+  qBox.appendChild(h('div', 'setting-label', [L('Questions', 'عدد الأسئلة')]));
   const qSel = h('select', 'setting-select');
   [5, 8, 10, 12, 15].forEach(n => {
     const opt = h('option', '', [String(n)], { value: n });
@@ -194,10 +211,10 @@ function renderLobby() {
   settRow.appendChild(qBox);
 
   const tBox = h('div', 'setting-box glass');
-  tBox.appendChild(h('div', 'setting-label', ['Timer (sec)']));
+  tBox.appendChild(h('div', 'setting-label', [L('Timer (sec)', 'الوقت (ثوانٍ)')]));
   const tSel = h('select', 'setting-select');
   [10, 15, 20, 30, 0].forEach(n => {
-    const opt = h('option', '', [n === 0 ? 'Off' : String(n)], { value: n });
+    const opt = h('option', '', [n === 0 ? L('Off', 'بدون') : String(n)], { value: n });
     if (n === state.timerSeconds) opt.selected = true;
     tSel.appendChild(opt);
   });
@@ -212,7 +229,7 @@ function renderLobby() {
 
   const controls = h('div', 'host-controls', [], { style: 'width:100%;max-width:420px' });
   const canStart = state.players.length >= 1;
-  controls.appendChild(h('button', 'btn-success', [canStart ? `Start Game (${state.players.length} player${state.players.length > 1 ? 's' : ''}) 🚀` : 'Waiting for players to join...'], {
+  controls.appendChild(h('button', 'btn-success', [canStart ? L(`Start Game (${state.players.length} player${state.players.length > 1 ? 's' : ''}) 🚀`, `ابدأ اللعبة (${state.players.length} ${state.players.length > 1 ? 'لاعبون' : 'لاعب'}) 🚀`) : L('Waiting for players to join...', 'بانتظار انضمام اللاعبين…')], {
     style: canStart ? 'width:100%' : 'width:100%;opacity:0.5;cursor:not-allowed',
     onclick: () => { if (!canStart) return; sound.click(); ws.send(JSON.stringify({ type: 'start_game' })); }
   }));
@@ -233,57 +250,59 @@ function renderLobby() {
   });
   c.appendChild(leaveBtn);
 
+  setTimeout(loadQR, 50);
   return c;
 }
 
-function loadQR() {
-  if (!state.roomCode) return;
-  fetch(`/api/config`)
-    .then(r => r.json())
-    .then(config => {
-      state.localUrl = config.localUrl || '';
-      state.publicUrl = config.publicUrl || null;
-    })
-    .catch(() => {})
-    .then(() => fetch(`/qr/${state.roomCode}`))
-    .then(r => r.json())
-    .then(data => {
-      const container = document.getElementById('qr-container');
-      if (container) {
-        container.innerHTML = '';
-        const img = document.createElement('img');
-        img.src = data.qr;
-        img.alt = 'QR Code';
-        container.appendChild(img);
+let qrLoading = false;
+async function loadQR() {
+  if (!state.roomCode || qrLoading) return;
+  qrLoading = true;
+  try {
+    const config = await fetch(`/api/config`).then(r => r.json());
+    state.localUrl = config.localUrl || '';
+    state.publicUrl = config.publicUrl || null;
+    const data = await fetch(`/qr/${state.roomCode}`).then(r => r.json());
+    const container = document.getElementById('qr-container');
+    if (container) {
+      container.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = data.qr;
+      img.alt = 'QR Code';
+      container.appendChild(img);
+    }
+    const urlEl = document.getElementById('join-url');
+    if (urlEl) {
+      const displayUrl = state.localUrl ? `${state.localUrl}/join/${state.roomCode}` : data.url;
+      urlEl.innerHTML = '';
+      urlEl.appendChild(h('div', 'join-url-label', [L('TAP TO COPY — SAME WIFI AS HOST', 'اضغط للنسخ — نفس شبكة الواي فاي الخاصة بالمضيف')]));
+      const urlText = h('div', 'join-url-text', [displayUrl]);
+      urlEl.appendChild(urlText);
+      state.joinUrl = displayUrl;
+    }
+    const onlineEl = document.getElementById('online-share');
+    if (onlineEl) {
+      onlineEl.innerHTML = '';
+      if (state.publicUrl) {
+        const onlineUrl = `${state.publicUrl}/join/${state.roomCode}`;
+        const row = h('div', 'online-share-row', []);
+        row.appendChild(h('div', 'online-share-label', [L('📡 PLAY ANYWHERE (INTERNET) — CLICK TO COPY', '📡 العب من أي مكان (إنترنت) — اضغط للنسخ')]));
+        row.appendChild(h('div', 'online-share-url', [onlineUrl]));
+        row.onclick = () => { navigator.clipboard.writeText(onlineUrl); sound.click(); };
+        onlineEl.appendChild(row);
       }
-      const urlEl = document.getElementById('join-url');
-      if (urlEl) {
-        const displayUrl = state.localUrl ? `${state.localUrl}/join/${state.roomCode}` : data.url;
-        urlEl.innerHTML = '';
-        urlEl.appendChild(h('div', 'join-url-label', ['TAP TO COPY — SAME WIFI AS HOST']));
-        const urlText = h('div', 'join-url-text', [displayUrl]);
-        urlEl.appendChild(urlText);
-        state.joinUrl = displayUrl;
-      }
-      const onlineEl = document.getElementById('online-share');
-      if (onlineEl) {
-        onlineEl.innerHTML = '';
-        if (state.publicUrl) {
-          const onlineUrl = `${state.publicUrl}/join/${state.roomCode}`;
-          const row = h('div', 'online-share-row', []);
-          row.appendChild(h('div', 'online-share-label', ['📡 PLAY ANYWHERE (INTERNET) — CLICK TO COPY']));
-          row.appendChild(h('div', 'online-share-url', [onlineUrl]));
-          row.onclick = () => { navigator.clipboard.writeText(onlineUrl); sound.click(); };
-          onlineEl.appendChild(row);
-        }
-      }
-    });
+    }
+  } catch (e) {
+  } finally {
+    qrLoading = false;
+  }
 }
 
 /* ======================== GAME ======================== */
 function renderGame() {
   const q = state.questions[state.currentQ];
   if (!q) return h('div', '', ['Loading...']);
+  const lq = Lq(q);
 
   const c = h('div', 'game-container');
 
@@ -295,7 +314,7 @@ function renderGame() {
   if (state.isHost) {
     const quickbar = h('div', 'host-quickbar');
     if (state.timerSeconds > 0) {
-      const pauseBtn = h('button', 'host-qb-btn glass', [state.paused ? '▶ Resume' : '⏸ Pause'], {
+      const pauseBtn = h('button', 'host-qb-btn glass', [state.paused ? L('▶ Resume', '▶ استئناف') : L('⏸ Pause', '⏸ إيقاف مؤقت')], {
         onclick: () => {
           if (state.paused) { sound.resume(); ws.send(JSON.stringify({ type: 'resume_timer' })); }
           else { sound.pause(); ws.send(JSON.stringify({ type: 'pause_timer' })); }
@@ -303,18 +322,18 @@ function renderGame() {
       });
       quickbar.appendChild(pauseBtn);
     }
-    quickbar.appendChild(h('button', 'host-qb-btn glass', ['⏭ Skip'], {
+    quickbar.appendChild(h('button', 'host-qb-btn glass', [L('⏭ Skip', '⏭ تخطي')], {
       onclick: () => { sound.skip(); ws.send(JSON.stringify({ type: 'skip_question' })); }
     }));
     c.appendChild(quickbar);
   }
 
   if (state.paused) {
-    c.appendChild(h('div', 'paused-chip', ['⏸ TIMER PAUSED — waiting for host']));
+    c.appendChild(h('div', 'paused-chip', [L('⏸ TIMER PAUSED — waiting for host', '⏸ تم إيقاف المؤقت — بانتظار المضيف')]));
   }
 
   const cat = CATEGORIES[q.category] || { name: 'General', emoji: '🧠', css: 'background:#475569' };
-  c.appendChild(h('div', 'category-badge', [`${cat.emoji} ${cat.name}`], { style: cat.css + ';margin-bottom:16px;color:white' }));
+  c.appendChild(h('div', 'category-badge', [`${cat.emoji} ${L(cat.name, cat.nameAr)}`], { style: cat.css + ';margin-bottom:16px;color:white' }));
 
   if (state.timerSeconds > 0) {
     const timerContainer = h('div', 'timer-container');
@@ -347,12 +366,12 @@ function renderGame() {
   c.appendChild(miniScores);
 
   const qCard = h('div', 'question-card glass');
-  qCard.appendChild(h('div', 'question-text', [q.q]));
+  qCard.appendChild(h('div', 'question-text', [lq.text]));
   c.appendChild(qCard);
 
   const optionsGrid = h('div', 'options-grid');
   const letters = ['A', 'B', 'C', 'D'];
-  q.options.forEach((opt, i) => {
+  lq.options.forEach((opt, i) => {
     let cls = 'option-btn';
     if (state.showReveal && state.revealData) {
       if (i === state.revealData.correctAnswer) cls += ' correct';
@@ -376,7 +395,7 @@ function renderGame() {
   c.appendChild(answerStatus);
 
   if (state.timerSeconds <= 0 && !state.showReveal && !state.revealData) {
-    c.appendChild(h('button', 'btn-primary', ['Reveal Answer'], {
+    c.appendChild(h('button', 'btn-primary', [L('Reveal Answer', 'إظهار الإجابة')], {
       style: 'margin-top:16px;padding:12px 24px;font-size:14px;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#ea580c)',
       onclick: () => { sound.click(); ws.send(JSON.stringify({ type: 'reveal_now' })); }
     }));
@@ -401,30 +420,30 @@ function showRevealOverlay(data) {
   const anyoneCorrect = data.correctPlayers && data.correctPlayers.length > 0;
 
   let verdictText, verdictClass;
-  if (iAnsweredCorrectly) { verdictText = 'CORRECT!'; verdictClass = 'correct'; }
-  else if (anyoneCorrect && state.isHost) { verdictText = 'SOMEONE GOT IT'; verdictClass = 'correct'; }
-  else if (anyoneCorrect) { verdictText = 'WRONG'; verdictClass = 'wrong'; }
-  else { verdictText = 'NOBODY GOT IT'; verdictClass = 'wrong'; }
+  if (iAnsweredCorrectly) { verdictText = L('CORRECT!', 'إجابة صحيحة!'); verdictClass = 'correct'; }
+  else if (anyoneCorrect && state.isHost) { verdictText = L('SOMEONE GOT IT', 'شخص ما أجاب صح!'); verdictClass = 'correct'; }
+  else if (anyoneCorrect) { verdictText = L('WRONG', 'إجابة خاطئة'); verdictClass = 'wrong'; }
+  else { verdictText = L('NOBODY GOT IT', 'لا أحد أجاب صح'); verdictClass = 'wrong'; }
 
-  overlay.appendChild(h('div', 'reveal-status', ['THE ANSWER WAS']));
+  overlay.appendChild(h('div', 'reveal-status', [L('THE ANSWER WAS', 'الإجابة الصحيحة كانت')]));
   overlay.appendChild(h('div', `reveal-verdict ${verdictClass}`, [verdictText]));
 
   const q = state.questions[state.currentQ];
-  if (q) overlay.appendChild(h('div', 'reveal-answer', [q.options[data.correctAnswer]]));
+  if (q) overlay.appendChild(h('div', 'reveal-answer', [Lq(q).options[data.correctAnswer]]));
 
   const correctNames = data.correctPlayers?.join(', ');
-  overlay.appendChild(h('div', 'reveal-points', [correctNames ? `${correctNames} got it right` : 'Nobody got it right']));
+  overlay.appendChild(h('div', 'reveal-points', [correctNames ? L(`${correctNames} got it right`, `${correctNames} أجابوا إجابة صحيحة`) : L('Nobody got it right', 'لا أحد أجاب إجابة صحيحة')]));
 
   if (data.ranked && data.ranked.length > 0) {
     const lbSection = h('div', 'reveal-leaderboard');
-    lbSection.appendChild(h('div', 'reveal-lb-title', ['STANDINGS']));
+    lbSection.appendChild(h('div', 'reveal-lb-title', [L('STANDINGS', 'الترتيب')]));
     const medals = ['🥇', '🥈', '🥉'];
     data.ranked.forEach((entry, i) => {
       const row = h('div', `reveal-lb-row rank-anim`, [], { style: `animation-delay: ${i * 0.1 + 0.5}s` });
       row.appendChild(h('div', 'reveal-lb-rank', [medals[i] || `#${i + 1}`]));
       const info = h('div', 'reveal-lb-info');
       info.appendChild(h('div', 'reveal-lb-name', [`${entry.emoji} ${entry.name}`]));
-      if (entry.streak >= 2) info.appendChild(h('div', 'reveal-lb-streak', [`🔥 ${entry.streak} streak`]));
+      if (entry.streak >= 2) info.appendChild(h('div', 'reveal-lb-streak', [`🔥 ${entry.streak} ${L('streak', 'سلسلة')}`]));
       row.appendChild(info);
       row.appendChild(h('div', 'reveal-lb-score font-display', [String(entry.score)]));
       lbSection.appendChild(row);
@@ -433,13 +452,13 @@ function showRevealOverlay(data) {
   }
 
   if (state.isHost) {
-    const nextBtn = h('button', 'btn-primary', ['Next Question →'], {
+    const nextBtn = h('button', 'btn-primary', [L('Next Question →', 'السؤال التالي ←')], {
       style: 'margin-top:20px;padding:12px 32px;font-size:16px;border-radius:12px;z-index:10;position:relative',
       onclick: () => { overlay.remove(); ws.send(JSON.stringify({ type: 'next_question' })); }
     });
     overlay.appendChild(nextBtn);
   } else {
-    overlay.appendChild(h('div', 'reveal-next-hint', ['Waiting for host...']));
+    overlay.appendChild(h('div', 'reveal-next-hint', [L('Waiting for host...', 'بانتظار المضيف…')]));
   }
 
   document.body.appendChild(overlay);
@@ -470,15 +489,15 @@ function renderGameOver() {
   const ranked = Object.entries(state.scores).sort((a, b) => b[1] - a[1]);
 
   c.appendChild(h('div', 'trophy animate-bounce', ['🏆']));
-  c.appendChild(h('h2', 'font-display gameover-title', ['Game Over!']));
-  c.appendChild(h('p', 'gameover-subtitle', ['Great game, everyone']));
+  c.appendChild(h('h2', 'font-display gameover-title', [L('Game Over!', 'انتهت اللعبة!')]));
+  c.appendChild(h('p', 'gameover-subtitle', [L('Great game, everyone', 'لعبة رائعة من الجميع')]));
 
   if (ranked.length > 0) {
     const wc = h('div', 'winner-callout');
     wc.appendChild(h('div', 'winner-label', ['👑 MVP']));
     const player = state.players.find(p => p.name === ranked[0][0]);
     wc.appendChild(h('div', 'winner-name font-display', [`${ranked[0][0]} ${player?.emoji || '🎉'}`]));
-    wc.appendChild(h('div', 'winner-score', [`${ranked[0][1]} points`]));
+    wc.appendChild(h('div', 'winner-score', [`${ranked[0][1]} ${L('points', 'نقطة')}`]));
     c.appendChild(wc);
   }
 
@@ -494,8 +513,8 @@ function renderGameOver() {
 
       const details = h('div', 'stat-details');
       details.appendChild(h('div', 'stat-row', [`✅ ${stats.correct}/${stats.total} (${stats.accuracy}%)`]));
-      details.appendChild(h('div', 'stat-row', [`🔥 Best streak: ${stats.maxStreak}`]));
-      details.appendChild(h('div', 'stat-row', [`⏱️ Bonus pts: ${stats.bonusPoints}`]));
+      details.appendChild(h('div', 'stat-row', [`🔥 ${L('Best streak', 'أفضل سلسلة')}: ${stats.maxStreak}`]));
+      details.appendChild(h('div', 'stat-row', [`⏱️ ${L('Bonus pts', 'نقاط إضافية')}: ${stats.bonusPoints}`]));
       card.appendChild(details);
       statsCards.appendChild(card);
     });
@@ -509,7 +528,7 @@ function renderGameOver() {
       entry.appendChild(h('div', 'lb-rank', [medals[i] || `${i + 1}`]));
       const info = h('div', 'lb-info');
       info.appendChild(h('div', 'lb-name', [`${player?.emoji || ''} ${name}`]));
-      if (state.streaks[name] > 0) info.appendChild(h('div', 'lb-streak', [`🔥 ${state.streaks[name]} streak`]));
+      if (state.streaks[name] > 0) info.appendChild(h('div', 'lb-streak', [`🔥 ${state.streaks[name]} ${L('streak', 'سلسلة')}`]));
       entry.appendChild(info);
       entry.appendChild(h('div', 'lb-score font-display', [String(score)]));
       lb.appendChild(entry);
@@ -518,10 +537,10 @@ function renderGameOver() {
   }
 
   const actions = h('div', 'gameover-actions');
-  actions.appendChild(h('button', 'btn-primary', ['Play Again'], {
+  actions.appendChild(h('button', 'btn-primary', [L('Play Again', 'العب مجدداً')], {
     onclick: () => { sound.click(); ws.send(JSON.stringify({ type: 'restart_game' })); }
   }));
-  actions.appendChild(h('button', 'btn-ghost', ['Leave Game'], {
+  actions.appendChild(h('button', 'btn-ghost', [L('Leave Game', 'مغادرة اللعبة')], {
     onclick: () => {
       sound.click();
       state.screen = 'landing';
@@ -542,17 +561,17 @@ function renderGameOver() {
 function renderPlayerWaiting() {
   const c = h('div', 'state-waiting');
   c.appendChild(h('div', 'state-emoji', ['⏳']));
-  c.appendChild(h('div', 'state-title font-display', ['Waiting for the host...']));
-  c.appendChild(h('div', 'state-sub', ['The game will start soon']));
+  c.appendChild(h('div', 'state-title font-display', [L('Waiting for the host...', 'بانتظار المضيف…')]));
+  c.appendChild(h('div', 'state-sub', [L('The game will start soon', 'ستبدأ اللعبة قريباً')]));
   c.appendChild(h('div', '', [], { style: 'margin-top:8px' }));
-  c.appendChild(h('div', 'controller-score', [`Playing as `, h('span', '', [state.playerName || ''])]));
+  c.appendChild(h('div', 'controller-score', [L('Playing as', 'تلعب باسم'), ` `, h('span', '', [state.playerName || ''])]));
 
   if (state.myPowerup) {
-    const puIcons = { freeze: '❄️ Freeze Timer', double: '✨ Double Points', steal: '🦊 Steal Points' };
+    const puIcons = { freeze: L('❄️ Freeze Timer', '❄️ تجميد المؤقت'), double: L('✨ Double Points', '✨ نقاط مضاعفة'), steal: L('🦊 Steal Points', '🦊 سرقة النقاط') };
     c.appendChild(h('div', 'player-powerup-badge', [puIcons[state.myPowerup] || state.myPowerup], { style: 'margin-top:12px' }));
   }
 
-  c.appendChild(h('button', 'btn-ghost', ['Leave'], {
+  c.appendChild(h('button', 'btn-ghost', [L('Leave', 'مغادرة')], {
     style: 'margin-top:20px;font-size:12px;padding:8px 20px',
     onclick: () => {
       sound.click();
@@ -571,6 +590,7 @@ function renderPlayerWaiting() {
 function renderPlayerAnswer() {
   const q = state.questions[state.currentQ];
   if (!q) return h('div', 'state-waiting', [h('div', 'state-title font-display', ['Loading...'])]);
+  const lq = Lq(q);
 
   const c = h('div', 'controller-container');
 
@@ -586,24 +606,24 @@ function renderPlayerAnswer() {
   }
   c.appendChild(top);
 
-  const roundInfo = h('div', 'controller-round', [`Q${state.currentQ + 1} of ${state.questions.length}`]);
+  const roundInfo = h('div', 'controller-round', [L(`Q${state.currentQ + 1} of ${state.questions.length}`, `سؤال ${state.currentQ + 1} من ${state.questions.length}`)]);
   c.appendChild(roundInfo);
 
   if (state.paused) {
-    c.appendChild(h('div', 'paused-chip', ['⏸ TIMER PAUSED — waiting for host']));
+    c.appendChild(h('div', 'paused-chip', [L('⏸ TIMER PAUSED — waiting for host', '⏸ تم إيقاف المؤقت — بانتظار المضيف')]));
   }
 
-  c.appendChild(h('div', 'controller-question', [q.q]));
+  c.appendChild(h('div', 'controller-question', [lq.text]));
 
   if (state.playerAnswer !== null) {
     const locked = h('div', 'controller-locked');
-    locked.appendChild(h('div', 'locked-text', ['LOCKED IN 🔒']));
-    locked.appendChild(h('div', 'locked-sub', ['Waiting for other players...']));
+    locked.appendChild(h('div', 'locked-text', [L('LOCKED IN 🔒', 'تم تأكيد الإجابة 🔒')]));
+    locked.appendChild(h('div', 'locked-sub', [L('Waiting for other players...', 'بانتظار اللاعبين الآخرين…')]));
     c.appendChild(locked);
   } else {
     const options = h('div', 'controller-options');
     const letters = ['A', 'B', 'C', 'D'];
-    q.options.forEach((opt, i) => {
+    lq.options.forEach((opt, i) => {
       const btn = h('button', 'controller-option', [
         h('div', 'controller-option-letter', [letters[i]]),
         h('span', '', [opt])
@@ -622,7 +642,11 @@ function renderPlayerAnswer() {
 
   if (state.myPowerup && state.playerAnswer === null) {
     const puContainer = h('div', 'powerup-container');
-    const puInfo = { freeze: { icon: '❄️', label: 'Freeze Timer', desc: 'Stops timer for 5s' }, double: { icon: '✨', label: 'Double Points', desc: 'Next answer worth 2x' }, steal: { icon: '🦊', label: 'Steal 50pts', desc: 'Take from the leader' } };
+    const puInfo = {
+      freeze: { icon: '❄️', label: L('Freeze Timer', 'تجميد المؤقت'), desc: L('Stops timer for 5s', 'يوقف المؤقت لخمس ثوانٍ') },
+      double: { icon: '✨', label: L('Double Points', 'نقاط مضاعفة'), desc: L('Next answer worth 2x', 'الإجابة التالية بنقطتين مضاعفتين') },
+      steal: { icon: '🦊', label: L('Steal 50pts', 'سرقة 50 نقطة'), desc: L('Take from the leader', 'خذ نقاطاً من المتصدر') }
+    };
     const pu = puInfo[state.myPowerup];
     if (pu) {
       const puBtn = h('button', 'powerup-btn', [
@@ -641,7 +665,7 @@ function renderPlayerAnswer() {
   }
 
   const bottom = h('div', 'controller-bottom');
-  bottom.appendChild(h('div', 'controller-score', [`Score: `, h('span', '', [String(state.scores[state.playerName] || 0)])]));
+  bottom.appendChild(h('div', 'controller-score', [L('Score:', 'النقاط:'), ` `, h('span', '', [String(state.scores[state.playerName] || 0)])]));
   c.appendChild(bottom);
 
   return c;
@@ -650,10 +674,10 @@ function renderPlayerAnswer() {
 function renderPlayerResult() {
   const c = h('div', 'state-waiting');
   c.appendChild(h('div', 'state-emoji', ['⏳']));
-  c.appendChild(h('div', 'state-title font-display', ['Waiting for next question...']));
-  c.appendChild(h('div', 'state-sub', ['Your answer is locked in']));
+  c.appendChild(h('div', 'state-title font-display', [L('Waiting for next question...', 'بانتظار السؤال التالي…')]));
+  c.appendChild(h('div', 'state-sub', [L('Your answer is locked in', 'تم تأكيد إجابتك')]));
   c.appendChild(h('div', '', [], { style: 'margin-top:16px' }));
-  c.appendChild(h('div', 'controller-score', [`Score: `, h('span', '', [String(state.scores[state.playerName] || 0)])]));
+  c.appendChild(h('div', 'controller-score', [L('Score:', 'النقاط:'), ` `, h('span', '', [String(state.scores[state.playerName] || 0)])]));
 
   if (state.showReveal && state.revealData) {
     setTimeout(() => showRevealOverlay(state.revealData), 200);
@@ -669,20 +693,24 @@ function renderJoin() {
 
   c.appendChild(h('button', 'back-btn', ['←'], { style: 'position:absolute;top:16px;left:16px', onclick: () => { sound.click(); state.screen = 'landing'; state.isHost = true; render(); } }));
 
+  const langRow = h('div', 'lang-row');
+  renderLangToggle(langRow);
+  c.appendChild(langRow);
+
   card.appendChild(h('div', 'join-logo font-display', ['QUIZORA']));
-  card.appendChild(h('div', 'join-subtitle', ['Enter the room code from the host screen']));
+  card.appendChild(h('div', 'join-subtitle', [L('Enter the room code from the host screen', 'أدخل رمز الغرفة المعروض على شاشة المضيف')]));
 
   const form = h('div', 'join-form');
   form.appendChild(h('input', 'input-field join-input', [], {
-    placeholder: 'CODE', maxlength: '5', id: 'join-code',
+    placeholder: L('CODE', 'الرمز'), maxlength: '5', id: 'join-code',
     value: state.inputCode || '',
     oninput: (e) => { state.inputCode = e.target.value.toUpperCase(); e.target.value = state.inputCode; }
   }));
-  form.appendChild(h('input', 'input-field join-name-input', [], { placeholder: 'Your name', maxlength: '12', id: 'join-name' }));
+  form.appendChild(h('input', 'input-field join-name-input', [], { placeholder: L('Your name', 'اسمك'), maxlength: '12', id: 'join-name' }));
   form.appendChild(h('div', 'join-error', [], { id: 'join-error' }));
 
   const ready = state.inputCode.length >= 4;
-  form.appendChild(h('button', `join-btn ${ready ? 'ready' : 'disabled'}`, ['Join Game'], {
+  form.appendChild(h('button', `join-btn ${ready ? 'ready' : 'disabled'}`, [L('Join Game', 'دخول اللعبة')], {
     onclick: () => { if (ready) attemptJoin(); }
   }));
   card.appendChild(form);
@@ -693,14 +721,34 @@ function renderJoin() {
 function attemptJoin() {
   const code = state.inputCode;
   const name = document.getElementById('join-name')?.value?.trim();
+  const err = document.getElementById('join-error');
   if (!name) {
-    const err = document.getElementById('join-error');
-    if (err) err.textContent = 'Enter your name';
+    if (err) err.textContent = L('Enter your name', 'أدخل اسمك');
     return;
   }
   sound.click();
-  ws.send(JSON.stringify({ type: 'join_room', code, name }));
-  state.playerName = name;
+
+  const doJoin = () => {
+    try {
+      ws.send(JSON.stringify({ type: 'join_room', code, name }));
+      state.playerName = name;
+    } catch (e) {
+      if (err) err.textContent = L('Connection lost. Try again.', 'انقطع الاتصال. حاول مجدداً');
+    }
+  };
+
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    doJoin();
+  } else if (ws) {
+    if (err) err.textContent = L('Connecting to server…', 'جارٍ الاتصال بالخادم…');
+    const orig = ws.onopen;
+    ws.onopen = () => {
+      if (orig) orig();
+      doJoin();
+    };
+  } else {
+    if (err) err.textContent = L('Connection lost. Try again.', 'انقطع الاتصال. حاول مجدداً');
+  }
 }
 
 /* ======================== WEBSOCKET ======================== */
@@ -794,7 +842,7 @@ function handleHostMessage(msg) {
       break;
 
     case 'question_skipped':
-      showPowerupNotification('⏭️ Question skipped');
+      showPowerupNotification(L('⏭️ Question skipped', '⏭️ تم تخطي السؤال'));
       state.paused = false;
       break;
 
@@ -829,7 +877,7 @@ function handleHostMessage(msg) {
       break;
 
     case 'powerup_used':
-      showPowerupNotification(msg.message);
+      showPowerupNotification(L(msg.message, msg.messageAr));
       if (msg.scores) state.scores = msg.scores;
       if (state.screen === 'game') render();
       break;
@@ -854,7 +902,9 @@ function handleHostMessage(msg) {
       break;
 
     case 'error':
-      alert(msg.message);
+      const errEl = document.getElementById('join-error');
+      if (errEl && state.screen === 'join') errEl.textContent = L(msg.message, msg.messageAr);
+      else alert(L(msg.message, msg.messageAr));
       break;
   }
 }
@@ -904,7 +954,7 @@ function handlePlayerMessage(msg) {
       break;
 
     case 'question_skipped':
-      showPowerupNotification('⏭️ Question skipped by host');
+      showPowerupNotification(L('⏭️ Question skipped by host', '⏭️ تخطى المضيف السؤال'));
       state.paused = false;
       break;
 
@@ -933,7 +983,7 @@ function handlePlayerMessage(msg) {
       break;
 
     case 'powerup_used':
-      showPowerupNotification(msg.message);
+      showPowerupNotification(L(msg.message, msg.messageAr));
       if (msg.scores) state.scores = msg.scores;
       break;
 
@@ -943,7 +993,7 @@ function handlePlayerMessage(msg) {
       break;
 
     case 'powerup_failed':
-      showPowerupNotification(msg.message);
+      showPowerupNotification(L(msg.message, msg.messageAr));
       break;
 
     case 'game_over':
@@ -963,12 +1013,14 @@ function handlePlayerMessage(msg) {
       state.screen = 'landing';
       state.roomCode = null;
       state.players = [];
-      alert('Host disconnected. Game ended.');
+      alert(L('Host disconnected. Game ended.', 'انقطع المضيف. انتهت اللعبة.'));
       render();
       break;
 
     case 'error':
-      alert(msg.message);
+      const joinErr = document.getElementById('join-error');
+      if (joinErr && state.screen === 'join') joinErr.textContent = L(msg.message, msg.messageAr);
+      else alert(L(msg.message, msg.messageAr));
       break;
   }
 }
@@ -1013,6 +1065,7 @@ function fireConfetti() {
 
 /* ======================== HOST OR PLAYER? ======================== */
 function checkRoute() {
+  initLang();
   const path = window.location.pathname;
   if (path.startsWith('/join/')) {
     const code = path.split('/join/')[1];

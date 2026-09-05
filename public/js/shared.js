@@ -1,15 +1,29 @@
 const CATEGORIES = {
-  general: { name: 'General Knowledge', emoji: '🧠', color: 'from-violet-500 to-purple-600', css: 'background: linear-gradient(135deg, #8b5cf6, #9333ea)' },
-  movies: { name: 'Movies & TV', emoji: '🎬', color: 'from-rose-500 to-pink-600', css: 'background: linear-gradient(135deg, #f43f5e, #db2777)' },
-  sports: { name: 'Sports', emoji: '⚽', color: 'from-emerald-500 to-teal-600', css: 'background: linear-gradient(135deg, #22c55e, #0d9488)' },
-  science: { name: 'Science', emoji: '🔬', color: 'from-cyan-500 to-blue-600', css: 'background: linear-gradient(135deg, #06b6d4, #2563eb)' },
-  history: { name: 'History', emoji: '🏛️', color: 'from-amber-500 to-orange-600', css: 'background: linear-gradient(135deg, #f59e0b, #ea580c)' },
-  family: { name: 'Family Fun', emoji: '👨‍👩‍👧‍👦', color: 'from-fuchsia-500 to-pink-500', css: 'background: linear-gradient(135deg, #d946ef, #ec4899)' },
-  music: { name: 'Music', emoji: '🎵', color: 'from-indigo-500 to-violet-600', css: 'background: linear-gradient(135deg, #6366f1, #8b5cf6)' },
-  geography: { name: 'Geography', emoji: '🌍', color: 'from-green-500 to-emerald-600', css: 'background: linear-gradient(135deg, #22c55e, #059669)' },
-  tech: { name: 'Tech & Internet', emoji: '💻', color: 'from-sky-500 to-cyan-600', css: 'background: linear-gradient(135deg, #0ea5e9, #0891b2)' },
-  islam: { name: 'Islam & Arab World', emoji: '🕌', color: 'from-emerald-500 to-teal-700', css: 'background: linear-gradient(135deg, #10b981, #0f766e)' },
+  general: { name: 'General Knowledge', nameAr: 'المعلومات العامة', emoji: '🧠', color: 'from-violet-500 to-purple-600', css: 'background: linear-gradient(135deg, #8b5cf6, #9333ea)' },
+  movies: { name: 'Movies & TV', nameAr: 'سينما وتلفزيون', emoji: '🎬', color: 'from-rose-500 to-pink-600', css: 'background: linear-gradient(135deg, #f43f5e, #db2777)' },
+  sports: { name: 'Sports', nameAr: 'الرياضة', emoji: '⚽', color: 'from-emerald-500 to-teal-600', css: 'background: linear-gradient(135deg, #22c55e, #0d9488)' },
+  science: { name: 'Science', nameAr: 'العلوم', emoji: '🔬', color: 'from-cyan-500 to-blue-600', css: 'background: linear-gradient(135deg, #06b6d4, #2563eb)' },
+  history: { name: 'History', nameAr: 'التاريخ', emoji: '🏛️', color: 'from-amber-500 to-orange-600', css: 'background: linear-gradient(135deg, #f59e0b, #ea580c)' },
+  family: { name: 'Family Fun', nameAr: 'مرح العائلة', emoji: '👨‍👩‍👧‍👦', color: 'from-fuchsia-500 to-pink-500', css: 'background: linear-gradient(135deg, #d946ef, #ec4899)' },
+  music: { name: 'Music', nameAr: 'الموسيقى', emoji: '🎵', color: 'from-indigo-500 to-violet-600', css: 'background: linear-gradient(135deg, #6366f1, #8b5cf6)' },
+  geography: { name: 'Geography', nameAr: 'الجغرافيا', emoji: '🌍', color: 'from-green-500 to-emerald-600', css: 'background: linear-gradient(135deg, #22c55e, #059669)' },
+  tech: { name: 'Tech & Internet', nameAr: 'التقنية والإنترنت', emoji: '💻', color: 'from-sky-500 to-cyan-600', css: 'background: linear-gradient(135deg, #0ea5e9, #0891b2)' },
+  islam: { name: 'Islam & Arab World', nameAr: 'الإسلام والعالم العربي', emoji: '🕌', color: 'from-emerald-500 to-teal-700', css: 'background: linear-gradient(135deg, #10b981, #0f766e)' },
 };
+
+let appLang = 'en';
+try { appLang = localStorage.getItem('quizora_lang') || 'en'; } catch (e) {}
+
+function setLang(l) {
+  appLang = l === 'ar' ? 'ar' : 'en';
+  try { localStorage.setItem('quizora_lang', appLang); } catch (e) {}
+  document.documentElement.lang = appLang;
+  if (appLang === 'ar') document.documentElement.dir = 'rtl';
+  else document.documentElement.dir = 'ltr';
+}
+function L(en, ar) { return appLang === 'ar' ? (ar || en) : en; }
+function Lq(q) { return { text: L(q.q, q.qAr), options: q.options.map((o, i) => L(o, q.optionsAr?.[i])) }; }
+function initLang() { setLang(appLang); }
 
 class SoundManager {
   constructor() {

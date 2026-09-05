@@ -53,12 +53,14 @@ const CATEGORIES = {
   "general": {
     "name": "General Knowledge",
     "nameAr": "المعلومات العامة",
+    "nameTr": "Genel Kültür",
     "emoji": "🧠",
     "color": "from-violet-500 to-purple-600",
     "questions": [
       {
         "q": "What is the capital of France?",
         "qAr": "ما هي عاصمة فرنسا؟",
+        "qTr": "Fransa'nın başkenti neresidir?",
         "options": [
           "London",
           "Berlin",
@@ -71,11 +73,18 @@ const CATEGORIES = {
           "باريس",
           "مدريد"
         ],
+        "optionsTr": [
+          "Londra",
+          "Berlin",
+          "Paris",
+          "Madrid"
+        ],
         "correct": 2
       },
       {
         "q": "Which planet is known as the Red Planet?",
         "qAr": "ما هو الكوكب المعروف بالكوكب الأحمر؟",
+        "qTr": "Hangi gezegen 'Kızıl Gezegen' olarak bilinir?",
         "options": [
           "Venus",
           "Mars",
@@ -88,11 +97,18 @@ const CATEGORIES = {
           "المشتري",
           "زحل"
         ],
+        "optionsTr": [
+          "Venüs",
+          "Mars",
+          "Jüpiter",
+          "Satürn"
+        ],
         "correct": 1
       },
       {
         "q": "What is the largest ocean on Earth?",
         "qAr": "ما هو أكبر محيط على وجه الأرض؟",
+        "qTr": "Dünya üzerindeki en büyük okyanus hangisidir?",
         "options": [
           "Atlantic",
           "Indian",
@@ -105,11 +121,18 @@ const CATEGORIES = {
           "المتجمد الشمالي",
           "الهادئ"
         ],
+        "optionsTr": [
+          "Atlantik",
+          "Hint",
+          "Kuzey Buz",
+          "Pasifik"
+        ],
         "correct": 3
       },
       {
         "q": "How many continents are there?",
         "qAr": "كم عدد القارات في العالم؟",
+        "qTr": "Dünyada kaç kıta vardır?",
         "options": [
           "5",
           "6",
@@ -117,6 +140,12 @@ const CATEGORIES = {
           "8"
         ],
         "optionsAr": [
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "optionsTr": [
           "5",
           "6",
           "7",
@@ -127,6 +156,7 @@ const CATEGORIES = {
       {
         "q": "What is the chemical symbol for gold?",
         "qAr": "ما هو الرمز الكيميائي للذهب؟",
+        "qTr": "Altının kimyasal sembolü nedir?",
         "options": [
           "Go",
           "Gd",
@@ -139,11 +169,18 @@ const CATEGORIES = {
           "Au",
           "Ag"
         ],
+        "optionsTr": [
+          "Go",
+          "Gd",
+          "Au",
+          "Ag"
+        ],
         "correct": 2
       },
       {
         "q": "Who painted the Mona Lisa?",
         "qAr": "من رسم لوحة الموناليزا؟",
+        "qTr": "Mona Lisa'yı kim çizdi?",
         "options": [
           "Van Gogh",
           "Picasso",
@@ -156,11 +193,18 @@ const CATEGORIES = {
           "دافنشي",
           "مايكل أنجلو"
         ],
+        "optionsTr": [
+          "Van Gogh",
+          "Picasso",
+          "Da Vinci",
+          "Michelangelo"
+        ],
         "correct": 2
       },
       {
         "q": "What is the tallest mountain in the world?",
         "qAr": "ما هو أطول جبل في العالم؟",
+        "qTr": "Dünyanın en yüksek dağı hangisidir?",
         "options": [
           "K2",
           "Kangchenjunga",
@@ -173,11 +217,18 @@ const CATEGORIES = {
           "جبل إيفرست",
           "لوتسي"
         ],
+        "optionsTr": [
+          "K2 Dağı",
+          "Kangchenjunga",
+          "Everest Dağı",
+          "Lhotse"
+        ],
         "correct": 2
       },
       {
         "q": "In which year did the Titanic sink?",
         "qAr": "في أي عام غرقت سفينة تيتانيك؟",
+        "qTr": "Titanic hangi yıl battı?",
         "options": [
           "1905",
           "1912",
@@ -190,11 +241,18 @@ const CATEGORIES = {
           "1918",
           "1923"
         ],
+        "optionsTr": [
+          "1905",
+          "1912",
+          "1918",
+          "1923"
+        ],
         "correct": 1
       },
       {
         "q": "What is the smallest country in the world?",
         "qAr": "ما هي أصغر دولة في العالم؟",
+        "qTr": "Dünyanın en küçük ülkesi hangisidir?",
         "options": [
           "Monaco",
           "Vatican City",
@@ -207,11 +265,18 @@ const CATEGORIES = {
           "سان مارينو",
           "ليختنشتاين"
         ],
+        "optionsTr": [
+          "Monako",
+          "Vatikan",
+          "San Marino",
+          "Lihtenştayn"
+        ],
         "correct": 1
       },
       {
         "q": "Which element has the atomic number 1?",
         "qAr": "ما هو العنصر ذو العدد الذري 1؟",
+        "qTr": "Atom numarası 1 olan element hangisidir?",
         "options": [
           "Helium",
           "Oxygen",
@@ -224,11 +289,18 @@ const CATEGORIES = {
           "الهيدروجين",
           "الكربون"
         ],
+        "optionsTr": [
+          "Helyum",
+          "Oksijen",
+          "Hidrojen",
+          "Karbon"
+        ],
         "correct": 2
       },
       {
         "q": "Which country gifted the Statue of Liberty to the United States?",
         "qAr": "أي دولة أهدت تمثال الحرية إلى الولايات المتحدة؟",
+        "qTr": "Özgürlük Heykeli'ni ABD'ye hangi ülke hediye etti?",
         "options": [
           "France",
           "England",
@@ -241,11 +313,18 @@ const CATEGORIES = {
           "إسبانيا",
           "إيطاليا"
         ],
+        "optionsTr": [
+          "Fransa",
+          "İngiltere",
+          "İspanya",
+          "İtalya"
+        ],
         "correct": 0
       },
       {
         "q": "What is the currency of Japan?",
         "qAr": "ما هي عملة اليابان؟",
+        "qTr": "Japonya'nın para birimi nedir?",
         "options": [
           "Won",
           "Yen",
@@ -258,11 +337,18 @@ const CATEGORIES = {
           "اليوان",
           "الرينغيت"
         ],
+        "optionsTr": [
+          "Won",
+          "Yen",
+          "Yuan",
+          "Ringit"
+        ],
         "correct": 1
       },
       {
         "q": "Which musical instrument has 88 keys?",
         "qAr": "ما هي الآلة الموسيقية التي تحتوي على 88 مفتاحاً؟",
+        "qTr": "Hangi müzik aletinde 88 tuş vardır?",
         "options": [
           "Guitar",
           "Piano",
@@ -275,11 +361,18 @@ const CATEGORIES = {
           "الكمان",
           "البوق"
         ],
+        "optionsTr": [
+          "Gitar",
+          "Piyano",
+          "Keman",
+          "Trompet"
+        ],
         "correct": 1
       },
       {
         "q": "In which country is the Taj Mahal located?",
         "qAr": "في أي دولة يقع تاج محل؟",
+        "qTr": "Tac Mahal hangi ülkede bulunur?",
         "options": [
           "Pakistan",
           "India",
@@ -292,11 +385,18 @@ const CATEGORIES = {
           "بنغلاديش",
           "نيبال"
         ],
+        "optionsTr": [
+          "Pakistan",
+          "Hindistan",
+          "Bangladeş",
+          "Nepal"
+        ],
         "correct": 1
       },
       {
         "q": "What is the largest hot desert in the world?",
         "qAr": "ما هي أكبر صحراء حارة في العالم؟",
+        "qTr": "Dünyanın en büyük sıcak çölü hangisidir?",
         "options": [
           "Sahara",
           "Gobi",
@@ -309,11 +409,18 @@ const CATEGORIES = {
           "كالاهاري",
           "أتاكاما"
         ],
+        "optionsTr": [
+          "Sahra Çölü",
+          "Gobi",
+          "Kalahari",
+          "Atacama"
+        ],
         "correct": 0
       },
       {
         "q": "In which city is the Burj Khalifa located?",
         "qAr": "في أي مدينة يقع برج خليفة؟",
+        "qTr": "Burç Halife hangi şehirde bulunur?",
         "options": [
           "Dubai",
           "Doha",
@@ -326,11 +433,18 @@ const CATEGORIES = {
           "الرياض",
           "مدينة الكويت"
         ],
+        "optionsTr": [
+          "Dubai",
+          "Doha",
+          "Riyad",
+          "Kuveyt Şehri"
+        ],
         "correct": 0
       },
       {
         "q": "Which language is the most spoken in the world by native speakers?",
         "qAr": "ما هي اللغة الأكثر تحدثاً في العالم كلغة أم؟",
+        "qTr": "Dünyada en çok ana dil olarak konuşulan dil hangisidir?",
         "options": [
           "English",
           "Spanish",
@@ -343,11 +457,18 @@ const CATEGORIES = {
           "الصينية الماندرين",
           "الهندية"
         ],
+        "optionsTr": [
+          "İngilizce",
+          "İspanyolca",
+          "Mandarin Çincesi",
+          "Hintçe"
+        ],
         "correct": 2
       },
       {
         "q": "Which vitamin does sunlight help the body produce?",
         "qAr": "أي فيتامين يساعد ضوء الشمس الجسم على إنتاجه؟",
+        "qTr": "Güneş ışığı vücudun hangi vitamini üretmesine yardımcı olur?",
         "options": [
           "Vitamin A",
           "Vitamin B",
@@ -360,11 +481,18 @@ const CATEGORIES = {
           "فيتامين ج",
           "فيتامين د"
         ],
+        "optionsTr": [
+          "A vitamini",
+          "B vitamini",
+          "C vitamini",
+          "D vitamini"
+        ],
         "correct": 3
       },
       {
         "q": "How many days are in a leap year?",
         "qAr": "كم يوماً في السنة الكبيسة؟",
+        "qTr": "Artık yılda kaç gün vardır?",
         "options": [
           "364",
           "365",
@@ -377,11 +505,18 @@ const CATEGORIES = {
           "366",
           "367"
         ],
+        "optionsTr": [
+          "364",
+          "365",
+          "366",
+          "367"
+        ],
         "correct": 2
       },
       {
         "q": "Which animal is called the 'Ship of the Desert'?",
         "qAr": "ما هو الحيوان الملقب بـ«سفينة الصحراء»؟",
+        "qTr": "Hangi hayvana 'Çöl Gemisi' denir?",
         "options": [
           "Horse",
           "Camel",
@@ -394,11 +529,18 @@ const CATEGORIES = {
           "الحمار",
           "الفيل"
         ],
+        "optionsTr": [
+          "At",
+          "Deve",
+          "Eşek",
+          "Fil"
+        ],
         "correct": 1
       },
       {
         "q": "What is the largest mammal on Earth?",
         "qAr": "ما هو أكبر حيوان ثديي على وجه الأرض؟",
+        "qTr": "Dünyadaki en büyük memeli hangisidir?",
         "options": [
           "Elephant",
           "Blue Whale",
@@ -411,11 +553,18 @@ const CATEGORIES = {
           "الزرافة",
           "فرس النهر"
         ],
+        "optionsTr": [
+          "Fil",
+          "Mavi balina",
+          "Zürafa",
+          "Su aygırı"
+        ],
         "correct": 1
       },
       {
         "q": "What color results from mixing red and yellow?",
         "qAr": "ما اللون الناتج عن مزج الأحمر والأصفر؟",
+        "qTr": "Kırmızı ve sarı karıştırılırsa hangi renk elde edilir?",
         "options": [
           "Green",
           "Orange",
@@ -428,11 +577,18 @@ const CATEGORIES = {
           "البنفسجي",
           "البني"
         ],
+        "optionsTr": [
+          "Yeşil",
+          "Turuncu",
+          "Mor",
+          "Kahverengi"
+        ],
         "correct": 1
       },
       {
         "q": "Which organ pumps blood around the body?",
         "qAr": "ما هو العضو الذي يضخ الدم في الجسم؟",
+        "qTr": "Hangi organ vücuda kan pompalar?",
         "options": [
           "Lungs",
           "Heart",
@@ -445,11 +601,18 @@ const CATEGORIES = {
           "الكلى",
           "الدماغ"
         ],
+        "optionsTr": [
+          "Akciğerler",
+          "Kalp",
+          "Böbrekler",
+          "Beyin"
+        ],
         "correct": 1
       },
       {
         "q": "Which planet is often called the Evening Star?",
         "qAr": "أي كوكب غالباً ما يُسمى نجم المساء؟",
+        "qTr": "Hangi gezegene genellikle 'Akşam Yıldızı' denir?",
         "options": [
           "Venus",
           "Mars",
@@ -462,11 +625,18 @@ const CATEGORIES = {
           "عطارد",
           "المشتري"
         ],
+        "optionsTr": [
+          "Venüs",
+          "Mars",
+          "Merkür",
+          "Jüpiter"
+        ],
         "correct": 0
       },
       {
         "q": "How many months in a year have 28 days?",
         "qAr": "كم شهراً في السنة يحتوي على 28 يوماً؟",
+        "qTr": "Yılda kaç ay 28 gün çeker?",
         "options": [
           "1",
           "6",
@@ -479,11 +649,18 @@ const CATEGORIES = {
           "12",
           "28"
         ],
+        "optionsTr": [
+          "1",
+          "6",
+          "12",
+          "28"
+        ],
         "correct": 2
       },
       {
         "q": "Who invented the World Wide Web?",
         "qAr": "من اخترع الشبكة العنكبوتية العالمية؟",
+        "qTr": "World Wide Web'i kim icat etti?",
         "options": [
           "Bill Gates",
           "Tim Berners-Lee",
@@ -496,6 +673,12 @@ const CATEGORIES = {
           "ستيف جوبز",
           "مارك زوكربيرغ"
         ],
+        "optionsTr": [
+          "Bill Gates",
+          "Tim Berners-Lee",
+          "Steve Jobs",
+          "Mark Zuckerberg"
+        ],
         "correct": 1
       }
     ]
@@ -503,12 +686,14 @@ const CATEGORIES = {
   "movies": {
     "name": "Movies & TV",
     "nameAr": "سينما وتلفزيون",
+    "nameTr": "Film ve TV",
     "emoji": "🎬",
     "color": "from-rose-500 to-pink-600",
     "questions": [
       {
         "q": "Who directed the movie Titanic?",
         "qAr": "من أخرج فيلم تيتانيك؟",
+        "qTr": "Titanik filmini kim yönetti?",
         "options": [
           "Steven Spielberg",
           "James Cameron",
@@ -521,11 +706,18 @@ const CATEGORIES = {
           "كريستوفر نولان",
           "ريدلي سكوت"
         ],
+        "optionsTr": [
+          "Steven Spielberg",
+          "James Cameron",
+          "Christopher Nolan",
+          "Ridley Scott"
+        ],
         "correct": 1
       },
       {
         "q": "What is the fictional African country in Black Panther?",
         "qAr": "ما هي الدولة الأفريقية الخيالية في فيلم النمر الأسود؟",
+        "qTr": "Black Panther'deki kurgusal Afrika ülkesi hangisidir?",
         "options": [
           "Zamunda",
           "Wakanda",
@@ -538,11 +730,18 @@ const CATEGORIES = {
           "جنوفيا",
           "لاتفيريا"
         ],
+        "optionsTr": [
+          "Zamonda",
+          "Wakanda",
+          "Genovia",
+          "Latveria"
+        ],
         "correct": 1
       },
       {
         "q": "Which movie features the quote 'I'll be back'?",
         "qAr": "ما الفيلم الذي يحتوي على الجملة الشهيرة «سأعود»؟",
+        "qTr": "Hangi film 'Ger döneceğim' sözünü içerir?",
         "options": [
           "Predator",
           "Terminator",
@@ -555,11 +754,18 @@ const CATEGORIES = {
           "كائنات فضائية",
           "روبوكوب"
         ],
+        "optionsTr": [
+          "Predator",
+          "Terminatör",
+          "Yaratık",
+          "RoboCop"
+        ],
         "correct": 1
       },
       {
         "q": "In The Matrix, what color pill does Neo take?",
         "qAr": "في فيلم الماتريكس، ما لون الحبة التي يتناولها نيو؟",
+        "qTr": "Matrix'te Neo hangi renk hapı alır?",
         "options": [
           "Blue",
           "Red",
@@ -572,11 +778,18 @@ const CATEGORIES = {
           "الخضراء",
           "الصفراء"
         ],
+        "optionsTr": [
+          "Mavi",
+          "Kırmızı",
+          "Yeşil",
+          "Sarı"
+        ],
         "correct": 1
       },
       {
         "q": "Who played Iron Man in the MCU?",
         "qAr": "من لعب دور الرجل الحديدي في أفلام مارفل؟",
+        "qTr": "MCU'da Demir Adam'ı kim canlandırdı?",
         "options": [
           "Chris Evans",
           "Chris Hemsworth",
@@ -589,11 +802,18 @@ const CATEGORIES = {
           "روبرت داوني جونيور",
           "مارك رافالو"
         ],
+        "optionsTr": [
+          "Chris Evans",
+          "Chris Hemsworth",
+          "Robert Downey Jr.",
+          "Mark Ruffalo"
+        ],
         "correct": 2
       },
       {
         "q": "What year was the first Star Wars movie released?",
         "qAr": "في أي عام صدر أول فيلم من سلسلة حرب النجوم؟",
+        "qTr": "İlk Star Wars filmi hangi yıl yayınlandı?",
         "options": [
           "1975",
           "1977",
@@ -606,11 +826,18 @@ const CATEGORIES = {
           "1979",
           "1980"
         ],
+        "optionsTr": [
+          "1975",
+          "1977",
+          "1979",
+          "1980"
+        ],
         "correct": 1
       },
       {
         "q": "Which animated film features a character named Simba?",
         "qAr": "ما الفيلم الكرتوني الذي تظهر فيه شخصية سيمبا؟",
+        "qTr": "Hangi animasyon filminde Simba adlı bir karakter vardır?",
         "options": [
           "Aladdin",
           "The Lion King",
@@ -623,11 +850,18 @@ const CATEGORIES = {
           "فروزن",
           "موانا"
         ],
+        "optionsTr": [
+          "Aladdin",
+          "Aslan Kral",
+          "Karlar Ülkesi",
+          "Moana"
+        ],
         "correct": 1
       },
       {
         "q": "Who directed Inception?",
         "qAr": "من أخرج فيلم إنسيبشن؟",
+        "qTr": "Inception'ı kim yönetti?",
         "options": [
           "Denis Villeneuve",
           "Christopher Nolan",
@@ -640,11 +874,18 @@ const CATEGORIES = {
           "ديفيد فينشر",
           "كوينتن تارانتينو"
         ],
+        "optionsTr": [
+          "Denis Villeneuve",
+          "Christopher Nolan",
+          "David Fincher",
+          "Quentin Tarantino"
+        ],
         "correct": 1
       },
       {
         "q": "What is the highest-grossing film of all time?",
         "qAr": "ما هو الفيلم الأعلى ربحاً في التاريخ؟",
+        "qTr": "Tüm zamanların en çok hasılat yapan filmi hangisidir?",
         "options": [
           "Titanic",
           "Avatar",
@@ -657,11 +898,18 @@ const CATEGORIES = {
           "المنتقمون: نهاية اللعبة",
           "حرب النجوم"
         ],
+        "optionsTr": [
+          "Titanik",
+          "Avatar",
+          "Avengers: Endgame",
+          "Star Wars"
+        ],
         "correct": 1
       },
       {
         "q": "In Harry Potter, what house does Harry belong to?",
         "qAr": "في هاري بوتر، إلى أي منزل ينتمي هاري؟",
+        "qTr": "Harry Potter'da Harry hangi evin üyesidir?",
         "options": [
           "Slytherin",
           "Hufflepuff",
@@ -674,11 +922,18 @@ const CATEGORIES = {
           "رافينكلو",
           "جريفندور"
         ],
+        "optionsTr": [
+          "Slytherin",
+          "Hufflepuff",
+          "Ravenclaw",
+          "Gryffindor"
+        ],
         "correct": 3
       },
       {
         "q": "Which actor played Jack Sparrow in Pirates of the Caribbean?",
         "qAr": "من لعب دور جاك سبارو في قراصنة الكاريبي؟",
+        "qTr": "Karayip Korsanları'nda Jack Sparrow'u hangi aktör canlandırdı?",
         "options": [
           "Johnny Depp",
           "Brad Pitt",
@@ -691,11 +946,18 @@ const CATEGORIES = {
           "ليوناردو دي كابريو",
           "توم كروز"
         ],
+        "optionsTr": [
+          "Johnny Depp",
+          "Brad Pitt",
+          "Leonardo DiCaprio",
+          "Tom Cruise"
+        ],
         "correct": 0
       },
       {
         "q": "What is the name of the wizarding school in Harry Potter?",
         "qAr": "ما اسم مدرسة السحر والشعوذة في هاري بوتر؟",
+        "qTr": "Harry Potter'daki büyücülük okulunun adı nedir?",
         "options": [
           "Beauxbatons",
           "Hogwarts",
@@ -708,11 +970,18 @@ const CATEGORIES = {
           "دورمسترانغ",
           "إلفرمورني"
         ],
+        "optionsTr": [
+          "Beauxbatons",
+          "Hogwarts",
+          "Durmstrang",
+          "Ilvermorny"
+        ],
         "correct": 1
       },
       {
         "q": "Who won the Oscar for Best Actor as the Joker in 2019?",
         "qAr": "من فاز بجائزة الأوسكار لأفضل ممثل عن دور الجوكر عام 2019؟",
+        "qTr": "2019'da Joker rolüyle En İyi Erkek Oyuncu Oscar'ını kim kazandı?",
         "options": [
           "Joaquin Phoenix",
           "Jared Leto",
@@ -725,11 +994,18 @@ const CATEGORIES = {
           "هيث ليدجر",
           "جاك نيكلسون"
         ],
+        "optionsTr": [
+          "Joaquin Phoenix",
+          "Jared Leto",
+          "Heath Ledger",
+          "Jack Nicholson"
+        ],
         "correct": 0
       },
       {
         "q": "Which Toy Story spaceman says 'To infinity and beyond!'?",
         "qAr": "أي رائد فضاء من لعبة «قصة لعبة» يقول «إلى ما لا نهاية وما بعدها»؟",
+        "qTr": "Oyuncak Hikayesi'ndeki hangi uzay adamı 'Sınırsıza ve ötesine!' der?",
         "options": [
           "Buzz Lightyear",
           "Woody",
@@ -742,11 +1018,18 @@ const CATEGORIES = {
           "ريكس",
           "هام"
         ],
+        "optionsTr": [
+          "Buzz",
+          "Woody",
+          "Rex",
+          "Hamm"
+        ],
         "correct": 0
       },
       {
         "q": "Which animated film features the sisters Anna and Elsa?",
         "qAr": "ما الفيلم الكرتوني الذي يضم الأختين آنا وإلسا؟",
+        "qTr": "Hangi animasyon filmi Anna ve Elsa kardeşleri içerir?",
         "options": [
           "Frozen",
           "Moana",
@@ -759,11 +1042,18 @@ const CATEGORIES = {
           "رابونزيل",
           "إنكانتو"
         ],
+        "optionsTr": [
+          "Karlar Ülkesi",
+          "Moana",
+          "Rapunzel",
+          "Encanto"
+        ],
         "correct": 0
       },
       {
         "q": "Who directed the movie 'Avatar'?",
         "qAr": "من أخرج فيلم أفاتار؟",
+        "qTr": "Avatar filmini kim yönetti?",
         "options": [
           "James Cameron",
           "Steven Spielberg",
@@ -776,11 +1066,18 @@ const CATEGORIES = {
           "بيتر جاكسون",
           "مايكل باي"
         ],
+        "optionsTr": [
+          "James Cameron",
+          "Steven Spielberg",
+          "Peter Jackson",
+          "Michael Bay"
+        ],
         "correct": 0
       },
       {
         "q": "Which 1977 space film introduced 'The Force'?",
         "qAr": "ما هو فيلم الفضاء الصادر عام 1977 الذي قدّم مصطلح «القوة»؟",
+        "qTr": "Hangi 1977 uzay filmi 'Güç' kavramını tanıttı?",
         "options": [
           "Star Wars",
           "Star Trek",
@@ -793,11 +1090,18 @@ const CATEGORIES = {
           "غريب الفضاء",
           "فلاش غوردون"
         ],
+        "optionsTr": [
+          "Star Wars",
+          "Star Trek",
+          "Yaratık",
+          "Flash Gordon"
+        ],
         "correct": 0
       },
       {
         "q": "Which movie stars Tom Hanks as a castaway named Chuck?",
         "qAr": "ما هو الفيلم الذي يلعب فيه توم هانكس دور غريق اسمه تشاك؟",
+        "qTr": "Hangi filmde Tom Hanks, Chuck adlı bir kazazede rolündedir?",
         "options": [
           "Cast Away",
           "Forrest Gump",
@@ -810,11 +1114,18 @@ const CATEGORIES = {
           "المطار",
           "فيلادلفيا"
         ],
+        "optionsTr": [
+          "Kazazede",
+          "Forrest Gump",
+          "Terminal",
+          "Philadelphia"
+        ],
         "correct": 0
       },
       {
         "q": "Which Japanese studio made 'Spirited Away'?",
         "qAr": "أي استوديو ياباني أنتج فيلم «المخطوفة»؟",
+        "qTr": "'Ruhların Kaçışı'nı hangi Japon stüdyosu yaptı?",
         "options": [
           "Studio Ghibli",
           "Toei",
@@ -827,11 +1138,18 @@ const CATEGORIES = {
           "صنرايز",
           "مادهاوس"
         ],
+        "optionsTr": [
+          "Studio Ghibli",
+          "Toei",
+          "Sunrise",
+          "Madhouse"
+        ],
         "correct": 0
       },
       {
         "q": "Which 2008 superhero film introduced Iron Man to the big screen?",
         "qAr": "ما هو فيلم الأبطال الخارقين لعام 2008 الذي قدّم الرجل الحديدي للشاشة الكبيرة؟",
+        "qTr": "Hangi 2008 süper kahraman filmi Demir Adam'ı beyaz perdeye taşıdı?",
         "options": [
           "Iron Man",
           "The Dark Knight",
@@ -844,6 +1162,12 @@ const CATEGORIES = {
           "رجل الفولاذ",
           "سوبرمان يعود"
         ],
+        "optionsTr": [
+          "Demir Adam",
+          "Kara Şövalye",
+          "Çelik Adam",
+          "Superman Dönüyor"
+        ],
         "correct": 0
       }
     ]
@@ -851,12 +1175,14 @@ const CATEGORIES = {
   "sports": {
     "name": "Sports",
     "nameAr": "الرياضة",
+    "nameTr": "Spor",
     "emoji": "⚽",
     "color": "from-emerald-500 to-teal-600",
     "questions": [
       {
         "q": "How many players on a soccer team on the field?",
         "qAr": "كم عدد لاعبي فريق كرة القدم داخل الملعب؟",
+        "qTr": "Bir futbol takımında sahada kaç oyuncu vardır?",
         "options": [
           "9",
           "10",
@@ -869,11 +1195,18 @@ const CATEGORIES = {
           "11",
           "12"
         ],
+        "optionsTr": [
+          "9",
+          "10",
+          "11",
+          "12"
+        ],
         "correct": 2
       },
       {
         "q": "Which country won the 2022 FIFA World Cup?",
         "qAr": "أي دولة فازت بكأس العالم لكرة القدم 2022؟",
+        "qTr": "2022 FIFA Dünya Kupası'nı hangi ülke kazandı?",
         "options": [
           "France",
           "Brazil",
@@ -886,11 +1219,18 @@ const CATEGORIES = {
           "الأرجنتين",
           "ألمانيا"
         ],
+        "optionsTr": [
+          "Fransa",
+          "Brezilya",
+          "Arjantin",
+          "Almanya"
+        ],
         "correct": 2
       },
       {
         "q": "How many points is a basketball free throw worth?",
         "qAr": "كم نقطة تساوي الرمية الحرة في كرة السلة؟",
+        "qTr": "Basketbolda bir serbest atış kaç puan değerindedir?",
         "options": [
           "1",
           "2",
@@ -903,11 +1243,18 @@ const CATEGORIES = {
           "3",
           "4"
         ],
+        "optionsTr": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
         "correct": 0
       },
       {
         "q": "What sport is played at Wimbledon?",
         "qAr": "ما هي الرياضة التي تُلعب في ويمبلدون؟",
+        "qTr": "Wimbledon'da hangi spor yapılır?",
         "options": [
           "Golf",
           "Tennis",
@@ -920,11 +1267,18 @@ const CATEGORIES = {
           "الكريكيت",
           "الرغبي"
         ],
+        "optionsTr": [
+          "Golf",
+          "Tenis",
+          "Kriket",
+          "Ragbi"
+        ],
         "correct": 1
       },
       {
         "q": "How many Grand Slam tennis tournaments per year?",
         "qAr": "كم عدد بطولات الغراند سلام في التنس سنوياً؟",
+        "qTr": "Yılda kaç Grand Slam tenis turnuvası vardır?",
         "options": [
           "3",
           "4",
@@ -937,11 +1291,18 @@ const CATEGORIES = {
           "5",
           "6"
         ],
+        "optionsTr": [
+          "3",
+          "4",
+          "5",
+          "6"
+        ],
         "correct": 1
       },
       {
         "q": "Which athlete has the most Olympic gold medals?",
         "qAr": "من هو الرياضي صاحب أكبر عدد من الميداليات الذهبية الأولمبية؟",
+        "qTr": "Hangi sporcu en çok Olimpiyat altın madalyasına sahiptir?",
         "options": [
           "Usain Bolt",
           "Michael Phelps",
@@ -954,11 +1315,18 @@ const CATEGORIES = {
           "كارل لويس",
           "سيمون بايلز"
         ],
+        "optionsTr": [
+          "Usain Bolt",
+          "Michael Phelps",
+          "Carl Lewis",
+          "Simone Biles"
+        ],
         "correct": 1
       },
       {
         "q": "How many points is a touchdown in American football?",
         "qAr": "كم نقطة تساوي محاولة تهديف (تاتش داون) في كرة القدم الأمريكية؟",
+        "qTr": "Amerikan futbolunda bir touchdown kaç puan değerindedir?",
         "options": [
           "3",
           "6",
@@ -966,6 +1334,12 @@ const CATEGORIES = {
           "8"
         ],
         "optionsAr": [
+          "3",
+          "6",
+          "7",
+          "8"
+        ],
+        "optionsTr": [
           "3",
           "6",
           "7",
@@ -976,6 +1350,7 @@ const CATEGORIES = {
       {
         "q": "What is the diameter of a basketball hoop in inches?",
         "qAr": "كم بوصةً قطر سلة كرة السلة؟",
+        "qTr": "Basketbol potasının çapı kaç inçtir?",
         "options": [
           "16",
           "18",
@@ -988,11 +1363,18 @@ const CATEGORIES = {
           "20",
           "22"
         ],
+        "optionsTr": [
+          "16",
+          "18",
+          "20",
+          "22"
+        ],
         "correct": 1
       },
       {
         "q": "Which country invented cricket?",
         "qAr": "أي دولة اخترعت رياضة الكريكيت؟",
+        "qTr": "Kriketi hangi ülke icat etti?",
         "options": [
           "Australia",
           "India",
@@ -1005,11 +1387,18 @@ const CATEGORIES = {
           "إنجلترا",
           "جنوب أفريقيا"
         ],
+        "optionsTr": [
+          "Avustralya",
+          "Hindistan",
+          "İngiltere",
+          "Güney Afrika"
+        ],
         "correct": 2
       },
       {
         "q": "How long is a marathon in km?",
         "qAr": "كم كيلومتراً يبلغ طول الماراثون؟",
+        "qTr": "Maraton kaç km uzunluğundadır?",
         "options": [
           "21",
           "32",
@@ -1022,11 +1411,18 @@ const CATEGORIES = {
           "42",
           "50"
         ],
+        "optionsTr": [
+          "21",
+          "32",
+          "42",
+          "50"
+        ],
         "correct": 2
       },
       {
         "q": "Which country hosted the 2022 FIFA World Cup?",
         "qAr": "أي دولة استضافت كأس العالم 2022؟",
+        "qTr": "2022 FIFA Dünya Kupası'na hangi ülke ev sahipliği yaptı?",
         "options": [
           "Qatar",
           "Russia",
@@ -1039,11 +1435,18 @@ const CATEGORIES = {
           "البرازيل",
           "الإمارات العربية المتحدة"
         ],
+        "optionsTr": [
+          "Katar",
+          "Rusya",
+          "Brezilya",
+          "BAE"
+        ],
         "correct": 0
       },
       {
         "q": "Which Egyptian footballer is nicknamed the 'Egyptian King'?",
         "qAr": "ما هو اللاعب المصري الملقب بـ«الملك المصري»؟",
+        "qTr": "Hangi Mısırlı futbolcu 'Mısır Kralı' lakabıyla anılır?",
         "options": [
           "Mohamed Salah",
           "Mohamed Aboutrika",
@@ -1056,11 +1459,18 @@ const CATEGORIES = {
           "تريزيغيه",
           "عصام الحضري"
         ],
+        "optionsTr": [
+          "Mohamed Salah",
+          "Mohamed Abou Treika",
+          "Trezeguet",
+          "Essam El-Hadary"
+        ],
         "correct": 0
       },
       {
         "q": "How many players are on a basketball team on the court?",
         "qAr": "كم عدد لاعبي كرة السلة على أرض الملعب؟",
+        "qTr": "Basketbolda sahada kaç oyuncu vardır?",
         "options": [
           "4",
           "5",
@@ -1073,11 +1483,18 @@ const CATEGORIES = {
           "6",
           "7"
         ],
+        "optionsTr": [
+          "4",
+          "5",
+          "6",
+          "7"
+        ],
         "correct": 1
       },
       {
         "q": "In which sport would you use a shuttlecock?",
         "qAr": "في أي رياضة يُستخدم الريشة؟",
+        "qTr": "Hangi sporda tüylü top kullanılır?",
         "options": [
           "Badminton",
           "Tennis",
@@ -1090,11 +1507,18 @@ const CATEGORIES = {
           "السكواش",
           "تنس الطاولة"
         ],
+        "optionsTr": [
+          "Badminton",
+          "Tenis",
+          "Squash",
+          "Masa tenisi"
+        ],
         "correct": 0
       },
       {
         "q": "Which country has won the most FIFA World Cups?",
         "qAr": "أي دولة فازت بأكبر عدد من كؤوس العالم؟",
+        "qTr": "Hangi ülke en çok FIFA Dünya Kupası kazanmıştır?",
         "options": [
           "Germany",
           "Brazil",
@@ -1107,11 +1531,18 @@ const CATEGORIES = {
           "إيطاليا",
           "الأرجنتين"
         ],
+        "optionsTr": [
+          "Almanya",
+          "Brezilya",
+          "İtalya",
+          "Arjantin"
+        ],
         "correct": 1
       },
       {
         "q": "What is the maximum score possible with a single dart?",
         "qAr": "ما هي أعلى نتيجة ممكنة برمية واحدة للنبلة؟",
+        "qTr": "Tek bir ok atışıyla mümkün olan en yüksek skor nedir?",
         "options": [
           "50",
           "60",
@@ -1119,6 +1550,12 @@ const CATEGORIES = {
           "180"
         ],
         "optionsAr": [
+          "50",
+          "60",
+          "100",
+          "180"
+        ],
+        "optionsTr": [
           "50",
           "60",
           "100",
@@ -1129,6 +1566,7 @@ const CATEGORIES = {
       {
         "q": "How many players are on a cricket team?",
         "qAr": "كم عدد لاعبي فريق الكريكيت؟",
+        "qTr": "Bir kriket takımında kaç oyuncu vardır?",
         "options": [
           "9",
           "10",
@@ -1141,11 +1579,18 @@ const CATEGORIES = {
           "11",
           "12"
         ],
+        "optionsTr": [
+          "9",
+          "10",
+          "11",
+          "12"
+        ],
         "correct": 2
       },
       {
         "q": "What is the traditional national sport of Japan?",
         "qAr": "ما هي الرياضة التقليدية الوطنية في اليابان؟",
+        "qTr": "Japonya'nın geleneksel milli sporu nedir?",
         "options": [
           "Sumo Wrestling",
           "Karate",
@@ -1158,11 +1603,18 @@ const CATEGORIES = {
           "البيسبول",
           "الجودو"
         ],
+        "optionsTr": [
+          "Sumo güreşi",
+          "Karate",
+          "Beyzbol",
+          "Judo"
+        ],
         "correct": 0
       },
       {
         "q": "Which football club is the biggest and most successful in Egypt?",
         "qAr": "ما هو أكبر وأنجح نادٍ لكرة القدم في مصر؟",
+        "qTr": "Mısır'ın en büyük ve en başarılı futbol kulübü hangisidir?",
         "options": [
           "Al Ahly",
           "Zamalek",
@@ -1175,11 +1627,18 @@ const CATEGORIES = {
           "الإسماعيلي",
           "بيراميدز"
         ],
+        "optionsTr": [
+          "El-Ehli",
+          "Zamalek",
+          "El-İsmailiy",
+          "Pyramids"
+        ],
         "correct": 0
       },
       {
         "q": "Which sport is known around the world as 'the beautiful game'?",
         "qAr": "أي رياضة تُعرف حول العالم بـ«اللعبة الجميلة»؟",
+        "qTr": "Hangi spor dünya çapında 'güzel oyun' olarak bilinir?",
         "options": [
           "Football",
           "Basketball",
@@ -1192,6 +1651,12 @@ const CATEGORIES = {
           "التنس",
           "الرغبي"
         ],
+        "optionsTr": [
+          "Futbol",
+          "Basketbol",
+          "Tenis",
+          "Ragbi"
+        ],
         "correct": 0
       }
     ]
@@ -1199,12 +1664,14 @@ const CATEGORIES = {
   "science": {
     "name": "Science",
     "nameAr": "العلوم",
+    "nameTr": "Bilim",
     "emoji": "🔬",
     "color": "from-cyan-500 to-blue-600",
     "questions": [
       {
         "q": "What is the chemical formula for water?",
         "qAr": "ما هي الصيغة الكيميائية للماء؟",
+        "qTr": "Suyun kimyasal formülü nedir?",
         "options": [
           "CO2",
           "H2O",
@@ -1212,6 +1679,12 @@ const CATEGORIES = {
           "NaCl"
         ],
         "optionsAr": [
+          "CO2",
+          "H2O",
+          "O2",
+          "NaCl"
+        ],
+        "optionsTr": [
           "CO2",
           "H2O",
           "O2",
@@ -1222,6 +1695,7 @@ const CATEGORIES = {
       {
         "q": "How many bones in the adult human body?",
         "qAr": "كم عدد العظام في جسم الإنسان البالغ؟",
+        "qTr": "Yetişkin insan vücudunda kaç kemik vardır?",
         "options": [
           "186",
           "206",
@@ -1234,11 +1708,18 @@ const CATEGORIES = {
           "226",
           "256"
         ],
+        "optionsTr": [
+          "186",
+          "206",
+          "226",
+          "256"
+        ],
         "correct": 1
       },
       {
         "q": "What planet is closest to the Sun?",
         "qAr": "ما هو أقرب كوكب إلى الشمس؟",
+        "qTr": "Güneş'e en yakın gezegen hangisidir?",
         "options": [
           "Venus",
           "Earth",
@@ -1251,11 +1732,18 @@ const CATEGORIES = {
           "عطارد",
           "المريخ"
         ],
+        "optionsTr": [
+          "Venüs",
+          "Dünya",
+          "Merkür",
+          "Mars"
+        ],
         "correct": 2
       },
       {
         "q": "What force keeps us on the ground?",
         "qAr": "ما هي القوة التي تبقينا على الأرض؟",
+        "qTr": "Hangi kuvvet bizi yerde tutar?",
         "options": [
           "Magnetism",
           "Friction",
@@ -1268,11 +1756,18 @@ const CATEGORIES = {
           "الجاذبية",
           "القصور الذاتي"
         ],
+        "optionsTr": [
+          "Manyetizma",
+          "Sürtünme",
+          "Yerçekimi",
+          "Atalet"
+        ],
         "correct": 2
       },
       {
         "q": "What is the powerhouse of the cell?",
         "qAr": "ما هو مصدر طاقة الخلية؟",
+        "qTr": "Hücrenin enerji merkezi nedir?",
         "options": [
           "Nucleus",
           "Ribosome",
@@ -1285,11 +1780,18 @@ const CATEGORIES = {
           "الميتوكوندريا",
           "جهاز غولجي"
         ],
+        "optionsTr": [
+          "Çekirdek",
+          "Ribozom",
+          "Mitokondri",
+          "Golgi aygıtı"
+        ],
         "correct": 2
       },
       {
         "q": "What gas do plants absorb from the atmosphere?",
         "qAr": "ما هو الغاز الذي تمتصه النباتات من الجو؟",
+        "qTr": "Bitkiler atmosferden hangi gazı emer?",
         "options": [
           "Oxygen",
           "Nitrogen",
@@ -1302,11 +1804,18 @@ const CATEGORIES = {
           "ثاني أكسيد الكربون",
           "الهيدروجين"
         ],
+        "optionsTr": [
+          "Oksijen",
+          "Azot",
+          "Karbondioksit",
+          "Hidrojen"
+        ],
         "correct": 2
       },
       {
         "q": "Approx speed of light in km/s?",
         "qAr": "ما هي سرعة الضوء تقريباً بالكيلومتر/ثانية؟",
+        "qTr": "Işığın hızı yaklaşık kaç km/s'dir?",
         "options": [
           "150,000",
           "300,000",
@@ -1319,11 +1828,18 @@ const CATEGORIES = {
           "450,000",
           "600,000"
         ],
+        "optionsTr": [
+          "150.000",
+          "300.000",
+          "450.000",
+          "600.000"
+        ],
         "correct": 1
       },
       {
         "q": "Who proposed the theory of relativity?",
         "qAr": "من وضع نظرية النسبية؟",
+        "qTr": "Görelilik teorisini kim ortaya attı?",
         "options": [
           "Newton",
           "Einstein",
@@ -1336,11 +1852,18 @@ const CATEGORIES = {
           "هوكينغ",
           "تسلا"
         ],
+        "optionsTr": [
+          "Newton",
+          "Einstein",
+          "Hawking",
+          "Tesla"
+        ],
         "correct": 1
       },
       {
         "q": "What is the hardest natural substance on Earth?",
         "qAr": "ما هي أقسى مادة طبيعية على وجه الأرض؟",
+        "qTr": "Dünyadaki en sert doğal madde hangisidir?",
         "options": [
           "Gold",
           "Iron",
@@ -1353,11 +1876,18 @@ const CATEGORIES = {
           "الألماس",
           "البلاتين"
         ],
+        "optionsTr": [
+          "Altın",
+          "Demir",
+          "Elmas",
+          "Platin"
+        ],
         "correct": 2
       },
       {
         "q": "How many elements in the periodic table?",
         "qAr": "كم عدد العناصر في الجدول الدوري؟",
+        "qTr": "Periyodik tabloda kaç element vardır?",
         "options": [
           "92",
           "108",
@@ -1370,11 +1900,18 @@ const CATEGORIES = {
           "118",
           "130"
         ],
+        "optionsTr": [
+          "92",
+          "108",
+          "118",
+          "130"
+        ],
         "correct": 2
       },
       {
         "q": "Which Muslim scholar is known as the 'Father of Algebra'?",
         "qAr": "ما هو العالم المسلم المعروف بـ«أبي الجبر»؟",
+        "qTr": "Hangi Müslüman bilgin 'Cebrin Babası' olarak bilinir?",
         "options": [
           "Al-Khwarizmi",
           "Ibn Sina",
@@ -1387,11 +1924,18 @@ const CATEGORIES = {
           "الرازي",
           "عمر الخيام"
         ],
+        "optionsTr": [
+          "Harezmi",
+          "İbn Sina",
+          "Razi",
+          "Ömer Hayyam"
+        ],
         "correct": 0
       },
       {
         "q": "Which scientist formulated the three laws of motion?",
         "qAr": "من هو العالم الذي صاغ قوانين الحركة الثلاثة؟",
+        "qTr": "Hangi bilim insanı üç hareket yasasını formüle etti?",
         "options": [
           "Isaac Newton",
           "Albert Einstein",
@@ -1404,11 +1948,18 @@ const CATEGORIES = {
           "غاليليو غاليلي",
           "نيكولا تسلا"
         ],
+        "optionsTr": [
+          "Isaac Newton",
+          "Albert Einstein",
+          "Galileo Galilei",
+          "Nikola Tesla"
+        ],
         "correct": 0
       },
       {
         "q": "Which gas makes up about 78% of Earth's atmosphere?",
         "qAr": "ما هو الغاز الذي يشكل حوالي 78% من الغلاف الجوي للأرض؟",
+        "qTr": "Dünya atmosferinin yaklaşık %78'ini hangi gaz oluşturur?",
         "options": [
           "Oxygen",
           "Carbon Dioxide",
@@ -1421,11 +1972,18 @@ const CATEGORIES = {
           "النيتروجين",
           "الهيدروجين"
         ],
+        "optionsTr": [
+          "Oksijen",
+          "Karbondioksit",
+          "Azot",
+          "Hidrojen"
+        ],
         "correct": 2
       },
       {
         "q": "What is the study of weather called?",
         "qAr": "ما اسم علم دراسة الطقس؟",
+        "qTr": "Hava durumunu inceleyen bilime ne denir?",
         "options": [
           "Geology",
           "Meteorology",
@@ -1438,11 +1996,18 @@ const CATEGORIES = {
           "علم الفلك",
           "علم البيئة"
         ],
+        "optionsTr": [
+          "Jeoloji",
+          "Meteoroloji",
+          "Astronomi",
+          "Ekoloji"
+        ],
         "correct": 1
       },
       {
         "q": "Which metal is liquid at room temperature?",
         "qAr": "أي معدن يكون سائلاً في درجة حرارة الغرفة؟",
+        "qTr": "Hangi metal oda sıcaklığında sıvıdır?",
         "options": [
           "Mercury",
           "Aluminium",
@@ -1455,11 +2020,18 @@ const CATEGORIES = {
           "الحديد",
           "النحاس"
         ],
+        "optionsTr": [
+          "Cıva",
+          "Alüminyum",
+          "Demir",
+          "Bakır"
+        ],
         "correct": 0
       },
       {
         "q": "Who was the first scientist to use a telescope to observe the stars?",
         "qAr": "من كان أول عالم استخدم التلسكوب لرصد النجوم؟",
+        "qTr": "Yıldızları gözlemlemek için teleskop kullanan ilk bilim insanı kimdi?",
         "options": [
           "Galileo Galilei",
           "Isaac Newton",
@@ -1472,11 +2044,18 @@ const CATEGORIES = {
           "كوبرنيكوس",
           "كيبلر"
         ],
+        "optionsTr": [
+          "Galileo Galilei",
+          "Isaac Newton",
+          "Kopernik",
+          "Kepler"
+        ],
         "correct": 0
       },
       {
         "q": "What is the unit used to measure electric current?",
         "qAr": "ما هي وحدة قياس التيار الكهربائي؟",
+        "qTr": "Elektrik akımını ölçmek için kullanılan birim nedir?",
         "options": [
           "Volt",
           "Watt",
@@ -1489,11 +2068,18 @@ const CATEGORIES = {
           "الأمبير",
           "الأوم"
         ],
+        "optionsTr": [
+          "Volt",
+          "Watt",
+          "Amper",
+          "Ohm"
+        ],
         "correct": 2
       },
       {
         "q": "Which Arab scholar is considered the 'father of optics' for his work on light and vision?",
         "qAr": "ما هو العالم العربي الملقب بـ«أبي البصريات» لدراساته عن الضوء والرؤية؟",
+        "qTr": "Işık ve görme üzerine çalışmalarıyla 'optiğin babası' sayılan Arap bilgin kimdir?",
         "options": [
           "Ibn al-Haytham",
           "Al-Khwarizmi",
@@ -1506,11 +2092,18 @@ const CATEGORIES = {
           "ابن خلدون",
           "الفارابي"
         ],
+        "optionsTr": [
+          "İbn Heysem",
+          "Harezmi",
+          "İbn Haldun",
+          "Farabi"
+        ],
         "correct": 0
       },
       {
         "q": "What does DNA stand for?",
         "qAr": "ماذا يعني DNA؟",
+        "qTr": "DNA'nın açılımı nedir?",
         "options": [
           "Deoxyribonucleic Acid",
           "Dinucleotide Acid",
@@ -1523,11 +2116,18 @@ const CATEGORIES = {
           "ريبوز منقوص الأكسجين",
           "نيتروجين مزدوج"
         ],
+        "optionsTr": [
+          "Deoksiribonükleik asit",
+          "Dinükleotit asit",
+          "Deoksiriboz",
+          "Çift azot"
+        ],
         "correct": 0
       },
       {
         "q": "What is the approximate speed of sound in air?",
         "qAr": "ما هي السرعة التقريبية للصوت في الهواء؟",
+        "qTr": "Sesin havadaki yaklaşık hızı nedir?",
         "options": [
           "343 m/s",
           "150 m/s",
@@ -1540,6 +2140,12 @@ const CATEGORIES = {
           "800 م/ث",
           "1000 م/ث"
         ],
+        "optionsTr": [
+          "343 m/s",
+          "150 m/s",
+          "800 m/s",
+          "1000 m/s"
+        ],
         "correct": 0
       }
     ]
@@ -1547,12 +2153,14 @@ const CATEGORIES = {
   "history": {
     "name": "History",
     "nameAr": "التاريخ",
+    "nameTr": "Tarih",
     "emoji": "🏛️",
     "color": "from-amber-500 to-orange-600",
     "questions": [
       {
         "q": "In which year did World War II end?",
         "qAr": "في أي عام انتهت الحرب العالمية الثانية؟",
+        "qTr": "II. Dünya Savaşı hangi yıl sona erdi?",
         "options": [
           "1943",
           "1944",
@@ -1565,11 +2173,18 @@ const CATEGORIES = {
           "1945",
           "1946"
         ],
+        "optionsTr": [
+          "1943",
+          "1944",
+          "1945",
+          "1946"
+        ],
         "correct": 2
       },
       {
         "q": "Who was the first President of the United States?",
         "qAr": "من كان أول رئيس للولايات المتحدة الأمريكية؟",
+        "qTr": "Amerika Birleşik Devletleri'nin ilk başkanı kimdi?",
         "options": [
           "Jefferson",
           "Washington",
@@ -1582,11 +2197,18 @@ const CATEGORIES = {
           "لينكولن",
           "آدامز"
         ],
+        "optionsTr": [
+          "Jefferson",
+          "Washington",
+          "Lincoln",
+          "Adams"
+        ],
         "correct": 1
       },
       {
         "q": "How many hills was Rome built on?",
         "qAr": "على كم تلة بُنيت مدينة روما؟",
+        "qTr": "Roma kaç tepe üzerine kuruldu?",
         "options": [
           "5",
           "6",
@@ -1599,11 +2221,18 @@ const CATEGORIES = {
           "7",
           "8"
         ],
+        "optionsTr": [
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
         "correct": 2
       },
       {
         "q": "Which civilization built the pyramids of Giza?",
         "qAr": "أي حضارة بنت أهرامات الجيزة؟",
+        "qTr": "Gize piramitlerini hangi uygarlık inşa etti?",
         "options": [
           "Mayans",
           "Romans",
@@ -1616,11 +2245,18 @@ const CATEGORIES = {
           "المصريون",
           "الإغريق"
         ],
+        "optionsTr": [
+          "Maya",
+          "Romalılar",
+          "Mısırlılar",
+          "Yunanlar"
+        ],
         "correct": 2
       },
       {
         "q": "In which year did the Berlin Wall fall?",
         "qAr": "في أي عام سقط جدار برلين؟",
+        "qTr": "Berlin Duvarı hangi yıl yıkıldı?",
         "options": [
           "1987",
           "1989",
@@ -1633,11 +2269,18 @@ const CATEGORIES = {
           "1991",
           "1993"
         ],
+        "optionsTr": [
+          "1987",
+          "1989",
+          "1991",
+          "1993"
+        ],
         "correct": 1
       },
       {
         "q": "Which empire was ruled by Genghis Khan?",
         "qAr": "أي إمبراطورية حكمها جنكيز خان؟",
+        "qTr": "Cengiz Han hangi imparatorluğu yönetti?",
         "options": [
           "Roman",
           "Ottoman",
@@ -1650,11 +2293,18 @@ const CATEGORIES = {
           "المغولية",
           "الفارسية"
         ],
+        "optionsTr": [
+          "Roma",
+          "Osmanlı",
+          "Moğol",
+          "Pers"
+        ],
         "correct": 2
       },
       {
         "q": "Which city was the center of the Islamic Golden Age?",
         "qAr": "ما هي المدينة التي كانت مركز العصر الذهبي الإسلامي؟",
+        "qTr": "Hangi şehir İslam Altın Çağı'nın merkeziydi?",
         "options": [
           "Baghdad",
           "Rome",
@@ -1667,11 +2317,18 @@ const CATEGORIES = {
           "أثينا",
           "القسطنطينية"
         ],
+        "optionsTr": [
+          "Bağdat",
+          "Roma",
+          "Atina",
+          "Konstantinopolis"
+        ],
         "correct": 0
       },
       {
         "q": "Who was the first caliph after Prophet Muhammad ﷺ?",
         "qAr": "من كان أول خليفة بعد النبي محمد ﷺ؟",
+        "qTr": "Hz. Muhammed (s.a.v.)'den sonraki ilk halife kimdi?",
         "options": [
           "Abu Bakr",
           "Umar",
@@ -1684,11 +2341,18 @@ const CATEGORIES = {
           "عثمان",
           "علي"
         ],
+        "optionsTr": [
+          "Ebu Bekir",
+          "Ömer",
+          "Osman",
+          "Ali"
+        ],
         "correct": 0
       },
       {
         "q": "In which year did the Ottoman Empire officially come to an end?",
         "qAr": "في أي عام انتهت الدولة العثمانية رسمياً؟",
+        "qTr": "Osmanlı İmparatorluğu resmen hangi yıl sona erdi?",
         "options": [
           "1918",
           "1922",
@@ -1701,11 +2365,18 @@ const CATEGORIES = {
           "1924",
           "1928"
         ],
+        "optionsTr": [
+          "1918",
+          "1922",
+          "1924",
+          "1928"
+        ],
         "correct": 1
       },
       {
         "q": "Who led the Muslim armies against the Crusaders and is known in the West as 'Saladin'?",
         "qAr": "من قاد الجيوش الإسلامية ضد الصليبيين وعُرف في الغرب بـ«صلاح الدين»؟",
+        "qTr": "Haçlılara karşı Müslüman ordularına liderlik eden ve Batı'da 'Selahaddin' olarak bilinen kişi kimdir?",
         "options": [
           "Salah ad-Din",
           "Omar Mukhtar",
@@ -1718,11 +2389,18 @@ const CATEGORIES = {
           "خالد بن الوليد",
           "طارق بن زياد"
         ],
+        "optionsTr": [
+          "Selahaddin Eyyubi",
+          "Ömer Muhtar",
+          "Halid bin Velid",
+          "Tarık bin Ziyad"
+        ],
         "correct": 0
       },
       {
         "q": "The Great Pyramid of Giza was built as a tomb for which pharaoh?",
         "qAr": "بُني الهرم الأكبر في الجيزة مقبرةً لأي فرعون؟",
+        "qTr": "Gize'deki Büyük Piramit hangi firavun için mezar olarak inşa edildi?",
         "options": [
           "Cleopatra",
           "Khufu",
@@ -1735,11 +2413,18 @@ const CATEGORIES = {
           "رمسيس الثاني",
           "توت عنخ آمون"
         ],
+        "optionsTr": [
+          "Kleopatra",
+          "Keops",
+          "II. Ramses",
+          "Tutankamon"
+        ],
         "correct": 1
       },
       {
         "q": "In which year did the United Arab Emirates gain independence?",
         "qAr": "في أي عام نالت الإمارات العربية المتحدة استقلالها؟",
+        "qTr": "Birleşik Arap Emirlikleri hangi yıl bağımsızlığını kazandı?",
         "options": [
           "1968",
           "1971",
@@ -1752,11 +2437,18 @@ const CATEGORIES = {
           "1975",
           "1980"
         ],
+        "optionsTr": [
+          "1968",
+          "1971",
+          "1975",
+          "1980"
+        ],
         "correct": 1
       },
       {
         "q": "Gibraltar (Jabal Tariq) is named after which Muslim general?",
         "qAr": "سُمي جبل طارق على اسم أي قائد مسلم؟",
+        "qTr": "Cebelitarık hangi Müslüman komutanın adını taşır?",
         "options": [
           "Tariq ibn Ziyad",
           "Khalid ibn al-Walid",
@@ -1769,11 +2461,18 @@ const CATEGORIES = {
           "عمرو بن العاص",
           "سعد بن أبي وقاص"
         ],
+        "optionsTr": [
+          "Tarık bin Ziyad",
+          "Halid bin Velid",
+          "Amr bin As",
+          "Sa'd bin Ebi Vakkas"
+        ],
         "correct": 0
       },
       {
         "q": "What was the writing system used by the ancient Egyptians?",
         "qAr": "ما نظام الكتابة الذي استخدمه قدماء المصريين؟",
+        "qTr": "Eski Mısırlıların kullandığı yazı sistemi neydi?",
         "options": [
           "Hieroglyphics",
           "Cuneiform",
@@ -1786,11 +2485,18 @@ const CATEGORIES = {
           "اللاتينية",
           "السنسكريتية"
         ],
+        "optionsTr": [
+          "Hiyeroglif",
+          "Çivi yazısı",
+          "Latin",
+          "Sanskritçe"
+        ],
         "correct": 0
       },
       {
         "q": "Which country was formerly known as Persia?",
         "qAr": "أي دولة كانت تُعرف سابقاً باسم فارس؟",
+        "qTr": "Eskiden Pers olarak bilinen ülke hangisidir?",
         "options": [
           "Iran",
           "Iraq",
@@ -1803,11 +2509,18 @@ const CATEGORIES = {
           "تركيا",
           "أفغانستان"
         ],
+        "optionsTr": [
+          "İran",
+          "Irak",
+          "Türkiye",
+          "Afganistan"
+        ],
         "correct": 0
       },
       {
         "q": "The Suez Canal connects the Mediterranean with which sea?",
         "qAr": "قناة السويس تصل البحر المتوسط بأي بحر؟",
+        "qTr": "Süveyş Kanalı Akdeniz'i hangi denize bağlar?",
         "options": [
           "The Red Sea",
           "The Black Sea",
@@ -1820,11 +2533,18 @@ const CATEGORIES = {
           "بحر قزوين",
           "بحر العرب"
         ],
+        "optionsTr": [
+          "Kızıldeniz",
+          "Karadeniz",
+          "Hazar Denizi",
+          "Arap Denizi"
+        ],
         "correct": 0
       },
       {
         "q": "Who wrote 'Al-Muqaddimah', the founding work of sociology and historiography?",
         "qAr": "من كتب كتاب «المقدمة» المؤسس لعلم الاجتماع وفلسفة التاريخ؟",
+        "qTr": "Sosyolojinin ve tarih biliminin kurucu eseri 'Mukaddime'yi kim yazdı?",
         "options": [
           "Ibn Khaldun",
           "Ibn Sina",
@@ -1837,6 +2557,12 @@ const CATEGORIES = {
           "الغزالي",
           "البيروني"
         ],
+        "optionsTr": [
+          "İbn Haldun",
+          "İbn Sina",
+          "Gazali",
+          "Biruni"
+        ],
         "correct": 0
       }
     ]
@@ -1844,12 +2570,14 @@ const CATEGORIES = {
   "family": {
     "name": "Family Fun",
     "nameAr": "مرح العائلة",
+    "nameTr": "Aile Eğlencesi",
     "emoji": "👨‍👩‍👧‍👦",
     "color": "from-fuchsia-500 to-pink-500",
     "questions": [
       {
         "q": "What do you call a group of flamingos?",
         "qAr": "ماذا يُسمى مجموعة طيور الفلامنغو؟",
+        "qTr": "Bir grup flamingoya ne ad verilir?",
         "options": [
           "A flock",
           "A flamboyance",
@@ -1862,11 +2590,18 @@ const CATEGORIES = {
           "قطيع",
           "حشد"
         ],
+        "optionsTr": [
+          "Sürü",
+          "Gösteriş",
+          "Yavru",
+          "Kalabalık"
+        ],
         "correct": 1
       },
       {
         "q": "How many colors are in a rainbow?",
         "qAr": "كم عدد ألوان قوس قزح؟",
+        "qTr": "Gökkuşağında kaç renk vardır?",
         "options": [
           "5",
           "6",
@@ -1879,11 +2614,18 @@ const CATEGORIES = {
           "7",
           "8"
         ],
+        "optionsTr": [
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
         "correct": 2
       },
       {
         "q": "Most popular pizza topping in the US?",
         "qAr": "ما هي أكثر إضافة شيوعاً على البيتزا في أمريكا؟",
+        "qTr": "ABD'de pizzada en popüler malzeme hangisidir?",
         "options": [
           "Mushrooms",
           "Pepperoni",
@@ -1896,11 +2638,18 @@ const CATEGORIES = {
           "النقانق",
           "الزيتون"
         ],
+        "optionsTr": [
+          "Mantar",
+          "Pepperoni",
+          "Sosis",
+          "Zeytin"
+        ],
         "correct": 1
       },
       {
         "q": "Which Disney princess has a raccoon sidekick?",
         "qAr": "أي أميرة من أميرات ديزني لديها رفيق راكون؟",
+        "qTr": "Hangi Disney prensesinin rakun arkadaşı vardır?",
         "options": [
           "Ariel",
           "Belle",
@@ -1913,11 +2662,18 @@ const CATEGORIES = {
           "بوكاهونتاس",
           "مولان"
         ],
+        "optionsTr": [
+          "Ariel",
+          "Belle",
+          "Pocahontas",
+          "Mulan"
+        ],
         "correct": 2
       },
       {
         "q": "What is the opposite of 'day'?",
         "qAr": "ما هو عكس كلمة «نهار»؟",
+        "qTr": "'Gündüz' kelimesinin zıttı nedir?",
         "options": [
           "Dark",
           "Night",
@@ -1930,11 +2686,18 @@ const CATEGORIES = {
           "مساء",
           "غروب"
         ],
+        "optionsTr": [
+          "Karanlık",
+          "Gece",
+          "Akşam",
+          "Gün batımı"
+        ],
         "correct": 1
       },
       {
         "q": "How many sides does a hexagon have?",
         "qAr": "كم عدد أضلاع الشكل السداسي؟",
+        "qTr": "Altıgenin kaç kenarı vardır?",
         "options": [
           "5",
           "6",
@@ -1947,11 +2710,18 @@ const CATEGORIES = {
           "7",
           "8"
         ],
+        "optionsTr": [
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
         "correct": 1
       },
       {
         "q": "What animal is the 'King of the Jungle'?",
         "qAr": "ما هو الحيوان الملقب بـ«ملك الغابة»؟",
+        "qTr": "Hangi hayvan 'Ormanın Kralı'dır?",
         "options": [
           "Tiger",
           "Elephant",
@@ -1964,11 +2734,18 @@ const CATEGORIES = {
           "الأسد",
           "الغوريلا"
         ],
+        "optionsTr": [
+          "Kaplan",
+          "Fil",
+          "Aslan",
+          "Goril"
+        ],
         "correct": 2
       },
       {
         "q": "Which fruit keeps the doctor away?",
         "qAr": "أي فاكهة «تُبعد الطبيب»؟",
+        "qTr": "Hangi meyve doktoru uzak tutar?",
         "options": [
           "Banana",
           "Orange",
@@ -1981,11 +2758,18 @@ const CATEGORIES = {
           "التفاح",
           "العنب"
         ],
+        "optionsTr": [
+          "Muz",
+          "Portakal",
+          "Elma",
+          "Üzüm"
+        ],
         "correct": 2
       },
       {
         "q": "What do bees collect to make honey?",
         "qAr": "ماذا يجمع النحل ليصنع العسل؟",
+        "qTr": "Arılar bal yapmak için ne toplar?",
         "options": [
           "Pollen",
           "Nectar",
@@ -1998,11 +2782,18 @@ const CATEGORIES = {
           "الصمغ",
           "الندى"
         ],
+        "optionsTr": [
+          "Polen",
+          "Çiçek nektarı",
+          "Reçine",
+          "Çiy"
+        ],
         "correct": 1
       },
       {
         "q": "How many bottles of beer on the wall?",
         "qAr": "كم زجاجة بيرة على الحائط في الأغنية؟",
+        "qTr": "Şarkıda duvarda kaç bira şişesi vardır?",
         "options": [
           "50",
           "99",
@@ -2015,11 +2806,18 @@ const CATEGORIES = {
           "100",
           "101"
         ],
+        "optionsTr": [
+          "50",
+          "99",
+          "100",
+          "101"
+        ],
         "correct": 1
       },
       {
         "q": "What is the most widely eaten grain in the world?",
         "qAr": "ما هي أكثر الحبوب استهلاكاً في العالم؟",
+        "qTr": "Dünyada en çok tüketilen tahıl hangisidir?",
         "options": [
           "Rice",
           "Wheat",
@@ -2032,11 +2830,18 @@ const CATEGORIES = {
           "الذرة",
           "الشوفان"
         ],
+        "optionsTr": [
+          "Pirinç",
+          "Buğday",
+          "Mısır",
+          "Yulaf"
+        ],
         "correct": 0
       },
       {
         "q": "Hummus and falafel are famous dishes of which region?",
         "qAr": "الحمص والفلافل أطباق شهيرة من أي منطقة؟",
+        "qTr": "Humus ve felafel hangi bölgenin ünlü yemekleridir?",
         "options": [
           "The Middle East",
           "Asia",
@@ -2049,11 +2854,18 @@ const CATEGORIES = {
           "أوروبا",
           "أمريكا اللاتينية"
         ],
+        "optionsTr": [
+          "Orta Doğu",
+          "Asya",
+          "Avrupa",
+          "Latin Amerika"
+        ],
         "correct": 0
       },
       {
         "q": "How many legs does a spider have?",
         "qAr": "كم عدد أرجل العنكبوت؟",
+        "qTr": "Bir örümceğin kaç bacağı vardır?",
         "options": [
           "6",
           "8",
@@ -2066,11 +2878,18 @@ const CATEGORIES = {
           "10",
           "12"
         ],
+        "optionsTr": [
+          "6",
+          "8",
+          "10",
+          "12"
+        ],
         "correct": 1
       },
       {
         "q": "What is the national dish of Yemen?",
         "qAr": "ما هو الطبق الوطني في اليمن؟",
+        "qTr": "Yemen'in milli yemeği nedir?",
         "options": [
           "Saltah",
           "Kabsa",
@@ -2083,11 +2902,18 @@ const CATEGORIES = {
           "الكسكس",
           "البرياني"
         ],
+        "optionsTr": [
+          "Saltah",
+          "Kabse",
+          "Kuskus",
+          "Biryani"
+        ],
         "correct": 0
       },
       {
         "q": "Which sweet cheese dessert is famous in the Middle East during Ramadan?",
         "qAr": "ما هي حلوى الجبن الحلوة الشهيرة في الشرق الأوسط خلال رمضان؟",
+        "qTr": "Ramazan'da Orta Doğu'da ünlü tatlı peynir tatlısı hangisidir?",
         "options": [
           "Kunafa",
           "Tiramisu",
@@ -2100,11 +2926,18 @@ const CATEGORIES = {
           "تشيز كيك",
           "البافلوفا"
         ],
+        "optionsTr": [
+          "Künefe",
+          "Tiramisu",
+          "Cheesecake",
+          "Pavlova"
+        ],
         "correct": 0
       },
       {
         "q": "Which card game has kings, queens, and aces?",
         "qAr": "أي لعبة أوراق تحتوي على ملوك وملكات وآصات؟",
+        "qTr": "Hangi kart oyununda papazlar, kızlar ve aslar vardır?",
         "options": [
           "Playing Cards",
           "Dominoes",
@@ -2117,11 +2950,18 @@ const CATEGORIES = {
           "الطاولة",
           "الشطرنج"
         ],
+        "optionsTr": [
+          "İskambil",
+          "Domino",
+          "Tavla",
+          "Satranç"
+        ],
         "correct": 0
       },
       {
         "q": "What is the fastest land animal?",
         "qAr": "ما هو أسرع حيوان بري؟",
+        "qTr": "En hızlı kara hayvanı hangisidir?",
         "options": [
           "Cheetah",
           "Lion",
@@ -2134,11 +2974,18 @@ const CATEGORIES = {
           "النعامة",
           "الظبي"
         ],
+        "optionsTr": [
+          "Çita",
+          "Aslan",
+          "Devekuşu",
+          "Antilop"
+        ],
         "correct": 0
       },
       {
         "q": "How many colors are in a traffic light?",
         "qAr": "كم عدد ألوان إشارة المرور؟",
+        "qTr": "Trafik lambasında kaç renk vardır?",
         "options": [
           "2",
           "3",
@@ -2151,11 +2998,18 @@ const CATEGORIES = {
           "4",
           "5"
         ],
+        "optionsTr": [
+          "2",
+          "3",
+          "4",
+          "5"
+        ],
         "correct": 1
       },
       {
         "q": "Which fruit has the same name as a color?",
         "qAr": "أي فاكهة لها نفس اسم أحد الألوان؟",
+        "qTr": "Hangi meyvenin adı aynı zamanda bir renktir?",
         "options": [
           "Orange",
           "Apple",
@@ -2168,11 +3022,18 @@ const CATEGORIES = {
           "الموز",
           "المانجو"
         ],
+        "optionsTr": [
+          "Portakal",
+          "Elma",
+          "Muz",
+          "Mango"
+        ],
         "correct": 0
       },
       {
         "q": "How many vowels are in the English alphabet?",
         "qAr": "كم عدد حروف العلة في الأبجدية الإنجليزية؟",
+        "qTr": "İngiliz alfabesinde kaç sesli harf vardır?",
         "options": [
           "4",
           "5",
@@ -2180,6 +3041,12 @@ const CATEGORIES = {
           "7"
         ],
         "optionsAr": [
+          "4",
+          "5",
+          "6",
+          "7"
+        ],
+        "optionsTr": [
           "4",
           "5",
           "6",
@@ -2192,12 +3059,14 @@ const CATEGORIES = {
   "music": {
     "name": "Music",
     "nameAr": "الموسيقى",
+    "nameTr": "Müzik",
     "emoji": "🎵",
     "color": "from-indigo-500 to-violet-600",
     "questions": [
       {
         "q": "How many strings does a violin have?",
         "qAr": "كم عدد أوتار الكمان؟",
+        "qTr": "Bir kemanın kaç teli vardır?",
         "options": [
           "3",
           "4",
@@ -2210,11 +3079,18 @@ const CATEGORIES = {
           "5",
           "6"
         ],
+        "optionsTr": [
+          "3",
+          "4",
+          "5",
+          "6"
+        ],
         "correct": 1
       },
       {
         "q": "Who is known as the 'King of Pop'?",
         "qAr": "من يُعرف بـ«ملك البوب»؟",
+        "qTr": "Kim 'Popun Kralı' olarak bilinir?",
         "options": [
           "Michael Jackson",
           "Elvis Presley",
@@ -2227,11 +3103,18 @@ const CATEGORIES = {
           "برنس",
           "فريدي ميركوري"
         ],
+        "optionsTr": [
+          "Michael Jackson",
+          "Elvis Presley",
+          "Prince",
+          "Freddie Mercury"
+        ],
         "correct": 0
       },
       {
         "q": "Which legendary Egyptian singer is called 'Kawkab al-Sharq' (Star of the East)?",
         "qAr": "ما هي المطربة المصرية الأسطورية الملقبة بـ«كوكب الشرق»؟",
+        "qTr": "Hangi efsanevi Mısırlı şarkıcıya 'Kevkebü'ş-Şark' (Doğu'nun Yıldızı) denir?",
         "options": [
           "Umm Kulthum",
           "Fairuz",
@@ -2244,11 +3127,18 @@ const CATEGORIES = {
           "وردة",
           "سميرة سعيد"
         ],
+        "optionsTr": [
+          "Ümmü Gülsüm",
+          "Feyruz",
+          "Verda",
+          "Samira Said"
+        ],
         "correct": 0
       },
       {
         "q": "Which Lebanese icon sings 'Nassam Alayna El Hawa'?",
         "qAr": "ما هي الأيقونة اللبنانية التي غنت «نسم علينا الهوى»؟",
+        "qTr": "Hangi Lübnanlı ikon 'Nassam Aleyna El Hava'yı söyler?",
         "options": [
           "Fairuz",
           "Nancy Ajram",
@@ -2261,11 +3151,18 @@ const CATEGORIES = {
           "إليسا",
           "ماجدة الرومي"
         ],
+        "optionsTr": [
+          "Feyruz",
+          "Nancy Ajram",
+          "Elissa",
+          "Mecida Rumi"
+        ],
         "correct": 0
       },
       {
         "q": "What musical term means 'loud' in Italian?",
         "qAr": "ما المصطلح الموسيقي الإيطالي الذي يعني «بصوت عالٍ»؟",
+        "qTr": "Hangi müzik terimi İtalyanca'da 'yüksek sesle' anlamına gelir?",
         "options": [
           "Forte",
           "Piano",
@@ -2278,11 +3175,18 @@ const CATEGORIES = {
           "أليغرو",
           "أداجيو"
         ],
+        "optionsTr": [
+          "Forte",
+          "Piyano",
+          "Allegro",
+          "Adagio"
+        ],
         "correct": 0
       },
       {
         "q": "Which band performed 'Bohemian Rhapsody'?",
         "qAr": "أي فرقة موسيقية أدّت أغنية «بوهيميان رابسودي»؟",
+        "qTr": "'Bohemian Rhapsody'yi hangi grup seslendirdi?",
         "options": [
           "Queen",
           "The Beatles",
@@ -2295,11 +3199,18 @@ const CATEGORIES = {
           "بينك فلويد",
           "لد زيبلين"
         ],
+        "optionsTr": [
+          "Queen",
+          "Beatles",
+          "Pink Floyd",
+          "Led Zeppelin"
+        ],
         "correct": 0
       },
       {
         "q": "How many semitones are in one octave?",
         "qAr": "كم عدد أنصاف النغمات في الأوكتاف الواحد؟",
+        "qTr": "Bir oktavda kaç yarım ton vardır?",
         "options": [
           "8",
           "12",
@@ -2312,11 +3223,18 @@ const CATEGORIES = {
           "7",
           "10"
         ],
+        "optionsTr": [
+          "8",
+          "12",
+          "7",
+          "10"
+        ],
         "correct": 1
       },
       {
         "q": "Which traditional Arab instrument is a pear-shaped stringed lute?",
         "qAr": "ما هي الآلة العربية التقليدية التي تشبه العود على شكل كمثرى؟",
+        "qTr": "Hangi geleneksel Arap enstrümanı armut şeklinde telli bir uttur?",
         "options": [
           "Oud",
           "Tabla",
@@ -2329,11 +3247,18 @@ const CATEGORIES = {
           "القانون",
           "الناي"
         ],
+        "optionsTr": [
+          "Ud",
+          "Davul",
+          "Kanun",
+          "Ney"
+        ],
         "correct": 0
       },
       {
         "q": "Which instrument is famously called the 'King of Instruments'?",
         "qAr": "أي آلة موسيقية تُلقب بـ«ملك الآلات»؟",
+        "qTr": "Hangi enstrümana 'Enstrümanların Kralı' denir?",
         "options": [
           "Organ",
           "Piano",
@@ -2346,11 +3271,18 @@ const CATEGORIES = {
           "الغيتار",
           "الكمان"
         ],
+        "optionsTr": [
+          "Org",
+          "Piyano",
+          "Gitar",
+          "Keman"
+        ],
         "correct": 0
       },
       {
         "q": "How many beats are in each bar of 4/4 time?",
         "qAr": "كم عدد النبضات في كل ميزان من 4/4؟",
+        "qTr": "4/4'lük ölçüde her bar kaç vuruştur?",
         "options": [
           "3",
           "4",
@@ -2363,11 +3295,18 @@ const CATEGORIES = {
           "5",
           "6"
         ],
+        "optionsTr": [
+          "3",
+          "4",
+          "5",
+          "6"
+        ],
         "correct": 1
       },
       {
         "q": "Which instrument is played by blowing across the top edge?",
         "qAr": "أي آلة تعزف بالنفخ عبر الحافة العلوية؟",
+        "qTr": "Hangi enstrüman üst kenardan üfleyerek çalınır?",
         "options": [
           "Flute",
           "Trumpet",
@@ -2380,11 +3319,18 @@ const CATEGORIES = {
           "الكلارينيت",
           "الساكسفون"
         ],
+        "optionsTr": [
+          "Flüt",
+          "Trompet",
+          "Klarnet",
+          "Saksafon"
+        ],
         "correct": 0
       },
       {
         "q": "Who composed 'The Four Seasons' violin concertos?",
         "qAr": "من ألف كونشيرتوهات الكمان «الفصول الأربعة»؟",
+        "qTr": "'Dört Mevsim' keman konçertolarını kim besteledi?",
         "options": [
           "Vivaldi",
           "Mozart",
@@ -2397,11 +3343,18 @@ const CATEGORIES = {
           "باخ",
           "بيتهوفن"
         ],
+        "optionsTr": [
+          "Vivaldi",
+          "Mozart",
+          "Bach",
+          "Beethoven"
+        ],
         "correct": 0
       },
       {
         "q": "Which streaming service uses a green logo with a note symbol?",
         "qAr": "أي خدمة بث موسيقي تستخدم شعاراً أخضر عليه نوتة موسيقية؟",
+        "qTr": "Hangi müzik akış servisi notalı yeşil bir logo kullanır?",
         "options": [
           "Spotify",
           "SoundCloud",
@@ -2414,11 +3367,18 @@ const CATEGORIES = {
           "ديزر",
           "يوتيوب ميوزيك"
         ],
+        "optionsTr": [
+          "Spotify",
+          "SoundCloud",
+          "Deezer",
+          "YouTube Music"
+        ],
         "correct": 0
       },
       {
         "q": "How many keys does a standard piano have?",
         "qAr": "كم عدد مفاتيح البيانو القياسي؟",
+        "qTr": "Standart bir piyanoda kaç tuş vardır?",
         "options": [
           "66",
           "76",
@@ -2426,6 +3386,12 @@ const CATEGORIES = {
           "108"
         ],
         "optionsAr": [
+          "66",
+          "76",
+          "88",
+          "108"
+        ],
+        "optionsTr": [
           "66",
           "76",
           "88",
@@ -2438,12 +3404,14 @@ const CATEGORIES = {
   "geography": {
     "name": "Geography",
     "nameAr": "الجغرافيا",
+    "nameTr": "Coğrafya",
     "emoji": "🌍",
     "color": "from-green-500 to-emerald-600",
     "questions": [
       {
         "q": "What is the capital of Egypt?",
         "qAr": "ما هي عاصمة مصر؟",
+        "qTr": "Mısır'ın başkenti neresidir?",
         "options": [
           "Cairo",
           "Alexandria",
@@ -2456,11 +3424,18 @@ const CATEGORIES = {
           "الجيزة",
           "الأقصر"
         ],
+        "optionsTr": [
+          "Kahire",
+          "İskenderiye",
+          "Gize",
+          "Lüksor"
+        ],
         "correct": 0
       },
       {
         "q": "Which is the most populous Arab country?",
         "qAr": "ما هي الدولة العربية الأكثر سكاناً؟",
+        "qTr": "En kalabalık Arap ülkesi hangisidir?",
         "options": [
           "Egypt",
           "Saudi Arabia",
@@ -2473,11 +3448,18 @@ const CATEGORIES = {
           "العراق",
           "الجزائر"
         ],
+        "optionsTr": [
+          "Mısır",
+          "Suudi Arabistan",
+          "Irak",
+          "Cezayir"
+        ],
         "correct": 0
       },
       {
         "q": "The Nile River flows into which sea?",
         "qAr": "نهر النيل يصب في أي بحر؟",
+        "qTr": "Nil Nehri hangi denize dökülür?",
         "options": [
           "Mediterranean Sea",
           "Red Sea",
@@ -2490,11 +3472,18 @@ const CATEGORIES = {
           "بحر العرب",
           "البحر الأسود"
         ],
+        "optionsTr": [
+          "Akdeniz",
+          "Kızıldeniz",
+          "Arap Denizi",
+          "Karadeniz"
+        ],
         "correct": 0
       },
       {
         "q": "What is the capital of the United Arab Emirates?",
         "qAr": "ما هي عاصمة الإمارات العربية المتحدة؟",
+        "qTr": "Birleşik Arap Emirlikleri'nin başkenti neresidir?",
         "options": [
           "Abu Dhabi",
           "Dubai",
@@ -2507,11 +3496,18 @@ const CATEGORIES = {
           "الشارقة",
           "العين"
         ],
+        "optionsTr": [
+          "Abu Dabi",
+          "Dubai",
+          "Şarika",
+          "El-Ayn"
+        ],
         "correct": 0
       },
       {
         "q": "What is commonly considered the longest river in the world?",
         "qAr": "ما هو النهر الذي يُعتبر عموماً الأطول في العالم؟",
+        "qTr": "Genellikle dünyanın en uzun nehri sayılan nehir hangisidir?",
         "options": [
           "Nile",
           "Amazon",
@@ -2524,11 +3520,18 @@ const CATEGORIES = {
           "اليانغتسي",
           "الميسيسيبي"
         ],
+        "optionsTr": [
+          "Nil",
+          "Amazon",
+          "Yangtze",
+          "Mississippi"
+        ],
         "correct": 0
       },
       {
         "q": "Mount Everest lies on the border of Nepal and which country?",
         "qAr": "يقع جبل إيفرست على حدود نيبال مع أي دولة؟",
+        "qTr": "Everest Dağı, Nepal ile hangi ülkenin sınırında yer alır?",
         "options": [
           "China",
           "India",
@@ -2541,11 +3544,18 @@ const CATEGORIES = {
           "بوتان",
           "باكستان"
         ],
+        "optionsTr": [
+          "Çin",
+          "Hindistan",
+          "Butan",
+          "Pakistan"
+        ],
         "correct": 0
       },
       {
         "q": "Which sea separates the Arabian Peninsula from Iran?",
         "qAr": "أي بحر يفصل شبه الجزيرة العربية عن إيران؟",
+        "qTr": "Hangi deniz Arap Yarımadası'nı İran'dan ayırır?",
         "options": [
           "Arabian Gulf",
           "Red Sea",
@@ -2558,11 +3568,18 @@ const CATEGORIES = {
           "خليج عمان",
           "خليج عدن"
         ],
+        "optionsTr": [
+          "Basra Körfezi",
+          "Kızıldeniz",
+          "Umman Körfezi",
+          "Aden Körfezi"
+        ],
         "correct": 0
       },
       {
         "q": "What is the largest Arab country by area?",
         "qAr": "ما هي أكبر دولة عربية من حيث المساحة؟",
+        "qTr": "Yüzölçümü en büyük Arap ülkesi hangisidir?",
         "options": [
           "Algeria",
           "Saudi Arabia",
@@ -2575,11 +3592,18 @@ const CATEGORIES = {
           "السودان",
           "ليبيا"
         ],
+        "optionsTr": [
+          "Cezayir",
+          "Suudi Arabistan",
+          "Sudan",
+          "Libya"
+        ],
         "correct": 0
       },
       {
         "q": "Which vast desert covers much of the Arabian Peninsula?",
         "qAr": "ما هي الصحراء الشاسعة التي تغطي معظم شبه الجزيرة العربية؟",
+        "qTr": "Hangi geniş çöl Arap Yarımadası'nın büyük bölümünü kaplar?",
         "options": [
           "Rub' al Khali",
           "Sahara",
@@ -2592,11 +3616,18 @@ const CATEGORIES = {
           "صحراء ثار",
           "كاراكوم"
         ],
+        "optionsTr": [
+          "Rubülhali",
+          "Sahra Çölü",
+          "Thar Çölü",
+          "Karakum"
+        ],
         "correct": 0
       },
       {
         "q": "Which sea lies between Egypt and Saudi Arabia?",
         "qAr": "أي بحر يقع بين مصر والسعودية؟",
+        "qTr": "Hangi deniz Mısır ile Suudi Arabistan arasında yer alır?",
         "options": [
           "Red Sea",
           "Mediterranean Sea",
@@ -2609,11 +3640,18 @@ const CATEGORIES = {
           "بحر قزوين",
           "بحر إيجة"
         ],
+        "optionsTr": [
+          "Kızıldeniz",
+          "Akdeniz",
+          "Hazar Denizi",
+          "Ege Denizi"
+        ],
         "correct": 0
       },
       {
         "q": "What is the capital of Morocco?",
         "qAr": "ما هي عاصمة المغرب؟",
+        "qTr": "Fas'ın başkenti neresidir?",
         "options": [
           "Rabat",
           "Casablanca",
@@ -2626,11 +3664,18 @@ const CATEGORIES = {
           "مراكش",
           "تونس"
         ],
+        "optionsTr": [
+          "Rabat",
+          "Kazablanka",
+          "Marakeş",
+          "Tunus"
+        ],
         "correct": 0
       },
       {
         "q": "Which Arab country touches both the Mediterranean and the Atlantic?",
         "qAr": "أي دولة عربية تطل على البحر المتوسط والمحيط الأطلسي معاً؟",
+        "qTr": "Hangi Arap ülkesinin hem Akdeniz'e hem Atlantik'e kıyısı vardır?",
         "options": [
           "Morocco",
           "Tunisia",
@@ -2643,11 +3688,18 @@ const CATEGORIES = {
           "الجزائر",
           "ليبيا"
         ],
+        "optionsTr": [
+          "Fas",
+          "Tunus",
+          "Cezayir",
+          "Libya"
+        ],
         "correct": 0
       },
       {
         "q": "Which Saudi city is the holiest city in Islam?",
         "qAr": "ما هي المدينة السعودية الأقدس في الإسلام؟",
+        "qTr": "Hangi Suudi şehri İslam'ın en kutsal şehridir?",
         "options": [
           "Mecca",
           "Medina",
@@ -2660,11 +3712,18 @@ const CATEGORIES = {
           "الرياض",
           "جدة"
         ],
+        "optionsTr": [
+          "Mekke",
+          "Medine",
+          "Riyad",
+          "Cidde"
+        ],
         "correct": 0
       },
       {
         "q": "What is the capital of Turkey?",
         "qAr": "ما هي عاصمة تركيا؟",
+        "qTr": "Türkiye'nin başkenti neresidir?",
         "options": [
           "Ankara",
           "Istanbul",
@@ -2677,11 +3736,18 @@ const CATEGORIES = {
           "إزمير",
           "بورصة"
         ],
+        "optionsTr": [
+          "Ankara",
+          "İstanbul",
+          "İzmir",
+          "Bursa"
+        ],
         "correct": 0
       },
       {
         "q": "Which river runs through Baghdad?",
         "qAr": "أي نهر يمر عبر بغداد؟",
+        "qTr": "Bağdat'tan hangi nehir geçer?",
         "options": [
           "Tigris",
           "Euphrates",
@@ -2694,11 +3760,18 @@ const CATEGORIES = {
           "النيل",
           "الأردن"
         ],
+        "optionsTr": [
+          "Dicle",
+          "Fırat",
+          "Nil",
+          "Ürdün"
+        ],
         "correct": 0
       },
       {
         "q": "Which is the largest island in the Arab world?",
         "qAr": "ما هي أكبر جزيرة في الوطن العربي؟",
+        "qTr": "Arap dünyasının en büyük adası hangisidir?",
         "options": [
           "Socotra",
           "Bahrain",
@@ -2711,6 +3784,12 @@ const CATEGORIES = {
           "قشم",
           "أرواد"
         ],
+        "optionsTr": [
+          "Sokotra",
+          "Bahreyn",
+          "Keşm",
+          "Aruad"
+        ],
         "correct": 0
       }
     ]
@@ -2718,12 +3797,14 @@ const CATEGORIES = {
   "tech": {
     "name": "Tech & Internet",
     "nameAr": "التقنية والإنترنت",
+    "nameTr": "Teknoloji ve İnternet",
     "emoji": "💻",
     "color": "from-sky-500 to-cyan-600",
     "questions": [
       {
         "q": "Which company makes the iPhone?",
         "qAr": "أي شركة تصنع هاتف آيفون؟",
+        "qTr": "iPhone'u hangi şirket üretir?",
         "options": [
           "Apple",
           "Samsung",
@@ -2736,11 +3817,18 @@ const CATEGORIES = {
           "غوغل",
           "مايكروسوفت"
         ],
+        "optionsTr": [
+          "Apple",
+          "Samsung",
+          "Google",
+          "Microsoft"
+        ],
         "correct": 0
       },
       {
         "q": "What does 'HTTP' stand for?",
         "qAr": "ماذا يعني اختصار HTTP؟",
+        "qTr": "'HTTP' açılımı nedir?",
         "options": [
           "HyperText Transfer Protocol",
           "High Tech Transfer Protocol",
@@ -2753,11 +3841,18 @@ const CATEGORIES = {
           "نقل النص التشعبي",
           "بروتوكول نقل المضيف"
         ],
+        "optionsTr": [
+          "Köprü Metni Aktarım Protokolü",
+          "Yüksek Teknoloji Aktarım Protokolü",
+          "Metin Aktarım Protokolü",
+          "Aktarım Protokolü"
+        ],
         "correct": 0
       },
       {
         "q": "Who founded Microsoft together with Paul Allen?",
         "qAr": "من أسس مايكروسوفت مع بول ألن؟",
+        "qTr": "Microsoft'u Paul Allen ile birlikte kim kurdu?",
         "options": [
           "Bill Gates",
           "Steve Jobs",
@@ -2770,11 +3865,18 @@ const CATEGORIES = {
           "مارك زوكربيرغ",
           "إيلون ماسك"
         ],
+        "optionsTr": [
+          "Bill Gates",
+          "Steve Jobs",
+          "Mark Zuckerberg",
+          "Elon Musk"
+        ],
         "correct": 0
       },
       {
         "q": "What is the most used search engine in the world?",
         "qAr": "ما هو محرك البحث الأكثر استخداماً في العالم؟",
+        "qTr": "Dünyada en çok kullanılan arama motoru hangisidir?",
         "options": [
           "Google",
           "Bing",
@@ -2787,11 +3889,18 @@ const CATEGORIES = {
           "ياهو",
           "دك دك غو"
         ],
+        "optionsTr": [
+          "Google",
+          "Bing",
+          "Yahoo",
+          "DuckDuckGo"
+        ],
         "correct": 0
       },
       {
         "q": "What does 'AI' stand for?",
         "qAr": "ماذا يعني اختصار AI؟",
+        "qTr": "'AI' açılımı nedir?",
         "options": [
           "Artificial Intelligence",
           "Automated Internet",
@@ -2804,11 +3913,18 @@ const CATEGORIES = {
           "المعلومات التطبيقية",
           "الواجهة المتقدمة"
         ],
+        "optionsTr": [
+          "Yapay Zeka",
+          "Otomatik İnternet",
+          "Uygulamalı Bilgi",
+          "Gelişmiş Arayüz"
+        ],
         "correct": 0
       },
       {
         "q": "Which language is used to style web pages?",
         "qAr": "ما هي اللغة المستخدمة في تنسيق صفحات الويب؟",
+        "qTr": "Web sayfalarını biçimlendirmek için hangi dil kullanılır?",
         "options": [
           "CSS",
           "HTML",
@@ -2821,11 +3937,18 @@ const CATEGORIES = {
           "بايثون",
           "جافا"
         ],
+        "optionsTr": [
+          "CSS",
+          "HTML",
+          "Python",
+          "Java"
+        ],
         "correct": 0
       },
       {
         "q": "What does the 'www' at the start of web addresses stand for?",
         "qAr": "ماذا يعني اختصار www في بداية عناوين الويب؟",
+        "qTr": "Web adreslerinin başındaki 'www' ne anlama gelir?",
         "options": [
           "World Wide Web",
           "Web Wide World",
@@ -2838,11 +3961,18 @@ const CATEGORIES = {
           "عالم الويب الواسع",
           "موقع بلا أسلاك"
         ],
+        "optionsTr": [
+          "World Wide Web",
+          "Geniş Web",
+          "Geniş Web Dünyası",
+          "Kablosuz Site"
+        ],
         "correct": 0
       },
       {
         "q": "Which app is famous for short vertical videos with music?",
         "qAr": "ما هو التطبيق الشهير بالفيديوهات العمودية القصيرة مع الموسيقى؟",
+        "qTr": "Hangi uygulama müzikli kısa dikey videolarla ünlüdür?",
         "options": [
           "TikTok",
           "Facebook",
@@ -2855,11 +3985,18 @@ const CATEGORIES = {
           "لينكدإن",
           "إكس"
         ],
+        "optionsTr": [
+          "TikTok",
+          "Facebook",
+          "LinkedIn",
+          "X"
+        ],
         "correct": 0
       },
       {
         "q": "What does the term 'bit' in computing stand for?",
         "qAr": "ماذا يعني مصطلح «بت» في الحوسبة؟",
+        "qTr": "Bilgisayarda 'bit' terimi ne anlama gelir?",
         "options": [
           "Binary digit",
           "Byte of information",
@@ -2872,11 +4009,18 @@ const CATEGORIES = {
           "إدخال أساسي",
           "نقل ثنائي"
         ],
+        "optionsTr": [
+          "Binary digit",
+          "Bilgi byte'ı",
+          "Temel giriş",
+          "Binary ton"
+        ],
         "correct": 0
       },
       {
         "q": "Which device has a 'QWERTY' layout?",
         "qAr": "أي جهاز يحتوي على توزيع مفاتيح QWERTY؟",
+        "qTr": "Hangi cihaz 'QWERTY' düzenine sahiptir?",
         "options": [
           "Keyboard",
           "Mouse",
@@ -2889,11 +4033,18 @@ const CATEGORIES = {
           "الشاشة",
           "الراوتر"
         ],
+        "optionsTr": [
+          "Klavye",
+          "Fare",
+          "Ekran",
+          "Modem"
+        ],
         "correct": 0
       },
       {
         "q": "Which company develops the Android operating system?",
         "qAr": "أي شركة تطوّر نظام أندرويد؟",
+        "qTr": "Android işletim sistemini hangi şirket geliştirir?",
         "options": [
           "Google",
           "Apple",
@@ -2906,11 +4057,18 @@ const CATEGORIES = {
           "مايكروسوفت",
           "سامسونغ"
         ],
+        "optionsTr": [
+          "Google",
+          "Apple",
+          "Microsoft",
+          "Samsung"
+        ],
         "correct": 0
       },
       {
         "q": "What does 'USB' stand for?",
         "qAr": "ماذا يعني اختصار USB؟",
+        "qTr": "'USB' açılımı nedir?",
         "options": [
           "Universal Serial Bus",
           "United Serial Bridge",
@@ -2923,11 +4081,18 @@ const CATEGORIES = {
           "النظام التسلسلي العام",
           "المخزن التسلسلي الموحد"
         ],
+        "optionsTr": [
+          "Evrensel Seri Veriyolu",
+          "Birleşik Seri Köprü",
+          "Evrensel Seri Sistem",
+          "Birleşik Seri Depolama"
+        ],
         "correct": 0
       },
       {
         "q": "Which search engine is famous for its changing 'doodles'?",
         "qAr": "ما هو محرك البحث الشهير برسوماته المتغيرة على صفحته الرئيسية؟",
+        "qTr": "Hangi arama motoru değişen 'doodle'larıyla ünlüdür?",
         "options": [
           "Google",
           "Yahoo",
@@ -2940,6 +4105,12 @@ const CATEGORIES = {
           "أسك",
           "بينغ"
         ],
+        "optionsTr": [
+          "Google",
+          "Yahoo",
+          "Ask",
+          "Bing"
+        ],
         "correct": 0
       }
     ]
@@ -2947,12 +4118,14 @@ const CATEGORIES = {
   "islam": {
     "name": "Islam & Arab World",
     "nameAr": "الإسلام والعالم العربي",
+    "nameTr": "İslam ve Arap Dünyası",
     "emoji": "🕌",
     "color": "from-emerald-500 to-teal-700",
     "questions": [
       {
         "q": "How many pillars does Islam have?",
         "qAr": "كم عدد أركان الإسلام؟",
+        "qTr": "İslam'ın kaç şartı vardır?",
         "options": [
           "5",
           "4",
@@ -2965,11 +4138,18 @@ const CATEGORIES = {
           "6",
           "7"
         ],
+        "optionsTr": [
+          "5",
+          "4",
+          "6",
+          "7"
+        ],
         "correct": 0
       },
       {
         "q": "Which month is the holy fasting month?",
         "qAr": "ما هو شهر الصيام المبارك؟",
+        "qTr": "Kutsal oruç ayı hangisidir?",
         "options": [
           "Ramadan",
           "Shawwal",
@@ -2982,11 +4162,18 @@ const CATEGORIES = {
           "محرم",
           "رجب"
         ],
+        "optionsTr": [
+          "Ramazan",
+          "Şevval",
+          "Muharrem",
+          "Recep"
+        ],
         "correct": 0
       },
       {
         "q": "Towards which city do Muslims face when praying?",
         "qAr": "إلى أي مدينة يتجه المسلمون أثناء الصلاة؟",
+        "qTr": "Müslümanlar namaz kılarken hangi şehre yönelir?",
         "options": [
           "Mecca",
           "Medina",
@@ -2999,11 +4186,18 @@ const CATEGORIES = {
           "القدس",
           "القاهرة"
         ],
+        "optionsTr": [
+          "Mekke",
+          "Medine",
+          "Kudüs",
+          "Kahire"
+        ],
         "correct": 0
       },
       {
         "q": "What is the holy book of Islam?",
         "qAr": "ما هو الكتاب المقدس في الإسلام؟",
+        "qTr": "İslam'ın kutsal kitabı hangisidir?",
         "options": [
           "The Quran",
           "The Torah",
@@ -3016,11 +4210,18 @@ const CATEGORIES = {
           "الإنجيل",
           "التلمود"
         ],
+        "optionsTr": [
+          "Kur'an-ı Kerim",
+          "Tevrat",
+          "İncil",
+          "Talmud"
+        ],
         "correct": 0
       },
       {
         "q": "How many daily prayers are required in Islam?",
         "qAr": "كم عدد الصلوات اليومية في الإسلام؟",
+        "qTr": "İslam'da günde kaç vakit namaz farzdır?",
         "options": [
           "5",
           "3",
@@ -3033,11 +4234,18 @@ const CATEGORIES = {
           "7",
           "8"
         ],
+        "optionsTr": [
+          "5",
+          "3",
+          "7",
+          "8"
+        ],
         "correct": 0
       },
       {
         "q": "Which angel brought the revelation to Prophet Muhammad ﷺ?",
         "qAr": "ما هو الملاك الذي حمل الوحي إلى النبي محمد ﷺ؟",
+        "qTr": "Hz. Muhammed (s.a.v.)'e vahyi hangi melek getirdi?",
         "options": [
           "Jibreel",
           "Mika'il",
@@ -3050,11 +4258,18 @@ const CATEGORIES = {
           "إسرافيل",
           "عزرائيل"
         ],
+        "optionsTr": [
+          "Cebrail",
+          "Mikail",
+          "İsrafil",
+          "Azrail"
+        ],
         "correct": 0
       },
       {
         "q": "What is the annual pilgrimage to Mecca called?",
         "qAr": "ما اسم الرحلة السنوية إلى مكة المكرمة؟",
+        "qTr": "Mekke'ye yapılan yıllık hacca ne denir?",
         "options": [
           "Hajj",
           "Umrah",
@@ -3067,11 +4282,18 @@ const CATEGORIES = {
           "الهجرة",
           "الزكاة"
         ],
+        "optionsTr": [
+          "Hac",
+          "Umre",
+          "Hicret",
+          "Zekat"
+        ],
         "correct": 0
       },
       {
         "q": "Which is the second holiest city in Islam?",
         "qAr": "ما هي ثاني أقدس مدينة في الإسلام؟",
+        "qTr": "İslam'ın ikinci en kutsal şehri hangisidir?",
         "options": [
           "Medina",
           "Mecca",
@@ -3084,11 +4306,18 @@ const CATEGORIES = {
           "القدس",
           "كربلاء"
         ],
+        "optionsTr": [
+          "Medine",
+          "Mekke",
+          "Kudüs",
+          "Kerbela"
+        ],
         "correct": 0
       },
       {
         "q": "Who is the final prophet and messenger in Islam?",
         "qAr": "من هو خاتم الأنبياء والمرسلين في الإسلام؟",
+        "qTr": "İslam'ın son peygamberi ve elçisi kimdir?",
         "options": [
           "Muhammad ﷺ",
           "Isa",
@@ -3101,11 +4330,18 @@ const CATEGORIES = {
           "موسى",
           "إبراهيم"
         ],
+        "optionsTr": [
+          "Hz. Muhammed (s.a.v.)",
+          "Hz. İsa",
+          "Hz. Musa",
+          "Hz. İbrahim"
+        ],
         "correct": 0
       },
       {
         "q": "What is the obligatory yearly charity in Islam?",
         "qAr": "ما هي الصدقة الواجبة سنوياً في الإسلام؟",
+        "qTr": "İslam'da yıllık zorunlu hayır hangisidir?",
         "options": [
           "Zakat",
           "Sadaqah",
@@ -3118,11 +4354,18 @@ const CATEGORIES = {
           "الفطرة",
           "الربا"
         ],
+        "optionsTr": [
+          "Zekat",
+          "Sadaka",
+          "Fıtır",
+          "Riba"
+        ],
         "correct": 0
       },
       {
         "q": "Where is the Prophet's Mosque (Al-Masjid an-Nabawi)?",
         "qAr": "أين يقع المسجد النبوي؟",
+        "qTr": "Mescid-i Nebevi nerededir?",
         "options": [
           "Saudi Arabia",
           "Egypt",
@@ -3135,11 +4378,18 @@ const CATEGORIES = {
           "فلسطين",
           "الأردن"
         ],
+        "optionsTr": [
+          "Suudi Arabistan",
+          "Mısır",
+          "Filistin",
+          "Ürdün"
+        ],
         "correct": 0
       },
       {
         "q": "What is the Islamic greeting meaning 'peace be upon you'?",
         "qAr": "ما هي التحية الإسلامية التي تعني «السلام عليكم»؟",
+        "qTr": "'Size selam olsun' anlamına gelen İslami selam nedir?",
         "options": [
           "Assalamu alaikum",
           "Bismillah",
@@ -3152,11 +4402,18 @@ const CATEGORIES = {
           "الحمد لله",
           "ما شاء الله"
         ],
+        "optionsTr": [
+          "Esselamu aleyküm",
+          "Bismillah",
+          "Elhamdülillah",
+          "Maşallah"
+        ],
         "correct": 0
       },
       {
         "q": "How many surahs are in the Quran?",
         "qAr": "كم عدد سور القرآن الكريم؟",
+        "qTr": "Kur'an'da kaç sure vardır?",
         "options": [
           "114",
           "100",
@@ -3169,11 +4426,18 @@ const CATEGORIES = {
           "120",
           "99"
         ],
+        "optionsTr": [
+          "114",
+          "100",
+          "120",
+          "99"
+        ],
         "correct": 0
       },
       {
         "q": "Which of these is NOT one of the Five Pillars?",
         "qAr": "أي مما يلي ليس من أركان الإسلام الخمسة؟",
+        "qTr": "Hangisi İslam'ın beş şartından biri DEĞİLDİR?",
         "options": [
           "Reading the Quran",
           "Prayer (Salah)",
@@ -3186,11 +4450,18 @@ const CATEGORIES = {
           "الزكاة",
           "الصوم"
         ],
+        "optionsTr": [
+          "Kur'an okumak",
+          "Namaz",
+          "Zekat",
+          "Oruç"
+        ],
         "correct": 0
       },
       {
         "q": "Which prophet built the Kaaba together with his son Ismail?",
         "qAr": "أي نبي بنى الكعبة مع ابنه إسماعيل؟",
+        "qTr": "Hangi peygamber oğlu İsmail ile birlikte Kabe'yi inşa etti?",
         "options": [
           "Ibrahim",
           "Nuh",
@@ -3203,11 +4474,18 @@ const CATEGORIES = {
           "يوسف",
           "داود"
         ],
+        "optionsTr": [
+          "Hz. İbrahim",
+          "Hz. Nuh",
+          "Hz. Yusuf",
+          "Hz. Davud"
+        ],
         "correct": 0
       },
       {
         "q": "During which month does the Hajj take place?",
         "qAr": "في أي شهر يتم الحج؟",
+        "qTr": "Hac hangi ayda yapılır?",
         "options": [
           "Dhul-Hijjah",
           "Ramadan",
@@ -3219,6 +4497,12 @@ const CATEGORIES = {
           "رمضان",
           "شوال",
           "صفر"
+        ],
+        "optionsTr": [
+          "Zilhicce",
+          "Ramazan",
+          "Şevval",
+          "Safer"
         ],
         "correct": 0
       }
@@ -3301,20 +4585,20 @@ wss.on('connection', (ws) => {
       const code = (msg.code || '').toUpperCase();
       const room = rooms.get(code);
       if (!room) {
-        ws.send(JSON.stringify({ type: 'error', message: 'Room not found', messageAr: 'الغرفة غير موجودة' }));
+        ws.send(JSON.stringify({ type: 'error', message: 'Room not found', messageAr: 'الغرفة غير موجودة', messageTr: 'Oda bulunamadı' }));
         return;
       }
       if (room.phase !== 'lobby') {
-        ws.send(JSON.stringify({ type: 'error', message: 'Game already in progress', messageAr: 'اللعبة قيد التقدم بالفعل' }));
+        ws.send(JSON.stringify({ type: 'error', message: 'Game already in progress', messageAr: 'اللعبة قيد التقدم بالفعل', messageTr: 'Oyun zaten devam ediyor' }));
         return;
       }
       const name = (msg.name || '').trim().substring(0, 12);
       if (!name) {
-        ws.send(JSON.stringify({ type: 'error', message: 'Name required', messageAr: 'الاسم مطلوب' }));
+        ws.send(JSON.stringify({ type: 'error', message: 'Name required', messageAr: 'الاسم مطلوب', messageTr: 'İsim gerekli' }));
         return;
       }
       if (room.players.find(p => p.name === name)) {
-        ws.send(JSON.stringify({ type: 'error', message: 'Name already taken', messageAr: 'الاسم مستخدم بالفعل' }));
+        ws.send(JSON.stringify({ type: 'error', message: 'Name already taken', messageAr: 'الاسم مستخدم بالفعل', messageTr: 'Bu isim zaten alınmış' }));
         return;
       }
 
@@ -3354,12 +4638,12 @@ wss.on('connection', (ws) => {
       broadcastAll(room, {
         type: 'game_started',
         questions: room.questions.map(q => ({
-          q: q.q, qAr: q.qAr || q.q, options: q.options, optionsAr: q.optionsAr || q.options, category: q.category,
+          q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q, options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options, category: q.category,
           roundNum: room.questions.indexOf(q) + 1
         })),
         totalQuestions: room.questions.length,
         currentQuestion: {
-          q: q.q, qAr: q.qAr || q.q, options: q.options, optionsAr: q.optionsAr || q.options, category: q.category,
+          q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q, options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options, category: q.category,
           round: 1
         },
         players: room.players,
@@ -3441,14 +4725,14 @@ wss.on('connection', (ws) => {
         room.frozenTimers[pname] = true;
         clearInterval(room.timerInterval);
         room.powerups[pname] = null;
-        broadcastAll(room, { type: 'powerup_used', player: pname, powerup: 'freeze', message: `${pname} froze the timer! ❄️`, messageAr: `${pname} جمّد المؤقت! ❄️` });
+        broadcastAll(room, { type: 'powerup_used', player: pname, powerup: 'freeze', message: `${pname} froze the timer! ❄️`, messageAr: `${pname} جمّد المؤقت! ❄️`, messageTr: `${pname} sayacı dondurdu! ❄️` });
         setTimeout(() => {
           if (room.phase === 'playing') startTimer(room);
         }, 5000);
       } else if (pu === 'double') {
         room.powerups[pname] = null;
         room.activeDoubles.add(pname);
-        broadcastAll(room, { type: 'powerup_used', player: pname, powerup: 'double', message: `${pname} activated DOUBLE POINTS! ✨`, messageAr: `${pname} فعّل النقاط المضاعفة! ✨` });
+        broadcastAll(room, { type: 'powerup_used', player: pname, powerup: 'double', message: `${pname} activated DOUBLE POINTS! ✨`, messageAr: `${pname} فعّل النقاط المضاعفة! ✨`, messageTr: `${pname} ÇİFT PUAN aktif etti! ✨` });
       } else if (pu === 'steal') {
         const ranked = Object.entries(room.scores).sort((a, b) => b[1] - a[1]);
         const victim = ranked.find(([n, s]) => n !== pname && s > 0);
@@ -3457,9 +4741,9 @@ wss.on('connection', (ws) => {
           room.scores[victim[0]] -= stealAmount;
           room.scores[pname] += stealAmount;
           room.powerups[pname] = null;
-          broadcastAll(room, { type: 'powerup_used', player: pname, powerup: 'steal', message: `${pname} stole ${stealAmount} pts from ${victim[0]}! 🦊`, messageAr: `${pname} سرق ${stealAmount} نقطة من ${victim[0]}! 🦊`, scores: room.scores, victim: victim[0], amount: stealAmount });
+          broadcastAll(room, { type: 'powerup_used', player: pname, powerup: 'steal', message: `${pname} stole ${stealAmount} pts from ${victim[0]}! 🦊`, messageAr: `${pname} سرق ${stealAmount} نقطة من ${victim[0]}! 🦊`, messageTr: `${pname}, ${victim[0]}'den ${stealAmount} puan çaldı! 🦊`, scores: room.scores, victim: victim[0], amount: stealAmount });
         } else {
-          ws.send(JSON.stringify({ type: 'powerup_failed', message: 'No one to steal from!', messageAr: 'لا يوجد من تسرق منه النقاط!' }));
+          ws.send(JSON.stringify({ type: 'powerup_failed', message: 'No one to steal from!', messageAr: 'لا يوجد من تسرق منه النقاط!', messageTr: 'Çalacak kimse yok!' }));
           return;
         }
       }
@@ -3482,7 +4766,12 @@ wss.on('connection', (ws) => {
 
     if (msg.type === 'skip_question') {
       const room = rooms.get(ws.roomCode);
-      if (!room || !ws.isHost || room.phase !== 'playing') return;
+      if (!room || !ws.isHost) return;
+      if (room.phase !== 'playing' && room.phase !== 'reveal') return;
+      if (room.skipLock) return;
+      room.skipLock = true;
+      clearTimeout(room.skipUnlock);
+      room.skipUnlock = setTimeout(() => { room.skipLock = false; }, 600);
       clearInterval(room.timerInterval);
       room.timerInterval = null;
       room.paused = false;
@@ -3634,9 +4923,9 @@ function advanceQuestion(room) {
 
   const q = room.questions[room.currentQ];
   broadcastAll(room, {
-    type: 'new_question',
+type: 'new_question',
     currentQuestion: {
-      q: q.q, qAr: q.qAr || q.q, options: q.options, optionsAr: q.optionsAr || q.options, category: q.category,
+      q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q, options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options, category: q.category,
       round: room.currentQ + 1
     },
     scores: room.scores,

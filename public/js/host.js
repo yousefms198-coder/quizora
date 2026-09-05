@@ -95,14 +95,17 @@ function render() {
 
 function renderLangToggle(container) {
   const seg = h('div', 'lang-toggle');
-  const en = h('button', `lang-btn ${appLang === 'en' ? 'active' : ''}`, ['🌍 English'], {
-    onclick: () => { setLang('en'); sound.click(); render(); }
+  const langs = [
+    ['en', '🌍 English'],
+    ['ar', '🌐 العربية'],
+    ['tr', '🇹🇷 Türkçe'],
+  ];
+  langs.forEach(([id, label]) => {
+    const b = h('button', `lang-btn ${appLang === id ? 'active' : ''}`, [label], {
+      onclick: () => { setLang(id); sound.click(); render(); }
+    });
+    seg.appendChild(b);
   });
-  const ar = h('button', `lang-btn ${appLang === 'ar' ? 'active' : ''}`, ['🌐 العربية'], {
-    onclick: () => { setLang('ar'); sound.click(); render(); }
-  });
-  seg.appendChild(en);
-  seg.appendChild(ar);
   container.appendChild(seg);
 }
 
@@ -111,30 +114,30 @@ function renderLanding() {
   const c = h('div', 'landing-container');
   c.appendChild(h('div', 'font-display landing-title', ['QUIZORA']));
   c.appendChild(h('div', 'landing-subtitle', ['THE ROOM IS YOUR GAME SHOW']));
-  c.appendChild(h('div', 'landing-tagline', [L('Create a game. Invite everyone. Then let the chaos begin.', 'أنشئ لعبة. ادعُ الجميع. ثم دع الفوضى تبدأ!')]))
+  c.appendChild(h('div', 'landing-tagline', [L('Create a game. Invite everyone. Then let the chaos begin.', 'أنشئ لعبة. ادعُ الجميع. ثم دع الفوضى تبدأ!', 'Bir oyun oluştur. Herkesi davet et. Sonra kaos başlasın!')]))
 
   const langRow = h('div', 'lang-row');
   renderLangToggle(langRow);
   c.appendChild(langRow);
 
   const actions = h('div', 'landing-actions');
-  actions.appendChild(h('button', 'btn-primary', [L('Create a Game', 'إنشاء لعبة')], {
+  actions.appendChild(h('button', 'btn-primary', [L('Create a Game', 'إنشاء لعبة', 'Oyun Oluştur')], {
     onclick: () => { sound.click(); startCreate(); }
   }));
-  actions.appendChild(h('button', 'btn-ghost', [L('Join a Game', 'الانضمام إلى لعبة')], {
+  actions.appendChild(h('button', 'btn-ghost', [L('Join a Game', 'الانضمام إلى لعبة', 'Bir Oyuna Katıl')], {
     onclick: () => { sound.click(); state.screen = 'join'; state.isHost = false; state.inputCode = ''; render(); }
   }));
   c.appendChild(actions);
 
   const badges = h('div', 'landing-badges');
-  [['👨‍👩‍👧‍👦', L('Friends & Family', 'أصدقاء وعائلة')], ['🎓', L('Classmates', 'زملاء الدراسة')], ['🎉', L('Party Time', 'وقت الحفلات')]].forEach(([icon, label]) => {
+  [['👨‍👩‍👧‍👦', L('Friends & Family', 'أصدقاء وعائلة', 'Arkadaşlar ve Aile')], ['🎓', L('Classmates', 'زملاء الدراسة', 'Sınıf Arkadaşları')], ['🎉', L('Party Time', 'وقت الحفلات', 'Parti Zamanı')]].forEach(([icon, label]) => {
     const b = h('div', 'badge glass');
     b.appendChild(h('span', 'badge-icon', [icon]));
     b.appendChild(document.createTextNode(label));
     badges.appendChild(b);
   });
   c.appendChild(badges);
-  c.appendChild(h('div', 'landing-footer', [L('Built with AI — Family Build-Off 2026', 'صُنع بالذكاء الاصطناعي — مسابقة بناء العائلات 2026')]));
+  c.appendChild(h('div', 'landing-footer', [L('Built with AI — Family Build-Off 2026', 'صُنع بالذكاء الاصطناعي — مسابقة بناء العائلات 2026', 'Yapay Zeka ile Yapıldı — Aile Build-Off 2026')]));
   return c;
 }
 
@@ -142,28 +145,28 @@ function renderLanding() {
 function renderLobby() {
   const c = h('div', 'lobby-container', [], { style: 'padding:20px;gap:12px' });
   c.appendChild(h('div', '', ['🎮'], { style: 'font-size:40px;margin-bottom:4px' }));
-  c.appendChild(h('h2', 'font-display', [L('Waiting for Players', 'بانتظار اللاعبين')], { style: 'font-size:1.5rem;font-weight:800;margin-bottom:2px' }));
-  c.appendChild(h('p', '', [L('Scan QR or enter code on your phone', 'امسح الرمز أو أدخل رمز الغرفة من هاتفك')], { style: 'color:#64748b;font-size:13px;margin-bottom:12px' }));
+  c.appendChild(h('h2', 'font-display', [L('Waiting for Players', 'بانتظار اللاعبين', 'Oyuncular Bekleniyor')], { style: 'font-size:1.5rem;font-weight:800;margin-bottom:2px' }));
+  c.appendChild(h('p', '', [L('Scan QR or enter code on your phone', 'امسح الرمز أو أدخل رمز الغرفة من هاتفك', 'Telefonunla QR kodu tara veya kodu gir')], { style: 'color:#64748b;font-size:13px;margin-bottom:12px' }));
 
   const codeDisplay = h('div', 'room-code-display', [], { style: 'margin:8px 0' });
-  codeDisplay.appendChild(h('div', 'room-code-label', [L('ROOM CODE', 'رمز الغرفة')]));
+  codeDisplay.appendChild(h('div', 'room-code-label', [L('ROOM CODE', 'رمز الغرفة', 'ODA KODU')]));
   codeDisplay.appendChild(h('div', 'room-code-value font-display', [state.roomCode || '-----']));
   c.appendChild(codeDisplay);
 
   const qrBox = h('div', 'qr-container glass-strong', [], { style: 'width:160px;height:160px;margin:8px auto' });
   qrBox.id = 'qr-container';
-  qrBox.appendChild(h('div', '', [L('Loading QR...', 'جارٍ تحميل رمز الدخول…')], { style: 'display:flex;align-items:center;justify-content:center;height:100%;color:#475569;font-size:12px' }));
+  qrBox.appendChild(h('div', '', [L('Loading QR...', 'جارٍ تحميل رمز الدخول…', 'QR yükleniyor…')], { style: 'display:flex;align-items:center;justify-content:center;height:100%;color:#475569;font-size:12px' }));
   c.appendChild(qrBox);
 
-  const urlDisplay = h('div', 'join-url-box', [], { id: 'join-url', title: L('Click to copy', 'اضغط للنسخ'), onclick: () => {
+  const urlDisplay = h('div', 'join-url-box', [], { id: 'join-url', title: L('Click to copy', 'اضغط للنسخ', 'Kopyalamak için tıkla'), onclick: () => {
     if (state.joinUrl) { navigator.clipboard.writeText(state.joinUrl); sound.click(); }
-  } }, [L('Loading...', 'جارٍ التحميل…')]);
+  } }, [L('Loading...', 'جارٍ التحميل…', 'Yükleniyor…')]);
   c.appendChild(urlDisplay);
 
   const onlineBox = h('div', 'online-share-box', [], { id: 'online-share' }, ['']);
   c.appendChild(onlineBox);
 
-  c.appendChild(h('div', 'player-count', [L(`${state.players.length} player${state.players.length !== 1 ? 's' : ''} connected`, `${state.players.length} ${state.players.length !== 1 ? 'لاعبون متصلون' : 'لاعب متصل'}`)], { style: 'margin:8px 0' }));
+  c.appendChild(h('div', 'player-count', [L(`${state.players.length} player${state.players.length !== 1 ? 's' : ''} connected`, `${state.players.length} ${state.players.length !== 1 ? 'لاعبون متصلون' : 'لاعب متصل'}`, `${state.players.length} ${state.players.length !== 1 ? 'oyuncu bağlı' : 'oyuncu bağlı'}`)], { style: 'margin:8px 0' }));
 
   const pGrid = h('div', 'player-grid', [], { style: 'margin-bottom:12px' });
   state.players.forEach(p => {
@@ -175,7 +178,7 @@ function renderLobby() {
   c.appendChild(pGrid);
 
   const settingsPanel = h('div', 'glass', [], { style: 'width:100%;max-width:420px;padding:16px;border-radius:16px;margin:8px 0' });
-  settingsPanel.appendChild(h('div', 'section-label', [L('Game Settings', 'إعدادات اللعبة')], { style: 'margin-bottom:10px' }));
+  settingsPanel.appendChild(h('div', 'section-label', [L('Game Settings', 'إعدادات اللعبة', 'Oyun Ayarları')], { style: 'margin-bottom:10px' }));
 
   const catGrid = h('div', 'category-grid', [], { style: 'margin-bottom:12px' });
   Object.entries(CATEGORIES).forEach(([key, cat]) => {
@@ -196,7 +199,7 @@ function renderLobby() {
 
   const settRow = h('div', 'settings-grid', [], { style: 'margin-bottom:0' });
   const qBox = h('div', 'setting-box glass');
-  qBox.appendChild(h('div', 'setting-label', [L('Questions', 'عدد الأسئلة')]));
+  qBox.appendChild(h('div', 'setting-label', [L('Questions', 'عدد الأسئلة', 'Sorular')]));
   const qSel = h('select', 'setting-select');
   [5, 8, 10, 12, 15].forEach(n => {
     const opt = h('option', '', [String(n)], { value: n });
@@ -211,10 +214,10 @@ function renderLobby() {
   settRow.appendChild(qBox);
 
   const tBox = h('div', 'setting-box glass');
-  tBox.appendChild(h('div', 'setting-label', [L('Timer (sec)', 'الوقت (ثوانٍ)')]));
+  tBox.appendChild(h('div', 'setting-label', [L('Timer (sec)', 'الوقت (ثوانٍ)', 'Süre (sn)')]));
   const tSel = h('select', 'setting-select');
   [10, 15, 20, 30, 0].forEach(n => {
-    const opt = h('option', '', [n === 0 ? L('Off', 'بدون') : String(n)], { value: n });
+    const opt = h('option', '', [n === 0 ? L('Off', 'بدون', 'Kapalı') : String(n)], { value: n });
     if (n === state.timerSeconds) opt.selected = true;
     tSel.appendChild(opt);
   });
@@ -229,7 +232,7 @@ function renderLobby() {
 
   const controls = h('div', 'host-controls', [], { style: 'width:100%;max-width:420px' });
   const canStart = state.players.length >= 1;
-  controls.appendChild(h('button', 'btn-success', [canStart ? L(`Start Game (${state.players.length} player${state.players.length > 1 ? 's' : ''}) 🚀`, `ابدأ اللعبة (${state.players.length} ${state.players.length > 1 ? 'لاعبون' : 'لاعب'}) 🚀`) : L('Waiting for players to join...', 'بانتظار انضمام اللاعبين…')], {
+  controls.appendChild(h('button', 'btn-success', [canStart ? L(`Start Game (${state.players.length} player${state.players.length > 1 ? 's' : ''}) 🚀`, `ابدأ اللعبة (${state.players.length} ${state.players.length > 1 ? 'لاعبون' : 'لاعب'}) 🚀`, `Oyunu Başlat (${state.players.length} oyuncu) 🚀`) : L('Waiting for players to join...', 'بانتظار انضمام اللاعبين…', 'Oyuncuların katılması bekleniyor…')], {
     style: canStart ? 'width:100%' : 'width:100%;opacity:0.5;cursor:not-allowed',
     onclick: () => { if (!canStart) return; sound.click(); ws.send(JSON.stringify({ type: 'start_game' })); }
   }));
@@ -275,7 +278,7 @@ async function loadQR() {
     if (urlEl) {
       const displayUrl = state.localUrl ? `${state.localUrl}/join/${state.roomCode}` : data.url;
       urlEl.innerHTML = '';
-      urlEl.appendChild(h('div', 'join-url-label', [L('TAP TO COPY — SAME WIFI AS HOST', 'اضغط للنسخ — نفس شبكة الواي فاي الخاصة بالمضيف')]));
+      urlEl.appendChild(h('div', 'join-url-label', [L('TAP TO COPY — SAME WIFI AS HOST', 'اضغط للنسخ — نفس شبكة الواي فاي الخاصة بالمضيف', 'KOPYALAMAK İÇİN TIKLA — EV SAHİBİYLE AYNI WİFİ')]));
       const urlText = h('div', 'join-url-text', [displayUrl]);
       urlEl.appendChild(urlText);
       state.joinUrl = displayUrl;
@@ -286,7 +289,7 @@ async function loadQR() {
       if (state.publicUrl) {
         const onlineUrl = `${state.publicUrl}/join/${state.roomCode}`;
         const row = h('div', 'online-share-row', []);
-        row.appendChild(h('div', 'online-share-label', [L('📡 PLAY ANYWHERE (INTERNET) — CLICK TO COPY', '📡 العب من أي مكان (إنترنت) — اضغط للنسخ')]));
+        row.appendChild(h('div', 'online-share-label', [L('📡 PLAY ANYWHERE (INTERNET) — CLICK TO COPY', '📡 العب من أي مكان (إنترنت) — اضغط للنسخ', '📡 HER YERDEN OYNA (İNTERNET) — KOPYALAMAK İÇİN TIKLA')]));
         row.appendChild(h('div', 'online-share-url', [onlineUrl]));
         row.onclick = () => { navigator.clipboard.writeText(onlineUrl); sound.click(); };
         onlineEl.appendChild(row);
@@ -314,7 +317,7 @@ function renderGame() {
   if (state.isHost) {
     const quickbar = h('div', 'host-quickbar');
     if (state.timerSeconds > 0) {
-      const pauseBtn = h('button', 'host-qb-btn glass', [state.paused ? L('▶ Resume', '▶ استئناف') : L('⏸ Pause', '⏸ إيقاف مؤقت')], {
+      const pauseBtn = h('button', 'host-qb-btn glass', [state.paused ? L('▶ Resume', '▶ استئناف', '▶ Devam') : L('⏸ Pause', '⏸ إيقاف مؤقت', '⏸ Duraklat')], {
         onclick: () => {
           if (state.paused) { sound.resume(); ws.send(JSON.stringify({ type: 'resume_timer' })); }
           else { sound.pause(); ws.send(JSON.stringify({ type: 'pause_timer' })); }
@@ -322,18 +325,18 @@ function renderGame() {
       });
       quickbar.appendChild(pauseBtn);
     }
-    quickbar.appendChild(h('button', 'host-qb-btn glass', [L('⏭ Skip', '⏭ تخطي')], {
+    quickbar.appendChild(h('button', 'host-qb-btn glass', [L('⏭ Skip', '⏭ تخطي', '⏭ Geç')], {
       onclick: () => { sound.skip(); ws.send(JSON.stringify({ type: 'skip_question' })); }
     }));
     c.appendChild(quickbar);
   }
 
   if (state.paused) {
-    c.appendChild(h('div', 'paused-chip', [L('⏸ TIMER PAUSED — waiting for host', '⏸ تم إيقاف المؤقت — بانتظار المضيف')]));
+    c.appendChild(h('div', 'paused-chip', [L('⏸ TIMER PAUSED — waiting for host', '⏸ تم إيقاف المؤقت — بانتظار المضيف', '⏸ SÜRE DURDURULDU — ev sahibi bekleniyor')]));
   }
 
   const cat = CATEGORIES[q.category] || { name: 'General', emoji: '🧠', css: 'background:#475569' };
-  c.appendChild(h('div', 'category-badge', [`${cat.emoji} ${L(cat.name, cat.nameAr)}`], { style: cat.css + ';margin-bottom:16px;color:white' }));
+  c.appendChild(h('div', 'category-badge', [`${cat.emoji} ${L(cat.name, cat.nameAr, cat.nameTr)}`], { style: cat.css + ';margin-bottom:16px;color:white' }));
 
   if (state.timerSeconds > 0) {
     const timerContainer = h('div', 'timer-container');
@@ -395,7 +398,7 @@ function renderGame() {
   c.appendChild(answerStatus);
 
   if (state.timerSeconds <= 0 && !state.showReveal && !state.revealData) {
-    c.appendChild(h('button', 'btn-primary', [L('Reveal Answer', 'إظهار الإجابة')], {
+    c.appendChild(h('button', 'btn-primary', [L('Reveal Answer', 'إظهار الإجابة', 'Cevabı Göster')], {
       style: 'margin-top:16px;padding:12px 24px;font-size:14px;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#ea580c)',
       onclick: () => { sound.click(); ws.send(JSON.stringify({ type: 'reveal_now' })); }
     }));
@@ -406,6 +409,12 @@ function renderGame() {
   }
 
   return c;
+}
+
+function removeRevealOverlay() {
+  document.querySelectorAll('.reveal-overlay').forEach(el => el.remove());
+  state.showReveal = false;
+  state.revealData = null;
 }
 
 /* ======================== REVEAL OVERLAY ======================== */
@@ -420,30 +429,30 @@ function showRevealOverlay(data) {
   const anyoneCorrect = data.correctPlayers && data.correctPlayers.length > 0;
 
   let verdictText, verdictClass;
-  if (iAnsweredCorrectly) { verdictText = L('CORRECT!', 'إجابة صحيحة!'); verdictClass = 'correct'; }
-  else if (anyoneCorrect && state.isHost) { verdictText = L('SOMEONE GOT IT', 'شخص ما أجاب صح!'); verdictClass = 'correct'; }
-  else if (anyoneCorrect) { verdictText = L('WRONG', 'إجابة خاطئة'); verdictClass = 'wrong'; }
-  else { verdictText = L('NOBODY GOT IT', 'لا أحد أجاب صح'); verdictClass = 'wrong'; }
+  if (iAnsweredCorrectly) { verdictText = L('CORRECT!', 'إجابة صحيحة!', 'DOĞRU!'); verdictClass = 'correct'; }
+  else if (anyoneCorrect && state.isHost) { verdictText = L('SOMEONE GOT IT', 'شخص ما أجاب صح!', 'BİRİ DOĞRU BİLDİ'); verdictClass = 'correct'; }
+  else if (anyoneCorrect) { verdictText = L('WRONG', 'إجابة خاطئة', 'YANLIŞ'); verdictClass = 'wrong'; }
+  else { verdictText = L('NOBODY GOT IT', 'لا أحد أجاب صح', 'KİMSE BİLEMEDİ'); verdictClass = 'wrong'; }
 
-  overlay.appendChild(h('div', 'reveal-status', [L('THE ANSWER WAS', 'الإجابة الصحيحة كانت')]));
+  overlay.appendChild(h('div', 'reveal-status', [L('THE ANSWER WAS', 'الإجابة الصحيحة كانت', 'CEVAP ŞUYDU')]));
   overlay.appendChild(h('div', `reveal-verdict ${verdictClass}`, [verdictText]));
 
   const q = state.questions[state.currentQ];
   if (q) overlay.appendChild(h('div', 'reveal-answer', [Lq(q).options[data.correctAnswer]]));
 
   const correctNames = data.correctPlayers?.join(', ');
-  overlay.appendChild(h('div', 'reveal-points', [correctNames ? L(`${correctNames} got it right`, `${correctNames} أجابوا إجابة صحيحة`) : L('Nobody got it right', 'لا أحد أجاب إجابة صحيحة')]));
+  overlay.appendChild(h('div', 'reveal-points', [correctNames ? L(`${correctNames} got it right`, `${correctNames} أجابوا إجابة صحيحة`, `${correctNames} doğru bildi`) : L('Nobody got it right', 'لا أحد أجاب إجابة صحيحة', 'Kimse doğru bilmedi')]));
 
   if (data.ranked && data.ranked.length > 0) {
     const lbSection = h('div', 'reveal-leaderboard');
-    lbSection.appendChild(h('div', 'reveal-lb-title', [L('STANDINGS', 'الترتيب')]));
+    lbSection.appendChild(h('div', 'reveal-lb-title', [L('STANDINGS', 'الترتيب', 'SIRALAMA')]));
     const medals = ['🥇', '🥈', '🥉'];
     data.ranked.forEach((entry, i) => {
       const row = h('div', `reveal-lb-row rank-anim`, [], { style: `animation-delay: ${i * 0.1 + 0.5}s` });
       row.appendChild(h('div', 'reveal-lb-rank', [medals[i] || `#${i + 1}`]));
       const info = h('div', 'reveal-lb-info');
       info.appendChild(h('div', 'reveal-lb-name', [`${entry.emoji} ${entry.name}`]));
-      if (entry.streak >= 2) info.appendChild(h('div', 'reveal-lb-streak', [`🔥 ${entry.streak} ${L('streak', 'سلسلة')}`]));
+      if (entry.streak >= 2) info.appendChild(h('div', 'reveal-lb-streak', [`🔥 ${entry.streak} ${L('streak', 'سلسلة', 'seri')}`]));
       row.appendChild(info);
       row.appendChild(h('div', 'reveal-lb-score font-display', [String(entry.score)]));
       lbSection.appendChild(row);
@@ -452,13 +461,13 @@ function showRevealOverlay(data) {
   }
 
   if (state.isHost) {
-    const nextBtn = h('button', 'btn-primary', [L('Next Question →', 'السؤال التالي ←')], {
+    const nextBtn = h('button', 'btn-primary', [L('Next Question →', 'السؤال التالي ←', 'Sonraki Soru →')], {
       style: 'margin-top:20px;padding:12px 32px;font-size:16px;border-radius:12px;z-index:10;position:relative',
       onclick: () => { overlay.remove(); ws.send(JSON.stringify({ type: 'next_question' })); }
     });
     overlay.appendChild(nextBtn);
   } else {
-    overlay.appendChild(h('div', 'reveal-next-hint', [L('Waiting for host...', 'بانتظار المضيف…')]));
+    overlay.appendChild(h('div', 'reveal-next-hint', [L('Waiting for host...', 'بانتظار المضيف…', 'Ev sahibi bekleniyor…')]));
   }
 
   document.body.appendChild(overlay);
@@ -489,15 +498,15 @@ function renderGameOver() {
   const ranked = Object.entries(state.scores).sort((a, b) => b[1] - a[1]);
 
   c.appendChild(h('div', 'trophy animate-bounce', ['🏆']));
-  c.appendChild(h('h2', 'font-display gameover-title', [L('Game Over!', 'انتهت اللعبة!')]));
-  c.appendChild(h('p', 'gameover-subtitle', [L('Great game, everyone', 'لعبة رائعة من الجميع')]));
+  c.appendChild(h('h2', 'font-display gameover-title', [L('Game Over!', 'انتهت اللعبة!', 'Oyun Bitti!')]));
+  c.appendChild(h('p', 'gameover-subtitle', [L('Great game, everyone', 'لعبة رائعة من الجميع', 'Harika bir oyundu, millet')]));
 
   if (ranked.length > 0) {
     const wc = h('div', 'winner-callout');
     wc.appendChild(h('div', 'winner-label', ['👑 MVP']));
     const player = state.players.find(p => p.name === ranked[0][0]);
     wc.appendChild(h('div', 'winner-name font-display', [`${ranked[0][0]} ${player?.emoji || '🎉'}`]));
-    wc.appendChild(h('div', 'winner-score', [`${ranked[0][1]} ${L('points', 'نقطة')}`]));
+    wc.appendChild(h('div', 'winner-score', [`${ranked[0][1]} ${L('points', 'نقطة', 'puan')}`]));
     c.appendChild(wc);
   }
 
@@ -513,8 +522,8 @@ function renderGameOver() {
 
       const details = h('div', 'stat-details');
       details.appendChild(h('div', 'stat-row', [`✅ ${stats.correct}/${stats.total} (${stats.accuracy}%)`]));
-      details.appendChild(h('div', 'stat-row', [`🔥 ${L('Best streak', 'أفضل سلسلة')}: ${stats.maxStreak}`]));
-      details.appendChild(h('div', 'stat-row', [`⏱️ ${L('Bonus pts', 'نقاط إضافية')}: ${stats.bonusPoints}`]));
+      details.appendChild(h('div', 'stat-row', [`🔥 ${L('Best streak', 'أفضل سلسلة', 'En iyi seri')}: ${stats.maxStreak}`]));
+      details.appendChild(h('div', 'stat-row', [`⏱️ ${L('Bonus pts', 'نقاط إضافية', 'Bonus puan')}: ${stats.bonusPoints}`]));
       card.appendChild(details);
       statsCards.appendChild(card);
     });
@@ -528,7 +537,7 @@ function renderGameOver() {
       entry.appendChild(h('div', 'lb-rank', [medals[i] || `${i + 1}`]));
       const info = h('div', 'lb-info');
       info.appendChild(h('div', 'lb-name', [`${player?.emoji || ''} ${name}`]));
-      if (state.streaks[name] > 0) info.appendChild(h('div', 'lb-streak', [`🔥 ${state.streaks[name]} ${L('streak', 'سلسلة')}`]));
+      if (state.streaks[name] > 0) info.appendChild(h('div', 'lb-streak', [`🔥 ${state.streaks[name]} ${L('streak', 'سلسلة', 'seri')}`]));
       entry.appendChild(info);
       entry.appendChild(h('div', 'lb-score font-display', [String(score)]));
       lb.appendChild(entry);
@@ -537,10 +546,10 @@ function renderGameOver() {
   }
 
   const actions = h('div', 'gameover-actions');
-  actions.appendChild(h('button', 'btn-primary', [L('Play Again', 'العب مجدداً')], {
+  actions.appendChild(h('button', 'btn-primary', [L('Play Again', 'العب مجدداً', 'Tekrar Oyna')], {
     onclick: () => { sound.click(); ws.send(JSON.stringify({ type: 'restart_game' })); }
   }));
-  actions.appendChild(h('button', 'btn-ghost', [L('Leave Game', 'مغادرة اللعبة')], {
+  actions.appendChild(h('button', 'btn-ghost', [L('Leave Game', 'مغادرة اللعبة', 'Oyundan Ayrıl')], {
     onclick: () => {
       sound.click();
       state.screen = 'landing';
@@ -561,17 +570,17 @@ function renderGameOver() {
 function renderPlayerWaiting() {
   const c = h('div', 'state-waiting');
   c.appendChild(h('div', 'state-emoji', ['⏳']));
-  c.appendChild(h('div', 'state-title font-display', [L('Waiting for the host...', 'بانتظار المضيف…')]));
-  c.appendChild(h('div', 'state-sub', [L('The game will start soon', 'ستبدأ اللعبة قريباً')]));
+  c.appendChild(h('div', 'state-title font-display', [L('Waiting for the host...', 'بانتظار المضيف…', 'Ev sahibi bekleniyor…')]));
+  c.appendChild(h('div', 'state-sub', [L('The game will start soon', 'ستبدأ اللعبة قريباً', 'Oyun yakında başlayacak')]));
   c.appendChild(h('div', '', [], { style: 'margin-top:8px' }));
-  c.appendChild(h('div', 'controller-score', [L('Playing as', 'تلعب باسم'), ` `, h('span', '', [state.playerName || ''])]));
+  c.appendChild(h('div', 'controller-score', [L('Playing as', 'تلعب باسم', 'Oynayan:'), ` `, h('span', '', [state.playerName || ''])]));
 
   if (state.myPowerup) {
-    const puIcons = { freeze: L('❄️ Freeze Timer', '❄️ تجميد المؤقت'), double: L('✨ Double Points', '✨ نقاط مضاعفة'), steal: L('🦊 Steal Points', '🦊 سرقة النقاط') };
+    const puIcons = { freeze: L('❄️ Freeze Timer', '❄️ تجميد المؤقت', '❄️ Sayacı Dondur'), double: L('✨ Double Points', '✨ نقاط مضاعفة', '✨ Çift Puan'), steal: L('🦊 Steal Points', '🦊 سرقة النقاط', '🦊 Puan Çal') };
     c.appendChild(h('div', 'player-powerup-badge', [puIcons[state.myPowerup] || state.myPowerup], { style: 'margin-top:12px' }));
   }
 
-  c.appendChild(h('button', 'btn-ghost', [L('Leave', 'مغادرة')], {
+  c.appendChild(h('button', 'btn-ghost', [L('Leave', 'مغادرة', 'Ayrıl')], {
     style: 'margin-top:20px;font-size:12px;padding:8px 20px',
     onclick: () => {
       sound.click();
@@ -606,19 +615,19 @@ function renderPlayerAnswer() {
   }
   c.appendChild(top);
 
-  const roundInfo = h('div', 'controller-round', [L(`Q${state.currentQ + 1} of ${state.questions.length}`, `سؤال ${state.currentQ + 1} من ${state.questions.length}`)]);
+  const roundInfo = h('div', 'controller-round', [L(`Q${state.currentQ + 1} of ${state.questions.length}`, `سؤال ${state.currentQ + 1} من ${state.questions.length}`, `Soru ${state.currentQ + 1}/${state.questions.length}`)]);
   c.appendChild(roundInfo);
 
   if (state.paused) {
-    c.appendChild(h('div', 'paused-chip', [L('⏸ TIMER PAUSED — waiting for host', '⏸ تم إيقاف المؤقت — بانتظار المضيف')]));
+    c.appendChild(h('div', 'paused-chip', [L('⏸ TIMER PAUSED — waiting for host', '⏸ تم إيقاف المؤقت — بانتظار المضيف', '⏸ SÜRE DURDURULDU — ev sahibi bekleniyor')]));
   }
 
   c.appendChild(h('div', 'controller-question', [lq.text]));
 
   if (state.playerAnswer !== null) {
     const locked = h('div', 'controller-locked');
-    locked.appendChild(h('div', 'locked-text', [L('LOCKED IN 🔒', 'تم تأكيد الإجابة 🔒')]));
-    locked.appendChild(h('div', 'locked-sub', [L('Waiting for other players...', 'بانتظار اللاعبين الآخرين…')]));
+    locked.appendChild(h('div', 'locked-text', [L('LOCKED IN 🔒', 'تم تأكيد الإجابة 🔒', 'KİLİTLENDİ 🔒')]));
+    locked.appendChild(h('div', 'locked-sub', [L('Waiting for other players...', 'بانتظار اللاعبين الآخرين…', 'Diğer oyuncular bekleniyor…')]));
     c.appendChild(locked);
   } else {
     const options = h('div', 'controller-options');
@@ -643,9 +652,9 @@ function renderPlayerAnswer() {
   if (state.myPowerup && state.playerAnswer === null) {
     const puContainer = h('div', 'powerup-container');
     const puInfo = {
-      freeze: { icon: '❄️', label: L('Freeze Timer', 'تجميد المؤقت'), desc: L('Stops timer for 5s', 'يوقف المؤقت لخمس ثوانٍ') },
-      double: { icon: '✨', label: L('Double Points', 'نقاط مضاعفة'), desc: L('Next answer worth 2x', 'الإجابة التالية بنقطتين مضاعفتين') },
-      steal: { icon: '🦊', label: L('Steal 50pts', 'سرقة 50 نقطة'), desc: L('Take from the leader', 'خذ نقاطاً من المتصدر') }
+      freeze: { icon: '❄️', label: L('Freeze Timer', 'تجميد المؤقت', 'Sayacı Dondur'), desc: L('Stops timer for 5s', 'يوقف المؤقت لخمس ثوانٍ', 'Sayacı 5 saniye durdurur') },
+      double: { icon: '✨', label: L('Double Points', 'نقاط مضاعفة', 'Çift Puan'), desc: L('Next answer worth 2x', 'الإجابة التالية بنقطتين مضاعفتين', 'Sonraki cevap 2x değerinde') },
+      steal: { icon: '🦊', label: L('Steal 50pts', 'سرقة 50 نقطة', '50 Puan Çal'), desc: L('Take from the leader', 'خذ نقاطاً من المتصدر', 'Liderden puan al') }
     };
     const pu = puInfo[state.myPowerup];
     if (pu) {
@@ -665,7 +674,7 @@ function renderPlayerAnswer() {
   }
 
   const bottom = h('div', 'controller-bottom');
-  bottom.appendChild(h('div', 'controller-score', [L('Score:', 'النقاط:'), ` `, h('span', '', [String(state.scores[state.playerName] || 0)])]));
+  bottom.appendChild(h('div', 'controller-score', [L('Score:', 'النقاط:', 'Puan:'), ` `, h('span', '', [String(state.scores[state.playerName] || 0)])]));
   c.appendChild(bottom);
 
   return c;
@@ -674,10 +683,10 @@ function renderPlayerAnswer() {
 function renderPlayerResult() {
   const c = h('div', 'state-waiting');
   c.appendChild(h('div', 'state-emoji', ['⏳']));
-  c.appendChild(h('div', 'state-title font-display', [L('Waiting for next question...', 'بانتظار السؤال التالي…')]));
-  c.appendChild(h('div', 'state-sub', [L('Your answer is locked in', 'تم تأكيد إجابتك')]));
+  c.appendChild(h('div', 'state-title font-display', [L('Waiting for next question...', 'بانتظار السؤال التالي…', 'Sonraki soru bekleniyor…')]));
+  c.appendChild(h('div', 'state-sub', [L('Your answer is locked in', 'تم تأكيد إجابتك', 'Cevabın kilitlendi')]));
   c.appendChild(h('div', '', [], { style: 'margin-top:16px' }));
-  c.appendChild(h('div', 'controller-score', [L('Score:', 'النقاط:'), ` `, h('span', '', [String(state.scores[state.playerName] || 0)])]));
+  c.appendChild(h('div', 'controller-score', [L('Score:', 'النقاط:', 'Puan:'), ` `, h('span', '', [String(state.scores[state.playerName] || 0)])]));
 
   if (state.showReveal && state.revealData) {
     setTimeout(() => showRevealOverlay(state.revealData), 200);
@@ -698,11 +707,11 @@ function renderJoin() {
   c.appendChild(langRow);
 
   card.appendChild(h('div', 'join-logo font-display', ['QUIZORA']));
-  card.appendChild(h('div', 'join-subtitle', [L('Enter the room code from the host screen', 'أدخل رمز الغرفة المعروض على شاشة المضيف')]));
+  card.appendChild(h('div', 'join-subtitle', [L('Enter the room code from the host screen', 'أدخل رمز الغرفة المعروض على شاشة المضيف', 'Ev sahibi ekranındaki oda kodunu gir')]));
 
   const form = h('div', 'join-form');
   form.appendChild(h('input', 'input-field join-input', [], {
-    placeholder: L('CODE', 'الرمز'), maxlength: '5', id: 'join-code', autocomplete: 'off', autocapitalize: 'characters',
+    placeholder: L('CODE', 'الرمز', 'KOD'), maxlength: '5', id: 'join-code', autocomplete: 'off', autocapitalize: 'characters',
     value: state.inputCode || '',
     oninput: (e) => {
       state.inputCode = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -710,17 +719,17 @@ function renderJoin() {
       updateJoinBtn();
     }
   }));
-  form.appendChild(h('input', 'input-field join-name-input', [], { placeholder: L('Your name', 'اسمك'), maxlength: '12', id: 'join-name', autocomplete: 'name', oninput: () => updateJoinBtn(), onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('join-submit')?.click(); } } }));
+  form.appendChild(h('input', 'input-field join-name-input', [], { placeholder: L('Your name', 'اسمك', 'Adın'), maxlength: '12', id: 'join-name', autocomplete: 'name', oninput: () => updateJoinBtn(), onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('join-submit')?.click(); } } }));
   form.appendChild(h('div', 'join-error', [], { id: 'join-error' }));
 
-  const joinBtn = h('button', 'join-btn disabled', [L('Join Game', 'دخول اللعبة')], {
+  const joinBtn = h('button', 'join-btn disabled', [L('Join Game', 'دخول اللعبة', 'Oyuna Katıl')], {
     id: 'join-submit',
     onclick: () => {
       const name = document.getElementById('join-name')?.value?.trim();
       if (state.inputCode.length >= 4 && name) attemptJoin();
       else {
         const err = document.getElementById('join-error');
-        if (err) err.textContent = L('Enter code and name to join', 'أدخل الرمز واسمك للدخول');
+        if (err) err.textContent = L('Enter code and name to join', 'أدخل الرمز واسمك للدخول', 'Katılmak için kodu ve adını gir');
       }
     }
   });
@@ -747,13 +756,13 @@ function attemptJoin() {
   const code = state.inputCode;
   if (!code || code.length < 4) {
     const err = document.getElementById('join-error');
-    if (err) err.textContent = L('Enter the room code', 'أدخل رمز الغرفة');
+    if (err) err.textContent = L('Enter the room code', 'أدخل رمز الغرفة', 'Oda kodunu gir');
     return;
   }
   const name = document.getElementById('join-name')?.value?.trim();
   const err = document.getElementById('join-error');
   if (!name) {
-    if (err) err.textContent = L('Enter your name', 'أدخل اسمك');
+    if (err) err.textContent = L('Enter your name', 'أدخل اسمك', 'Adını gir');
     return;
   }
   sound.click();
@@ -763,21 +772,21 @@ function attemptJoin() {
       ws.send(JSON.stringify({ type: 'join_room', code, name }));
       state.playerName = name;
     } catch (e) {
-      if (err) err.textContent = L('Connection lost. Try again.', 'انقطع الاتصال. حاول مجدداً');
+      if (err) err.textContent = L('Connection lost. Try again.', 'انقطع الاتصال. حاول مجدداً', 'Bağlantı koparıldı. Tekrar dene.');
     }
   };
 
   if (ws && ws.readyState === WebSocket.OPEN) {
     doJoin();
   } else if (ws) {
-    if (err) err.textContent = L('Connecting to server…', 'جارٍ الاتصال بالخادم…');
+    if (err) err.textContent = L('Connecting to server…', 'جارٍ الاتصال بالخادم…', 'Sunucuya bağlanılıyor…');
     const orig = ws.onopen;
     ws.onopen = () => {
       if (orig) orig();
       doJoin();
     };
   } else {
-    if (err) err.textContent = L('Connection lost. Try again.', 'انقطع الاتصال. حاول مجدداً');
+    if (err) err.textContent = L('Connection lost. Try again.', 'انقطع الاتصال. حاول مجدداً', 'Bağlantı koparıldı. Tekrar dene.');
   }
 }
 
@@ -861,8 +870,10 @@ function handleHostMessage(msg) {
 
     case 'timer_tick':
       state.timeLeft = msg.timeLeft;
+      const wasPaused = state.paused;
       state.paused = false;
       updateTimer();
+      if (wasPaused && state.screen === 'game') render();
       break;
 
     case 'timer_paused':
@@ -872,8 +883,10 @@ function handleHostMessage(msg) {
       break;
 
     case 'question_skipped':
-      showPowerupNotification(L('⏭️ Question skipped', '⏭️ تم تخطي السؤال'));
+      showPowerupNotification(L('⏭️ Question skipped', '⏭️ تم تخطي السؤال', '⏭️ Soru atlandı'));
+      removeRevealOverlay();
       state.paused = false;
+      render();
       break;
 
     case 'player_answered':
@@ -907,7 +920,7 @@ function handleHostMessage(msg) {
       break;
 
     case 'powerup_used':
-      showPowerupNotification(L(msg.message, msg.messageAr));
+      showPowerupNotification(L(msg.message, msg.messageAr, msg.messageTr));
       if (msg.scores) state.scores = msg.scores;
       if (state.screen === 'game') render();
       break;
@@ -933,8 +946,8 @@ function handleHostMessage(msg) {
 
     case 'error':
       const errEl = document.getElementById('join-error');
-      if (errEl && state.screen === 'join') errEl.textContent = L(msg.message, msg.messageAr);
-      else alert(L(msg.message, msg.messageAr));
+      if (errEl && state.screen === 'join') errEl.textContent = L(msg.message, msg.messageAr, msg.messageTr);
+      else alert(L(msg.message, msg.messageAr, msg.messageTr));
       break;
   }
 }
@@ -973,7 +986,10 @@ function handlePlayerMessage(msg) {
 
     case 'timer_tick':
       state.timeLeft = msg.timeLeft;
+      const wasPaused = state.paused;
+      state.paused = false;
       updatePlayerTimer();
+      if (wasPaused && state.screen === 'player_answer') render();
       break;
 
     case 'answer_confirmed':
@@ -984,8 +1000,10 @@ function handlePlayerMessage(msg) {
       break;
 
     case 'question_skipped':
-      showPowerupNotification(L('⏭️ Question skipped by host', '⏭️ تخطى المضيف السؤال'));
+      showPowerupNotification(L('⏭️ Question skipped by host', '⏭️ تخطى المضيف السؤال', '⏭️ Soru ev sahibi tarafından atlandı'));
+      removeRevealOverlay();
       state.paused = false;
+      render();
       break;
 
     case 'timer_paused':
@@ -1013,7 +1031,7 @@ function handlePlayerMessage(msg) {
       break;
 
     case 'powerup_used':
-      showPowerupNotification(L(msg.message, msg.messageAr));
+      showPowerupNotification(L(msg.message, msg.messageAr, msg.messageTr));
       if (msg.scores) state.scores = msg.scores;
       break;
 
@@ -1023,7 +1041,7 @@ function handlePlayerMessage(msg) {
       break;
 
     case 'powerup_failed':
-      showPowerupNotification(L(msg.message, msg.messageAr));
+      showPowerupNotification(L(msg.message, msg.messageAr, msg.messageTr));
       break;
 
     case 'game_over':
@@ -1043,14 +1061,14 @@ function handlePlayerMessage(msg) {
       state.screen = 'landing';
       state.roomCode = null;
       state.players = [];
-      alert(L('Host disconnected. Game ended.', 'انقطع المضيف. انتهت اللعبة.'));
+      alert(L('Host disconnected. Game ended.', 'انقطع المضيف. انتهت اللعبة.', 'Ev sahibi bağlantıyı kesti. Oyun bitti.'));
       render();
       break;
 
     case 'error':
       const joinErr = document.getElementById('join-error');
-      if (joinErr && state.screen === 'join') joinErr.textContent = L(msg.message, msg.messageAr);
-      else alert(L(msg.message, msg.messageAr));
+      if (joinErr && state.screen === 'join') joinErr.textContent = L(msg.message, msg.messageAr, msg.messageTr);
+      else alert(L(msg.message, msg.messageAr, msg.messageTr));
       break;
   }
 }

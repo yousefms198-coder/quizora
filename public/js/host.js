@@ -41,6 +41,7 @@ let state = {
   practiceTimer: null,
   inputAnswer: null,
   settingsOpen: false,
+  authOpen: false,
   pendingAvatar: undefined,
 };
 
@@ -101,6 +102,7 @@ function render() {
   };
   const fn = screens[state.screen];
   if (fn) app.appendChild(fn());
+  if (state.authOpen) app.appendChild(renderAuthModal());
   if (state.settingsOpen) app.appendChild(renderSettings());
 }
 
@@ -215,8 +217,9 @@ function renderLanding() {
   c.appendChild(h('div', 'landing-subtitle', ['THE ROOM IS YOUR GAME SHOW']));
   c.appendChild(h('div', 'landing-tagline', [L('Create a game. Invite everyone. Then let the chaos begin.', 'أنشئ لعبة. ادعُ الجميع. ثم دع الفوضى تبدأ!', 'Bir oyun oluştur. Herkesi davet et. Sonra kaos başlasın!')]))
 
-  const langRow = h('div', 'lang-row');
+  const langRow = h('div', 'lang-row', [], { style: 'display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap' });
   renderLangToggle(langRow);
+  langRow.appendChild(accountChip());
   c.appendChild(langRow);
 
   const tabs = h('div', '', []);
@@ -229,8 +232,6 @@ function renderLanding() {
   panel.appendChild(h('div', 'section-label', [L('Game Settings', 'إعدادات اللعبة', 'Oyun Ayarları')], { style: 'margin-bottom:10px;margin-top:8px' }));
   appendSettingsRow(panel);
   c.appendChild(panel);
-
-  renderAuthPanel(c);
 
   const actions = h('div', 'landing-actions');
   actions.appendChild(h('button', 'btn-primary', [L('Create a Game', 'إنشاء لعبة', 'Oyun Oluştur')], {
@@ -1300,30 +1301,15 @@ function logout() {
   api('/api/auth/logout', 'POST', {});
   try { localStorage.removeItem('quizora_token'); } catch {}
   state.user = null;
+  state.settingsOpen = false;
+  state.authOpen = false;
   render();
 }
 
-function renderAuthPanel(c) {
-  const box = h('div', 'glass', [], { style: 'width:100%;max-width:440px;padding:16px;border-radius:16px;margin:8px 0' });
+function accountChip() {
+  const wrap = h('div', '', [], { style: 'display:flex;gap:8px;align-items:center' });
   if (state.user) {
-    box.appendChild(h('div', '', [
-      h('span', '', [state.user.avatar]),
-      h('span', '', [' ' + state.user.username + ' '], { style: 'font-weight:800' }),
-      h('span', '', [state.user.email], { style: 'color:#64748b;font-size:11px' }),
-    ], { style: 'margin-bottom:10px' }));
-    const stats = state.user.stats || {};
-    const avg = stats.tests ? Math.round(stats.scoreSum / stats.tests) : 0;
-    const statRow = h('div', 'profile-stats', []);
-    [[stats.tests, L('tests', 'اختبارات', 'test')], [avg + '%', L('avg', 'متوسط', 'ortalama')], [stats.correctTot || 0, L('correct', 'صحيحة', 'doğru')]].forEach(([v, lab]) => {
-      const d = h('div', 'glass-strong', [], { style: 'padding:8px 12px;border-radius:10px;text-align:center' });
-      d.appendChild(h('div', '', [String(v)], { style: 'font-weight:800;font-size:18px;color:#38bdf8' }));
-      d.appendChild(h('div', '', [lab], { style: 'font-size:11px;color:#64748b' }));
-      statRow.appendChild(d);
-    });
-    box.appendChild(statRow);
-    const btnRow = h('div', '', [], { style: 'display:flex;gap:8px;margin-top:12px;flex-wrap:wrap' });
-    btnRow.appendChild(h('button', 'btn-success', [L('📝 Practice Now', '📝 اختبر نفسك الآن', '📝 Hemen Deneyin')], {
-      style: 'flex:1',
+    wrap.appendChild(h('button', 'btn-success', ['📝 ' + L('Practice', 'تدريب', 'Pratik')], {
       onclick: () => {
         sound.click();
         state.practice = { pick: { categories: ['yks'], num: 5, mode: 'instant', timer: 0 } };
@@ -1332,67 +1318,83 @@ function renderAuthPanel(c) {
         render();
       }
     }));
-    btnRow.appendChild(h('button', 'btn-ghost', ['⚙️'], { style: 'flex:0 0 auto', title: L('Settings', 'الإعدادات', 'Ayarlar'), onclick: () => { sound.click(); state.pendingAvatar = undefined; state.settingsOpen = true; render(); } }));
-    btnRow.appendChild(h('button', 'btn-ghost', [L('Logout', 'تسجيل الخروج', 'Çıkış')], { style: 'flex:0 0 auto', onclick: logout }));
-    box.appendChild(btnRow);
+    wrap.appendChild(h('button', 'btn-ghost', [state.user.avatar + ' ' + state.user.username + ' ⚙️'], {
+      title: L('Account Settings', 'إعدادات الحساب', 'Hesap Ayarları'),
+      onclick: () => { sound.click(); state.pendingAvatar = undefined; state.settingsOpen = true; render(); }
+    }));
   } else {
-    box.appendChild(h('div', 'section-label', [L('Login / Sign Up', 'تسجيل الدخول / إنشاء حساب', 'Giriş / Kayıt Ol')], { style: 'margin-bottom:6px;font-weight:800;color:#38bdf8;font-size:13px' }));
-    box.appendChild(h('div', '', [L('Log in or create an account to take practice tests and track your scores.', 'سجّل الدخول أو أنشئ حساباً لدخول اختبارات الممارسة وتتبع نتائجك.', 'Pratik testleri çözmek ve puanlarınızı takip etmek için giriş yapın veya hesap oluşturun.')], { style: 'color:#64748b;font-size:12px;margin-bottom:10px' }));
-
-    let mode = 'login';
-    const tabs = h('div', 'mode-tabs', []);
-    const fields = h('div', '', []);
-    const errEl = h('div', 'join-error', [], { style: 'margin-top:6px;font-size:12px' });
-    let nameInput = null, emailInput = null, passInput = null;
-
-    const mkFields = () => {
-      fields.innerHTML = '';
-      nameInput = null; emailInput = null; passInput = null;
-      if (mode === 'register') {
-        nameInput = h('input', 'text-input', [], { placeholder: L('Username', 'اسم المستخدم', 'Kullanıcı adı'), style: 'width:100%;margin:4px 0;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:14px' });
-        fields.appendChild(nameInput);
-      }
-      emailInput = h('input', 'text-input', [], { placeholder: L('Email', 'البريد الإلكتروني', 'E-posta'), type: 'email', style: 'width:100%;margin:4px 0;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:14px' });
-      passInput = h('input', 'text-input', [], { placeholder: L('Password (min 4)', 'كلمة المرور (4 أحرف على الأقل)', 'Parola (en az 4 karakter)'), type: 'password', style: 'width:100%;margin:4px 0;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:14px' });
-      fields.appendChild(emailInput);
-      fields.appendChild(passInput);
-    };
-    const mkTabs = () => {
-      tabs.innerHTML = '';
-      [['login', L('Login', 'دخول', 'Giriş')], ['register', L('Sign Up', 'تسجيل', 'Kayıt')]].forEach(([m, lab]) => {
-        tabs.appendChild(h('button', `mode-btn ${mode === m ? 'active' : ''}`, [lab], { style: 'flex:1', onclick: () => { sound.click(); mode = m; mkTabs(); mkFields(); } }));
-      });
-    };
-    mkTabs();
-    mkFields();
-    box.appendChild(tabs);
-    box.appendChild(fields);
-
-    const submitBtn = h('button', 'btn-primary', [L('Continue', 'متابعة', 'Devam')], {
-      style: 'width:100%;margin-top:10px;padding:12px;font-size:14px;border-radius:10px',
-      onclick: async () => {
-        errEl.textContent = '';
-        const email = emailInput && emailInput.value.trim();
-        const password = passInput && passInput.value;
-        const uname = nameInput ? nameInput.value.trim() : '';
-        if (!email || !password) { errEl.textContent = L('Enter email and password', 'أدخل البريد وكلمة المرور', 'E-posta ve parola girin'); return; }
-        const body = mode === 'register' ? { username: uname, email, password } : { email, password };
-        const res = await api('/api/auth/' + mode, 'POST', body);
-        if (res.token) {
-          try { localStorage.setItem('quizora_token', res.token); } catch {}
-          state.user = res.user;
-          if (res.user.lang && res.user.lang !== appLang) setLang(res.user.lang);
-          sound.win();
-          render();
-        } else {
-          errEl.textContent = res.errorTr || res.error || L('Something went wrong', 'حدث خطأ', 'Bir şeyler ters gitti');
-        }
-      }
-    });
-    box.appendChild(submitBtn);
-    box.appendChild(errEl);
+    wrap.appendChild(h('button', 'btn-ghost', ['🔐 ' + L('Login / Sign Up', 'تسجيل الدخول / إنشاء حساب', 'Giriş / Kayıt Ol')], {
+      onclick: () => { sound.click(); state.authOpen = true; render(); }
+    }));
   }
-  c.appendChild(box);
+  return wrap;
+}
+
+function renderAuthModal() {
+  const overlay = h('div', 'modal-overlay', [], {
+    onclick: (e) => { if (e.target === overlay) { state.authOpen = false; render(); } }
+  });
+  const card = h('div', 'glass-strong', [], { style: 'width:100%;max-width:420px;padding:20px;border-radius:16px;position:relative' });
+  card.appendChild(h('button', 'btn-ghost', ['✕'], { style: 'position:absolute;top:10px;right:10px;flex:0 0 auto', onclick: () => { sound.click(); state.authOpen = false; render(); } }));
+  card.appendChild(h('div', 'section-label', [L('🔐 Login / Sign Up', '🔐 تسجيل الدخول / إنشاء حساب', '🔐 Giriş / Kayıt Ol')], { style: 'font-weight:800;color:#38bdf8;font-size:14px;margin-bottom:8px' }));
+  card.appendChild(h('div', '', [L('Log in or create an account to take practice tests and track your scores.', 'سجّل الدخول أو أنشئ حساباً لدخول اختبارات الممارسة وتتبع نتائجك.', 'Pratik testleri çözmek ve puanlarınızı takip etmek için giriş yapın veya hesap oluşturun.')], { style: 'color:#64748b;font-size:12px;margin-bottom:12px' }));
+
+  let mode = 'login';
+  const tabs = h('div', 'mode-tabs', []);
+  const fields = h('div', '', []);
+  const errEl = h('div', 'join-error', [], { style: 'margin-top:6px;font-size:12px' });
+  let nameInput = null, emailInput = null, passInput = null;
+
+  const mkFields = () => {
+    fields.innerHTML = '';
+    nameInput = null; emailInput = null; passInput = null;
+    if (mode === 'register') {
+      nameInput = h('input', 'text-input', [], { placeholder: L('Username', 'اسم المستخدم', 'Kullanıcı adı'), style: 'width:100%;margin:4px 0;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:14px' });
+      fields.appendChild(nameInput);
+    }
+    emailInput = h('input', 'text-input', [], { placeholder: L('Email', 'البريد الإلكتروني', 'E-posta'), type: 'email', style: 'width:100%;margin:4px 0;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:14px' });
+    passInput = h('input', 'text-input', [], { placeholder: L('Password (min 4)', 'كلمة المرور (4 أحرف على الأقل)', 'Parola (en az 4 karakter)'), type: 'password', style: 'width:100%;margin:4px 0;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:14px' });
+    fields.appendChild(emailInput);
+    fields.appendChild(passInput);
+  };
+  const mkTabs = () => {
+    tabs.innerHTML = '';
+    [['login', L('Login', 'دخول', 'Giriş')], ['register', L('Sign Up', 'تسجيل', 'Kayıt')]].forEach(([m, lab]) => {
+      tabs.appendChild(h('button', `mode-btn ${mode === m ? 'active' : ''}`, [lab], { style: 'flex:1', onclick: () => { sound.click(); mode = m; mkTabs(); mkFields(); } }));
+    });
+  };
+  mkTabs();
+  mkFields();
+  card.appendChild(tabs);
+  card.appendChild(fields);
+
+  const submitBtn = h('button', 'btn-primary', [L('Continue', 'متابعة', 'Devam')], {
+    style: 'width:100%;margin-top:10px;padding:12px;font-size:14px;border-radius:10px',
+    onclick: async () => {
+      errEl.textContent = '';
+      const email = emailInput && emailInput.value.trim();
+      const password = passInput && passInput.value;
+      const uname = nameInput ? nameInput.value.trim() : '';
+      if (!email || !password) { errEl.textContent = L('Enter email and password', 'أدخل البريد وكلمة المرور', 'E-posta ve parola girin'); return; }
+      const body = mode === 'register' ? { username: uname, email, password } : { email, password };
+      const res = await api('/api/auth/' + mode, 'POST', body);
+      if (res.token) {
+        try { localStorage.setItem('quizora_token', res.token); } catch {}
+        state.user = res.user;
+        if (res.user.lang && res.user.lang !== appLang) setLang(res.user.lang);
+        state.authOpen = false;
+        sound.win();
+        render();
+      } else {
+        errEl.textContent = res.errorTr || res.error || L('Something went wrong', 'حدث خطأ', 'Bir şeyler ters gitti');
+      }
+    }
+  });
+  card.appendChild(submitBtn);
+  card.appendChild(errEl);
+
+  overlay.appendChild(card);
+  return overlay;
 }
 
 /* ======================== ACCOUNT: SETTINGS ======================== */

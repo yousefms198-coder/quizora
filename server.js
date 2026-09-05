@@ -1,5 +1,6 @@
 const express = require('express');
 const http = require('http');
+const https = require('https');
 const { WebSocketServer } = require('ws');
 const QRCode = require('qrcode');
 const path = require('path');
@@ -5075,7 +5076,9 @@ app.post('/api/auth/login', (req, res) => {
   const { email, password } = req.body || {};
   const em = String(email || '').trim().toLowerCase();
   const user = usersDB[em];
-  if (!user || user.passHash !== hashPassword(String(password || ''), user.passSalt)) {
+  if (!user) return res.status(401).json({ error: 'Wrong email or password', errorTr: 'E-posta veya parola hatalı' });
+  if (!user.passHash) return res.status(401).json({ error: 'This account uses Google Sign-In. Please use the Google button.', errorTr: 'Bu hesap Google ile giriş yapıyor. Lütfen Google düğmesini kullanın.', errorAr: 'هذا الحساب يسجّل الدخول عبر Google. استخدم زر Google.' });
+  if (user.passHash !== hashPassword(String(password || ''), user.passSalt)) {
     return res.status(401).json({ error: 'Wrong email or password', errorTr: 'E-posta veya parola hatalı' });
   }
   const token = crypto.randomBytes(32).toString('hex');
@@ -5115,6 +5118,122 @@ app.post('/api/auth/update', (req, res) => {
   }
   saveUsers(usersDB);
   res.json({ user: cleanUser(user) });
+});
+
+/* ======================== GOOGLE SIGN-IN ======================== */
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
+const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
+const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
+const GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinfo';
+const oauthStates = new Map();
+
+function httpsRequest(method, url, opts = {}) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const req = https.request({
+      method,
+      hostname: u.hostname,
+      path: u.pathname + u.search,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', ...(opts.headers || {}) },
+    }, r => {
+      let data = '';
+      r.on('data', c => { data += c; });
+      r.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch { reject(new Error('Bad response from Google')); }
+      });
+    });
+    req.on('error', reject);
+    if (opts.body) req.write(opts.body);
+    req.end();
+  });
+}
+
+function oauthCleanup() {
+  const now = Date.now();
+  oauthStates.forEach((ts, key) => {
+    if (now - ts > 10 * 60 * 1000) oauthStates.delete(key);
+  });
+}
+
+app.get('/api/auth/google/url', (req, res) => {
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) return res.json({ available: false });
+  const redirectUri = resolveBase(req) + '/api/auth/google/callback';
+  const state = crypto.randomBytes(16).toString('hex');
+  oauthStates.set(state, Date.now());
+  oauthCleanup();
+  const params = new URLSearchParams({
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: 'openid email profile',
+    access_type: 'online',
+    include_granted_scopes: 'true',
+    state,
+  });
+  res.json({ available: true, url: GOOGLE_AUTH_URL + '?' + params.toString() });
+});
+
+app.get('/api/auth/google/callback', (req, res) => {
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) return res.status(503).send('Google login is not configured.').end();
+  const { code, state, error } = req.query || {};
+  if (error) return res.status(400).send('Sign-in cancelled or denied. Please close this tab and try again.');
+  if (!code || !state || !oauthStates.has(state)) return res.status(400).send('Invalid login request. Please close this tab and try again.');
+  oauthStates.delete(state);
+  const redirectUri = resolveBase(req) + '/api/auth/google/callback';
+  const body = new URLSearchParams({
+    code: String(code),
+    client_id: GOOGLE_CLIENT_ID,
+    client_secret: GOOGLE_CLIENT_SECRET,
+    redirect_uri: redirectUri,
+    grant_type: 'authorization_code',
+  }).toString();
+  httpsRequest('POST', GOOGLE_TOKEN_URL, { body })
+    .then(parsed => {
+      const accessToken = parsed && parsed.access_token;
+      if (!accessToken) throw new Error('No access token');
+      return httpsRequest('GET', GOOGLE_USERINFO_URL, { headers: { Authorization: 'Bearer ' + accessToken } });
+    })
+    .then(info => {
+      if (!info || !info.email) throw new Error('No profile email');
+      const email = String(info.email).toLowerCase();
+      let user = usersDB[email];
+      let isNew = false;
+      if (!user) {
+        isNew = true;
+        let username = String(info.name || '').trim().replace(/[^A-Za-z0-9 _-]/g, '').slice(0, 16) || email.split('@')[0].slice(0, 16) || 'player';
+        if (Object.values(usersDB).some(u => u.username.toLowerCase() === username.toLowerCase())) {
+          username = email.split('@')[0].slice(0, 14) || 'player';
+        }
+        let n = 1;
+        while (Object.values(usersDB).some(u => u.username.toLowerCase() === username.toLowerCase())) {
+          username = (email.split('@')[0].slice(0, 13) || 'player') + n;
+          n++;
+        }
+        if (username.length < 2) username = username + 'x';
+        user = {
+          username,
+          email,
+          googleId: String(info.sub || ''),
+          picture: info.picture || '',
+          lang: 'en',
+          createdAt: new Date().toISOString(),
+          stats: { tests: 0, scoreSum: 0, correctTot: 0, answerTot: 0 },
+          examStats: {},
+        };
+        usersDB[email] = user;
+      } else {
+        if (!user.googleId) user.googleId = String(info.sub || '');
+        if (!user.picture && info.picture) user.picture = info.picture;
+      }
+      saveUsers(usersDB);
+      const token = crypto.randomBytes(32).toString('hex');
+      sessions.set(token, email);
+      const page = `<!doctype html><html lang="en"><meta charset="utf-8"><title>Signing in…</title><body style="background:#020617;color:#e2e8f0;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh">Signing you in…<script>try{localStorage.setItem('quizora_token','${token}')}catch(e){}location.href='/'</script></body></html>`;
+      res.send(page);
+    })
+    .catch(() => res.status(500).send('Sign-in failed. Please close this tab and try again.'));
 });
 
 const practiceTests = new Map();

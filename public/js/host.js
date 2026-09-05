@@ -1290,6 +1290,7 @@ function restoreSession() {
     if (res.user) {
       state.user = res.user;
       if (res.user.lang && res.user.lang !== appLang) setLang(res.user.lang);
+      render();
     } else {
       try { localStorage.removeItem('quizora_token'); } catch {}
     }
@@ -1367,6 +1368,21 @@ function renderAuthModal() {
   mkFields();
   card.appendChild(tabs);
   card.appendChild(fields);
+
+  const orRow = h('div', '', [], { style: 'display:flex;align-items:center;gap:10px;margin:12px 0 2px' });
+  orRow.appendChild(h('div', '', [], { style: 'flex:1;height:1px;background:#334155' }));
+  orRow.appendChild(h('span', '', [L('or', 'أو', 'veya')], { style: 'color:#64748b;font-size:11px' }));
+  orRow.appendChild(h('div', '', [], { style: 'flex:1;height:1px;background:#334155' }));
+  card.appendChild(orRow);
+
+  const gBtn = h('button', 'btn-google', ['🔑 ' + L('Continue with Google', 'المتابعة باستخدام Google', 'Google ile Devam')], { style: 'width:100%;padding:12px;font-size:14px;border-radius:10px;margin-top:10px' });
+  gBtn.onclick = async () => {
+    errEl.textContent = '';
+    const res = await api('/api/auth/google/url', 'GET');
+    if (res.available && res.url) { window.location.href = res.url; }
+    else errEl.textContent = L('Google login is not set up yet — please use email.', 'تسجيل الدخول عبر Google غير مفعل بعد — استخدم البريد الإلكتروني.', 'Google girişi henüz kurulmadı — lütfen e-posta kullanın.');
+  };
+  card.appendChild(gBtn);
 
   const submitBtn = h('button', 'btn-primary', [L('Continue', 'متابعة', 'Devam')], {
     style: 'width:100%;margin-top:10px;padding:12px;font-size:14px;border-radius:10px',

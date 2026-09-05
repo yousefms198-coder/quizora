@@ -5,6 +5,10 @@ const CATEGORIES = {
   science: { name: 'Science', emoji: '🔬', color: 'from-cyan-500 to-blue-600', css: 'background: linear-gradient(135deg, #06b6d4, #2563eb)' },
   history: { name: 'History', emoji: '🏛️', color: 'from-amber-500 to-orange-600', css: 'background: linear-gradient(135deg, #f59e0b, #ea580c)' },
   family: { name: 'Family Fun', emoji: '👨‍👩‍👧‍👦', color: 'from-fuchsia-500 to-pink-500', css: 'background: linear-gradient(135deg, #d946ef, #ec4899)' },
+  music: { name: 'Music', emoji: '🎵', color: 'from-indigo-500 to-violet-600', css: 'background: linear-gradient(135deg, #6366f1, #8b5cf6)' },
+  geography: { name: 'Geography', emoji: '🌍', color: 'from-green-500 to-emerald-600', css: 'background: linear-gradient(135deg, #22c55e, #059669)' },
+  tech: { name: 'Tech & Internet', emoji: '💻', color: 'from-sky-500 to-cyan-600', css: 'background: linear-gradient(135deg, #0ea5e9, #0891b2)' },
+  islam: { name: 'Islam & Arab World', emoji: '🕌', color: 'from-emerald-500 to-teal-700', css: 'background: linear-gradient(135deg, #10b981, #0f766e)' },
 };
 
 class SoundManager {
@@ -45,6 +49,9 @@ class SoundManager {
   lockIn() { this.tone(330, 0.08, 'square', 0.05); setTimeout(() => this.tone(440, 0.12), 60); }
   reveal() { this.tone(392, 0.2); setTimeout(() => this.tone(523, 0.3), 150); }
   win() { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => this.tone(f, 0.3), i * 120)); }
+  skip() { this.tone(300, 0.1, 'sawtooth', 0.05); setTimeout(() => this.tone(200, 0.2, 'sawtooth', 0.05), 100); }
+  pause() { this.tone(320, 0.08, 'triangle', 0.06); setTimeout(() => this.tone(320, 0.08, 'triangle', 0.06), 120); }
+  resume() { this.tone(320, 0.08, 'triangle', 0.06); setTimeout(() => this.tone(480, 0.1, 'triangle', 0.06), 120); }
 }
 
 const sound = new SoundManager();

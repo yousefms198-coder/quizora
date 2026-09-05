@@ -63,6 +63,22 @@ const CATEGORIES = {
       { q: "In which year did the Titanic sink?", options: ["1905", "1912", "1918", "1923"], correct: 1 },
       { q: "What is the smallest country in the world?", options: ["Monaco", "Vatican City", "San Marino", "Liechtenstein"], correct: 1 },
       { q: "Which element has the atomic number 1?", options: ["Helium", "Oxygen", "Hydrogen", "Carbon"], correct: 2 },
+      { q: "Which country gifted the Statue of Liberty to the United States?", options: ["France", "England", "Spain", "Italy"], correct: 0 },
+      { q: "What is the currency of Japan?", options: ["Won", "Yen", "Yuan", "Ringgit"], correct: 1 },
+      { q: "Which musical instrument has 88 keys?", options: ["Guitar", "Piano", "Violin", "Trumpet"], correct: 1 },
+      { q: "In which country is the Taj Mahal located?", options: ["Pakistan", "India", "Bangladesh", "Nepal"], correct: 1 },
+      { q: "What is the largest hot desert in the world?", options: ["Sahara", "Gobi", "Kalahari", "Atacama"], correct: 0 },
+      { q: "In which city is the Burj Khalifa located?", options: ["Dubai", "Doha", "Riyadh", "Kuwait City"], correct: 0 },
+      { q: "Which language is the most spoken in the world by native speakers?", options: ["English", "Spanish", "Mandarin Chinese", "Hindi"], correct: 2 },
+      { q: "Which vitamin does sunlight help the body produce?", options: ["Vitamin A", "Vitamin B", "Vitamin C", "Vitamin D"], correct: 3 },
+      { q: "How many days are in a leap year?", options: ["364", "365", "366", "367"], correct: 2 },
+      { q: "Which animal is called the 'Ship of the Desert'?", options: ["Horse", "Camel", "Donkey", "Elephant"], correct: 1 },
+      { q: "What is the largest mammal on Earth?", options: ["Elephant", "Blue Whale", "Giraffe", "Hippopotamus"], correct: 1 },
+      { q: "What color results from mixing red and yellow?", options: ["Green", "Orange", "Purple", "Brown"], correct: 1 },
+      { q: "Which organ pumps blood around the body?", options: ["Lungs", "Heart", "Kidney", "Brain"], correct: 1 },
+      { q: "Which planet is often called the Evening Star?", options: ["Venus", "Mars", "Mercury", "Jupiter"], correct: 0 },
+      { q: "How many months in a year have 28 days?", options: ["1", "6", "12", "28"], correct: 2 },
+      { q: "Who invented the World Wide Web?", options: ["Bill Gates", "Tim Berners-Lee", "Steve Jobs", "Mark Zuckerberg"], correct: 1 },
     ]
   },
   movies: {
@@ -78,6 +94,16 @@ const CATEGORIES = {
       { q: "Who directed Inception?", options: ["Denis Villeneuve", "Christopher Nolan", "David Fincher", "Quentin Tarantino"], correct: 1 },
       { q: "What is the highest-grossing film of all time?", options: ["Titanic", "Avatar", "Avengers: Endgame", "Star Wars: TFA"], correct: 1 },
       { q: "In Harry Potter, what house does Harry belong to?", options: ["Slytherin", "Hufflepuff", "Ravenclaw", "Gryffindor"], correct: 3 },
+      { q: "Which actor played Jack Sparrow in Pirates of the Caribbean?", options: ["Johnny Depp", "Brad Pitt", "Leonardo DiCaprio", "Tom Cruise"], correct: 0 },
+      { q: "What is the name of the wizarding school in Harry Potter?", options: ["Beauxbatons", "Hogwarts", "Durmstrang", "Ilvermorny"], correct: 1 },
+      { q: "Who won the Oscar for Best Actor as the Joker in 2019?", options: ["Joaquin Phoenix", "Jared Leto", "Heath Ledger", "Jack Nicholson"], correct: 0 },
+      { q: "Which Toy Story spaceman says 'To infinity and beyond!'?", options: ["Buzz Lightyear", "Woody", "Rex", "Hamm"], correct: 0 },
+      { q: "Which animated film features the sisters Anna and Elsa?", options: ["Frozen", "Moana", "Tangled", "Encanto"], correct: 0 },
+      { q: "Who directed the movie 'Avatar'?", options: ["James Cameron", "Steven Spielberg", "Peter Jackson", "Michael Bay"], correct: 0 },
+      { q: "Which 1977 space film introduced 'The Force'?", options: ["Star Wars", "Star Trek", "Alien", "Flash Gordon"], correct: 0 },
+      { q: "Which movie stars Tom Hanks as a castaway named Chuck?", options: ["Cast Away", "Forrest Gump", "The Terminal", "Philadelphia"], correct: 0 },
+      { q: "Which Japanese studio made 'Spirited Away'?", options: ["Studio Ghibli", "Toei", "Sunrise", "Madhouse"], correct: 0 },
+      { q: "Which 2008 superhero film introduced Iron Man to the big screen?", options: ["Iron Man", "The Dark Knight", "Man of Steel", "Superman Returns"], correct: 0 },
     ]
   },
   sports: {
@@ -93,6 +119,16 @@ const CATEGORIES = {
       { q: "What is the diameter of a basketball hoop in inches?", options: ["16", "18", "20", "22"], correct: 1 },
       { q: "Which country invented cricket?", options: ["Australia", "India", "England", "South Africa"], correct: 2 },
       { q: "How long is a marathon in km?", options: ["21", "32", "42", "50"], correct: 2 },
+      { q: "Which country hosted the 2022 FIFA World Cup?", options: ["Qatar", "Russia", "Brazil", "United Arab Emirates"], correct: 0 },
+      { q: "Which Egyptian footballer is nicknamed the 'Egyptian King'?", options: ["Mohamed Salah", "Mohamed Aboutrika", "Trezeguet", "Essam El Hadary"], correct: 0 },
+      { q: "How many players are on a basketball team on the court?", options: ["4", "5", "6", "7"], correct: 1 },
+      { q: "In which sport would you use a shuttlecock?", options: ["Badminton", "Tennis", "Squash", "Table Tennis"], correct: 0 },
+      { q: "Which country has won the most FIFA World Cups?", options: ["Germany", "Brazil", "Italy", "Argentina"], correct: 1 },
+      { q: "What is the maximum score possible with a single dart?", options: ["50", "60", "100", "180"], correct: 2 },
+      { q: "How many players are on a cricket team?", options: ["9", "10", "11", "12"], correct: 2 },
+      { q: "What is the traditional national sport of Japan?", options: ["Sumo Wrestling", "Karate", "Baseball", "Judo"], correct: 0 },
+      { q: "Which football club is the biggest and most successful in Egypt?", options: ["Al Ahly", "Zamalek", "Ismaily", "Pyramids FC"], correct: 0 },
+      { q: "Which sport is known around the world as 'the beautiful game'?", options: ["Football", "Basketball", "Tennis", "Rugby"], correct: 0 },
     ]
   },
   science: {
@@ -108,6 +144,16 @@ const CATEGORIES = {
       { q: "Who proposed the theory of relativity?", options: ["Newton", "Einstein", "Hawking", "Tesla"], correct: 1 },
       { q: "What is the hardest natural substance on Earth?", options: ["Gold", "Iron", "Diamond", "Platinum"], correct: 2 },
       { q: "How many elements in the periodic table?", options: ["92", "108", "118", "130"], correct: 2 },
+      { q: "Which Muslim scholar is known as the 'Father of Algebra'?", options: ["Al-Khwarizmi", "Ibn Sina", "Al-Razi", "Omar Khayyam"], correct: 0 },
+      { q: "Which scientist formulated the three laws of motion?", options: ["Isaac Newton", "Albert Einstein", "Galileo Galilei", "Nikola Tesla"], correct: 0 },
+      { q: "Which gas makes up about 78% of Earth's atmosphere?", options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], correct: 2 },
+      { q: "What is the study of weather called?", options: ["Geology", "Meteorology", "Astronomy", "Ecology"], correct: 1 },
+      { q: "Which metal is liquid at room temperature?", options: ["Mercury", "Aluminium", "Iron", "Copper"], correct: 0 },
+      { q: "Who was the first scientist to use a telescope to observe the stars?", options: ["Galileo Galilei", "Isaac Newton", "Copernicus", "Kepler"], correct: 0 },
+      { q: "What is the unit used to measure electric current?", options: ["Volt", "Watt", "Ampere", "Ohm"], correct: 2 },
+      { q: "Which Arab scholar is considered the 'father of optics' for his work on light and vision?", options: ["Ibn al-Haytham", "Al-Khwarizmi", "Ibn Khaldun", "Al-Farabi"], correct: 0 },
+      { q: "What does DNA stand for?", options: ["Deoxyribonucleic Acid", "Dinucleotide Acid", "Deoxyribose Nucleic", "Dual Nitrogen Acid"], correct: 0 },
+      { q: "What is the approximate speed of sound in air?", options: ["343 m/s", "150 m/s", "800 m/s", "1000 m/s"], correct: 0 },
     ]
   },
   history: {
@@ -118,11 +164,18 @@ const CATEGORIES = {
       { q: "How many hills was Rome built on?", options: ["5", "6", "7", "8"], correct: 2 },
       { q: "Which civilization built the pyramids of Giza?", options: ["Mayans", "Romans", "Egyptians", "Greeks"], correct: 2 },
       { q: "In which year did the Berlin Wall fall?", options: ["1987", "1989", "1991", "1993"], correct: 1 },
-      { q: "Who discovered America in 1492?", options: ["Vasco da Gama", "Magellan", "Columbus", "Vespucci"], correct: 2 },
-      { q: "What ship brought the Pilgrims to America?", options: ["Santa Maria", "Mayflower", "Beagle", "Endeavour"], correct: 1 },
       { q: "Which empire was ruled by Genghis Khan?", options: ["Roman", "Ottoman", "Mongol", "Persian"], correct: 2 },
-      { q: "The Renaissance began in which country?", options: ["France", "England", "Italy", "Spain"], correct: 2 },
-      { q: "Who was the 'Maid of Orléans'?", options: ["Marie Antoinette", "Joan of Arc", "Catherine the Great", "Elizabeth I"], correct: 1 },
+      { q: "Which city was the center of the Islamic Golden Age?", options: ["Baghdad", "Rome", "Athens", "Constantinople"], correct: 0 },
+      { q: "Who was the first caliph after Prophet Muhammad ﷺ?", options: ["Abu Bakr", "Umar", "Uthman", "Ali"], correct: 0 },
+      { q: "In which year did the Ottoman Empire officially come to an end?", options: ["1918", "1922", "1924", "1928"], correct: 1 },
+      { q: "Who led the Muslim armies against the Crusaders and is known in the West as 'Saladin'?", options: ["Salah ad-Din", "Omar Mukhtar", "Khalid ibn al-Walid", "Tariq ibn Ziyad"], correct: 0 },
+      { q: "The Great Pyramid of Giza was built as a tomb for which pharaoh?", options: ["Cleopatra", "Khufu", "Ramses II", "Tutankhamun"], correct: 1 },
+      { q: "In which year did the United Arab Emirates gain independence?", options: ["1968", "1971", "1975", "1980"], correct: 1 },
+      { q: "Gibraltar (Jabal Tariq) is named after which Muslim general?", options: ["Tariq ibn Ziyad", "Khalid ibn al-Walid", "Amr ibn al-As", "Sa'd ibn Abi Waqqas"], correct: 0 },
+      { q: "What was the writing system used by the ancient Egyptians?", options: ["Hieroglyphics", "Cuneiform", "Latin", "Sanskrit"], correct: 0 },
+      { q: "Which country was formerly known as Persia?", options: ["Iran", "Iraq", "Turkey", "Afghanistan"], correct: 0 },
+      { q: "The Suez Canal connects the Mediterranean with which sea?", options: ["The Red Sea", "The Black Sea", "The Caspian Sea", "The Arabian Sea"], correct: 0 },
+      { q: "Who wrote 'Al-Muqaddimah', the founding work of sociology and historiography?", options: ["Ibn Khaldun", "Ibn Sina", "Al-Ghazali", "Al-Biruni"], correct: 0 },
     ]
   },
   family: {
@@ -138,6 +191,95 @@ const CATEGORIES = {
       { q: "Which fruit keeps the doctor away?", options: ["Banana", "Orange", "Apple", "Grape"], correct: 2 },
       { q: "What do bees collect to make honey?", options: ["Pollen", "Nectar", "Sap", "Dew"], correct: 1 },
       { q: "How many bottles of beer on the wall?", options: ["50", "99", "100", "101"], correct: 1 },
+      { q: "What is the most widely eaten grain in the world?", options: ["Rice", "Wheat", "Corn", "Oats"], correct: 0 },
+      { q: "Hummus and falafel are famous dishes of which region?", options: ["The Middle East", "Asia", "Europe", "Latin America"], correct: 0 },
+      { q: "How many legs does a spider have?", options: ["6", "8", "10", "12"], correct: 1 },
+      { q: "What is the national dish of Yemen?", options: ["Saltah", "Kabsa", "Couscous", "Biryani"], correct: 0 },
+      { q: "Which sweet cheese dessert is famous in the Middle East during Ramadan?", options: ["Kunafa", "Tiramisu", "Cheesecake", "Pavlova"], correct: 0 },
+      { q: "Which card game has kings, queens, and aces?", options: ["Playing Cards", "Dominoes", "Backgammon", "Chess"], correct: 0 },
+      { q: "What is the fastest land animal?", options: ["Cheetah", "Lion", "Ostrich", "Antelope"], correct: 0 },
+      { q: "How many colors are in a traffic light?", options: ["2", "3", "4", "5"], correct: 1 },
+      { q: "Which fruit has the same name as a color?", options: ["Orange", "Apple", "Banana", "Mango"], correct: 0 },
+      { q: "How many vowels are in the English alphabet?", options: ["4", "5", "6", "7"], correct: 1 },
+    ]
+  },
+  music: {
+    name: 'Music', emoji: '🎵', color: 'from-indigo-500 to-violet-600',
+    questions: [
+      { q: "How many strings does a violin have?", options: ["3", "4", "5", "6"], correct: 1 },
+      { q: "Who is known as the 'King of Pop'?", options: ["Michael Jackson", "Elvis Presley", "Prince", "Freddie Mercury"], correct: 0 },
+      { q: "Which legendary Egyptian singer is called 'Kawkab al-Sharq' (Star of the East)?", options: ["Umm Kulthum", "Fairuz", "Warda", "Samira Said"], correct: 0 },
+      { q: "Which Lebanese icon sings 'Nassam Alayna El Hawa'?", options: ["Fairuz", "Nancy Ajram", "Elissa", "Majida El Roumi"], correct: 0 },
+      { q: "What musical term means 'loud' in Italian?", options: ["Forte", "Piano", "Allegro", "Adagio"], correct: 0 },
+      { q: "Which band performed 'Bohemian Rhapsody'?", options: ["Queen", "The Beatles", "Pink Floyd", "Led Zeppelin"], correct: 0 },
+      { q: "How many semitones are in one octave?", options: ["8", "12", "7", "10"], correct: 1 },
+      { q: "Which traditional Arab instrument is a pear-shaped stringed lute?", options: ["Oud", "Tabla", "Qanun", "Ney"], correct: 0 },
+      { q: "Which instrument is famously called the 'King of Instruments'?", options: ["Organ", "Piano", "Guitar", "Violin"], correct: 0 },
+      { q: "How many beats are in each bar of 4/4 time?", options: ["3", "4", "5", "6"], correct: 1 },
+      { q: "Which instrument is played by blowing across the top edge?", options: ["Flute", "Trumpet", "Clarinet", "Saxophone"], correct: 0 },
+      { q: "Who composed 'The Four Seasons' violin concertos?", options: ["Vivaldi", "Mozart", "Bach", "Beethoven"], correct: 0 },
+      { q: "Which streaming service uses a green logo with a note symbol?", options: ["Spotify", "SoundCloud", "Deezer", "YouTube Music"], correct: 0 },
+      { q: "How many keys does a standard piano have?", options: ["66", "76", "88", "108"], correct: 2 },
+    ]
+  },
+  geography: {
+    name: 'Geography', emoji: '🌍', color: 'from-green-500 to-emerald-600',
+    questions: [
+      { q: "What is the capital of Egypt?", options: ["Cairo", "Alexandria", "Giza", "Luxor"], correct: 0 },
+      { q: "Which is the most populous Arab country?", options: ["Egypt", "Saudi Arabia", "Iraq", "Algeria"], correct: 0 },
+      { q: "The Nile River flows into which sea?", options: ["Mediterranean Sea", "Red Sea", "Arabian Sea", "Black Sea"], correct: 0 },
+      { q: "What is the capital of the United Arab Emirates?", options: ["Abu Dhabi", "Dubai", "Sharjah", "Al Ain"], correct: 0 },
+      { q: "What is commonly considered the longest river in the world?", options: ["Nile", "Amazon", "Yangtze", "Mississippi"], correct: 0 },
+      { q: "Mount Everest lies on the border of Nepal and which country?", options: ["China", "India", "Bhutan", "Pakistan"], correct: 0 },
+      { q: "Which sea separates the Arabian Peninsula from Iran?", options: ["Arabian Gulf", "Red Sea", "Gulf of Oman", "Gulf of Aden"], correct: 0 },
+      { q: "What is the largest Arab country by area?", options: ["Algeria", "Saudi Arabia", "Sudan", "Libya"], correct: 0 },
+      { q: "Which vast desert covers much of the Arabian Peninsula?", options: ["Rub' al Khali", "Sahara", "Thar", "Karakum"], correct: 0 },
+      { q: "Which sea lies between Egypt and Saudi Arabia?", options: ["Red Sea", "Mediterranean Sea", "Caspian Sea", "Aegean Sea"], correct: 0 },
+      { q: "What is the capital of Morocco?", options: ["Rabat", "Casablanca", "Marrakesh", "Tunis"], correct: 0 },
+      { q: "Which Arab country touches both the Mediterranean and the Atlantic?", options: ["Morocco", "Tunisia", "Algeria", "Libya"], correct: 0 },
+      { q: "Which Saudi city is the holiest city in Islam?", options: ["Mecca", "Medina", "Riyadh", "Jeddah"], correct: 0 },
+      { q: "What is the capital of Turkey?", options: ["Ankara", "Istanbul", "Izmir", "Bursa"], correct: 0 },
+      { q: "Which river runs through Baghdad?", options: ["Tigris", "Euphrates", "Nile", "Jordan"], correct: 0 },
+      { q: "Which is the largest island in the Arab world?", options: ["Socotra", "Bahrain", "Qeshm", "Arwad"], correct: 0 },
+    ]
+  },
+  tech: {
+    name: 'Tech & Internet', emoji: '💻', color: 'from-sky-500 to-cyan-600',
+    questions: [
+      { q: "Which company makes the iPhone?", options: ["Apple", "Samsung", "Google", "Microsoft"], correct: 0 },
+      { q: "What does 'HTTP' stand for?", options: ["HyperText Transfer Protocol", "High Tech Transfer Protocol", "Hyperlink Text Transfer", "Host Transfer Protocol"], correct: 0 },
+      { q: "Who founded Microsoft together with Paul Allen?", options: ["Bill Gates", "Steve Jobs", "Mark Zuckerberg", "Elon Musk"], correct: 0 },
+      { q: "What is the most used search engine in the world?", options: ["Google", "Bing", "Yahoo", "DuckDuckGo"], correct: 0 },
+      { q: "What does 'AI' stand for?", options: ["Artificial Intelligence", "Automated Internet", "Applied Information", "Advanced Interface"], correct: 0 },
+      { q: "Which language is used to style web pages?", options: ["CSS", "HTML", "Python", "Java"], correct: 0 },
+      { q: "What does the 'www' at the start of web addresses stand for?", options: ["World Wide Web", "Web Wide World", "World Web Wide", "Website Without Wires"], correct: 0 },
+      { q: "Which app is famous for short vertical videos with music?", options: ["TikTok", "Facebook", "LinkedIn", "X"], correct: 0 },
+      { q: "What does the term 'bit' in computing stand for?", options: ["Binary digit", "Byte of information", "Basic input", "Binary transfer"], correct: 0 },
+      { q: "Which device has a 'QWERTY' layout?", options: ["Keyboard", "Mouse", "Monitor", "Router"], correct: 0 },
+      { q: "Which company develops the Android operating system?", options: ["Google", "Apple", "Microsoft", "Samsung"], correct: 0 },
+      { q: "What does 'USB' stand for?", options: ["Universal Serial Bus", "United Serial Bridge", "Universal System Bus", "Unified Serial Buffer"], correct: 0 },
+      { q: "Which search engine is famous for its changing 'doodles'?", options: ["Google", "Yahoo", "Ask", "Bing"], correct: 0 },
+    ]
+  },
+  islam: {
+    name: 'Islam & Arab World', emoji: '🕌', color: 'from-emerald-500 to-teal-700',
+    questions: [
+      { q: "How many pillars does Islam have?", options: ["5", "4", "6", "7"], correct: 0 },
+      { q: "Which month is the holy fasting month?", options: ["Ramadan", "Shawwal", "Muharram", "Rajab"], correct: 0 },
+      { q: "Towards which city do Muslims face when praying?", options: ["Mecca", "Medina", "Jerusalem", "Cairo"], correct: 0 },
+      { q: "What is the holy book of Islam?", options: ["The Quran", "The Torah", "The Gospel", "The Talmud"], correct: 0 },
+      { q: "How many daily prayers are required in Islam?", options: ["5", "3", "7", "8"], correct: 0 },
+      { q: "Which angel brought the revelation to Prophet Muhammad ﷺ?", options: ["Jibreel", "Mika'il", "Israfil", "Azrael"], correct: 0 },
+      { q: "What is the annual pilgrimage to Mecca called?", options: ["Hajj", "Umrah", "Hijrah", "Zakat"], correct: 0 },
+      { q: "Which is the second holiest city in Islam?", options: ["Medina", "Mecca", "Jerusalem", "Karbala"], correct: 0 },
+      { q: "Who is the final prophet and messenger in Islam?", options: ["Muhammad ﷺ", "Isa", "Musa", "Ibrahim"], correct: 0 },
+      { q: "What is the obligatory yearly charity in Islam?", options: ["Zakat", "Sadaqah", "Fitr", "Riba"], correct: 0 },
+      { q: "Where is the Prophet's Mosque (Al-Masjid an-Nabawi)?", options: ["Saudi Arabia", "Egypt", "Palestine", "Jordan"], correct: 0 },
+      { q: "What is the Islamic greeting meaning 'peace be upon you'?", options: ["Assalamu alaikum", "Bismillah", "Alhamdulillah", "Mashallah"], correct: 0 },
+      { q: "How many surahs are in the Quran?", options: ["114", "100", "120", "99"], correct: 0 },
+      { q: "Which of these is NOT one of the Five Pillars?", options: ["Reading the Quran", "Prayer (Salah)", "Charity (Zakat)", "Fasting (Sawm)"], correct: 0 },
+      { q: "Which prophet built the Kaaba together with his son Ismail?", options: ["Ibrahim", "Nuh", "Yusuf", "Dawood"], correct: 0 },
+      { q: "During which month does the Hajj take place?", options: ["Dhul-Hijjah", "Ramadan", "Shawwal", "Safar"], correct: 0 },
     ]
   }
 };
@@ -200,6 +342,7 @@ wss.on('connection', (ws) => {
         timerSeconds: msg.timerSeconds !== undefined ? msg.timerSeconds : 20,
         timerInterval: null,
         timeLeft: msg.timerSeconds !== undefined ? msg.timerSeconds : 20,
+        paused: false,
         phase: 'lobby',
         selectedCategories: msg.categories || ['general', 'movies', 'family'],
         numQuestions: msg.numQuestions || 10,
@@ -395,6 +538,33 @@ wss.on('connection', (ws) => {
       advanceQuestion(room);
     }
 
+    if (msg.type === 'skip_question') {
+      const room = rooms.get(ws.roomCode);
+      if (!room || !ws.isHost || room.phase !== 'playing') return;
+      clearInterval(room.timerInterval);
+      room.timerInterval = null;
+      room.paused = false;
+      broadcastAll(room, { type: 'question_skipped' });
+      advanceQuestion(room);
+    }
+
+    if (msg.type === 'pause_timer') {
+      const room = rooms.get(ws.roomCode);
+      if (!room || !ws.isHost || room.phase !== 'playing' || !room.timerInterval) return;
+      clearInterval(room.timerInterval);
+      room.timerInterval = null;
+      room.paused = true;
+      broadcastAll(room, { type: 'timer_paused', timeLeft: room.timeLeft });
+    }
+
+    if (msg.type === 'resume_timer') {
+      const room = rooms.get(ws.roomCode);
+      if (!room || !ws.isHost || room.phase !== 'playing' || !room.paused) return;
+      room.paused = false;
+      broadcastAll(room, { type: 'timer_tick', timeLeft: room.timeLeft });
+      runTimer(room);
+    }
+
     if (msg.type === 'restart_game') {
       const room = rooms.get(ws.roomCode);
       if (!room || !ws.isHost) return;
@@ -431,6 +601,8 @@ wss.on('connection', (ws) => {
 
 function startTimer(room) {
   clearInterval(room.timerInterval);
+  room.timerInterval = null;
+  room.paused = false;
 
   if (room.timerSeconds <= 0) {
     room.timeLeft = 0;
@@ -441,12 +613,18 @@ function startTimer(room) {
   room.timeLeft = room.timerSeconds;
   broadcastAll(room, { type: 'timer_tick', timeLeft: room.timeLeft });
 
+  runTimer(room);
+}
+
+function runTimer(room) {
+  clearInterval(room.timerInterval);
   room.timerInterval = setInterval(() => {
     room.timeLeft--;
     broadcastAll(room, { type: 'timer_tick', timeLeft: room.timeLeft });
 
     if (room.timeLeft <= 0) {
       clearInterval(room.timerInterval);
+      room.timerInterval = null;
       revealAnswer(room);
     }
   }, 1000);

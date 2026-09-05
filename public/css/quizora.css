@@ -1230,3 +1230,55 @@ body { overscroll-behavior: none; background: #030712; color: #e2e8f0; font-fami
   transform: scale(1.05);
   box-shadow: 0 4px 20px rgba(56, 189, 248, 0.4);
 }
+
+/* ===== HOST QUICK BAR (Pause / Skip) ===== */
+.host-quickbar {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 520px;
+  margin: 2px auto 14px;
+}
+.host-qb-btn {
+  flex: 1;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(30, 41, 59, 0.6);
+  color: #e2e8f0;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.host-qb-btn:hover {
+  transform: scale(1.03);
+  background: rgba(51, 65, 85, 0.8);
+}
+.host-qb-btn:first-child:hover {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.5);
+}
+.host-qb-btn:last-child:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+/* ===== PAUSED INDICATOR ===== */
+.paused-chip {
+  display: inline-block;
+  margin: 0 auto 12px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  color: #fbbf24;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  animation: pulse-glow 1.5s ease infinite;
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}

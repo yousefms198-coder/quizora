@@ -10,6 +10,7 @@ let state = {
   answered: {},
   timeLeft: 20,
   timerSeconds: 20,
+  paused: false,
   selectedCategories: ['general', 'movies', 'family'],
   numQuestions: 10,
   phase: 'lobby',
@@ -291,6 +292,27 @@ function renderGame() {
   topBar.appendChild(h('div', '', [`${state.currentQ + 1}/${state.questions.length}`], { style: 'color:#64748b;font-size:13px;font-weight:600' }));
   c.appendChild(topBar);
 
+  if (state.isHost) {
+    const quickbar = h('div', 'host-quickbar');
+    if (state.timerSeconds > 0) {
+      const pauseBtn = h('button', 'host-qb-btn glass', [state.paused ? '▶ Resume' : '⏸ Pause'], {
+        onclick: () => {
+          if (state.paused) { sound.resume(); ws.send(JSON.stringify({ type: 'resume_timer' })); }
+          else { sound.pause(); ws.send(JSON.stringify({ type: 'pause_timer' })); }
+        }
+      });
+      quickbar.appendChild(pauseBtn);
+    }
+    quickbar.appendChild(h('button', 'host-qb-btn glass', ['⏭ Skip'], {
+      onclick: () => { sound.skip(); ws.send(JSON.stringify({ type: 'skip_question' })); }
+    }));
+    c.appendChild(quickbar);
+  }
+
+  if (state.paused) {
+    c.appendChild(h('div', 'paused-chip', ['⏸ TIMER PAUSED — waiting for host']));
+  }
+
   const cat = CATEGORIES[q.category] || { name: 'General', emoji: '🧠', css: 'background:#475569' };
   c.appendChild(h('div', 'category-badge', [`${cat.emoji} ${cat.name}`], { style: cat.css + ';margin-bottom:16px;color:white' }));
 
@@ -567,6 +589,10 @@ function renderPlayerAnswer() {
   const roundInfo = h('div', 'controller-round', [`Q${state.currentQ + 1} of ${state.questions.length}`]);
   c.appendChild(roundInfo);
 
+  if (state.paused) {
+    c.appendChild(h('div', 'paused-chip', ['⏸ TIMER PAUSED — waiting for host']));
+  }
+
   c.appendChild(h('div', 'controller-question', [q.q]));
 
   if (state.playerAnswer !== null) {
@@ -757,7 +783,19 @@ function handleHostMessage(msg) {
 
     case 'timer_tick':
       state.timeLeft = msg.timeLeft;
+      state.paused = false;
       updateTimer();
+      break;
+
+    case 'timer_paused':
+      state.paused = true;
+      state.timeLeft = msg.timeLeft;
+      if (state.screen === 'game') render();
+      break;
+
+    case 'question_skipped':
+      showPowerupNotification('⏭️ Question skipped');
+      state.paused = false;
       break;
 
     case 'player_answered':
@@ -859,8 +897,21 @@ function handlePlayerMessage(msg) {
       break;
 
     case 'answer_confirmed':
+      if (msg.correct) sound.correct();
+      else sound.wrong();
       state.screen = 'player_result';
       render();
+      break;
+
+    case 'question_skipped':
+      showPowerupNotification('⏭️ Question skipped by host');
+      state.paused = false;
+      break;
+
+    case 'timer_paused':
+      state.paused = true;
+      state.timeLeft = msg.timeLeft;
+      if (state.screen === 'player_answer') render();
       break;
 
     case 'answer_reveal':
@@ -875,6 +926,7 @@ function handlePlayerMessage(msg) {
       state.playerAnswer = null;
       state.showReveal = false;
       state.revealData = null;
+      state.paused = false;
       state.timeLeft = msg.timerSeconds || state.timerSeconds;
       state.screen = 'player_answer';
       render();

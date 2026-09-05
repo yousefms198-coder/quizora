@@ -11,6 +11,7 @@ let state = {
   timeLeft: 20,
   timerSeconds: 20,
   paused: false,
+  mode: 'fun',
   selectedCategories: ['general', 'movies', 'family'],
   numQuestions: 10,
   phase: 'lobby',
@@ -61,6 +62,7 @@ function startCreate() {
   const sendCreate = () => {
     ws.send(JSON.stringify({
       type: 'create_room',
+      mode: state.mode,
       categories: state.selectedCategories,
       numQuestions: state.numQuestions,
       timerSeconds: state.timerSeconds,
@@ -109,7 +111,95 @@ function renderLangToggle(container) {
   container.appendChild(seg);
 }
 
-/* ======================== LANDING ======================== */
+/* ======================== DASHBOARD ======================== */
+function currentBank() {
+  return state.mode === 'exam' ? EXAM_CATEGORIES : CATEGORIES;
+}
+
+function renderModeTabs(container) {
+  const tabs = h('div', 'mode-tabs');
+  const modes = [
+    ['fun', '🎮', L('Fun Mode', 'الوضع الترفيهي', 'Eğlence Modu')],
+    ['exam', '🎓', L('Educational Mode', 'الوضع التعليمي', 'Eğitim Modu')],
+  ];
+  modes.forEach(([m, icon, label]) => {
+    const b = h('button', `mode-btn ${state.mode === m ? 'active' : ''}`, [`${icon} ${label}`], {
+      onclick: () => {
+        sound.click();
+        state.mode = m;
+        const bank = currentBank();
+        if (!state.selectedCategories.some(k => bank[k])) {
+          state.selectedCategories = m === 'exam' ? ['yks'] : ['general', 'movies', 'family'];
+        }
+        render();
+      }
+    });
+    tabs.appendChild(b);
+  });
+  container.appendChild(tabs);
+}
+
+function renderSelectionGrid(container, sync) {
+  const bank = currentBank();
+  const grid = h('div', 'category-grid', [], { style: 'margin-bottom:12px' });
+  Object.entries(bank).forEach(([key, cat]) => {
+    const sel = state.selectedCategories.includes(key);
+    const btn = h('button', `cat-btn ${sel ? 'selected' : 'unselected'}`, [`${cat.emoji} ${L(cat.name, cat.nameAr, cat.nameTr)}`], {
+      style: sel ? cat.css : '',
+      onclick: () => {
+        sound.click();
+        if (sel) { if (state.selectedCategories.length > 1) state.selectedCategories = state.selectedCategories.filter(c => c !== key); }
+        else state.selectedCategories.push(key);
+        if (sync && ws && ws.readyState === WebSocket.OPEN && state.roomCode) {
+          ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds }));
+        }
+        render();
+      }
+    });
+    grid.appendChild(btn);
+  });
+  container.appendChild(grid);
+}
+
+function appendSettingsRow(panel) {
+  const settRow = h('div', 'settings-grid', [], { style: 'margin-bottom:0' });
+  const qBox = h('div', 'setting-box glass');
+  qBox.appendChild(h('div', 'setting-label', [L('Questions', 'عدد الأسئلة', 'Sorular')]));
+  const qSel = h('select', 'setting-select');
+  [5, 8, 10, 12, 15].forEach(n => {
+    const opt = h('option', '', [String(n)], { value: n });
+    if (n === state.numQuestions) opt.selected = true;
+    qSel.appendChild(opt);
+  });
+  qSel.onchange = e => {
+    state.numQuestions = +e.target.value;
+    if (ws && ws.readyState === WebSocket.OPEN && state.roomCode) {
+      ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds }));
+    }
+  };
+  qBox.appendChild(qSel);
+  settRow.appendChild(qBox);
+
+  const tBox = h('div', 'setting-box glass');
+  tBox.appendChild(h('div', 'setting-label', [L('Timer (sec)', 'الوقت (ثوانٍ)', 'Süre (sn)')]));
+  const tSel = h('select', 'setting-select');
+  [10, 15, 20, 30, 0].forEach(n => {
+    const opt = h('option', '', [n === 0 ? L('Off', 'بدون', 'Kapalı') : String(n)], { value: n });
+    if (n === state.timerSeconds) opt.selected = true;
+    tSel.appendChild(opt);
+  });
+  tSel.onchange = e => {
+    state.timerSeconds = +e.target.value;
+    if (ws && ws.readyState === WebSocket.OPEN && state.roomCode) {
+      ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds }));
+    }
+  };
+  tBox.appendChild(tSel);
+  settRow.appendChild(tBox);
+  panel.appendChild(settRow);
+}
+
+/* ======================== LANDING / DASHBOARD ======================== */
 function renderLanding() {
   const c = h('div', 'landing-container');
   c.appendChild(h('div', 'font-display landing-title', ['QUIZORA']));
@@ -119,6 +209,17 @@ function renderLanding() {
   const langRow = h('div', 'lang-row');
   renderLangToggle(langRow);
   c.appendChild(langRow);
+
+  const tabs = h('div', '', []);
+  renderModeTabs(tabs);
+  c.appendChild(tabs);
+
+  const panel = h('div', 'glass', [], { style: 'width:100%;max-width:440px;padding:16px;border-radius:16px;margin:8px 0' });
+  panel.appendChild(h('div', 'section-label', [L('Pick your categories', 'اختر الفئات', 'Kategorilerini Seç')], { style: 'margin-bottom:10px' }));
+  renderSelectionGrid(panel);
+  panel.appendChild(h('div', 'section-label', [L('Game Settings', 'إعدادات اللعبة', 'Oyun Ayarları')], { style: 'margin-bottom:10px;margin-top:8px' }));
+  appendSettingsRow(panel);
+  c.appendChild(panel);
 
   const actions = h('div', 'landing-actions');
   actions.appendChild(h('button', 'btn-primary', [L('Create a Game', 'إنشاء لعبة', 'Oyun Oluştur')], {
@@ -130,7 +231,7 @@ function renderLanding() {
   c.appendChild(actions);
 
   const badges = h('div', 'landing-badges');
-  [['👨‍👩‍👧‍👦', L('Friends & Family', 'أصدقاء وعائلة', 'Arkadaşlar ve Aile')], ['🎓', L('Classmates', 'زملاء الدراسة', 'Sınıf Arkadaşları')], ['🎉', L('Party Time', 'وقت الحفلات', 'Parti Zamanı')]].forEach(([icon, label]) => {
+  [['👨‍👩‍👧‍👦', L('Friends & Family', 'أصدقاء وعائلة', 'Arkadaşlar ve Aile')], ['🎓', L('Exam Prep', 'التحضير للامتحانات', 'Sınav Hazırlığı')], ['🎉', L('Party Time', 'وقت الحفلات', 'Parti Zamanı')]].forEach(([icon, label]) => {
     const b = h('div', 'badge glass');
     b.appendChild(h('span', 'badge-icon', [icon]));
     b.appendChild(document.createTextNode(label));
@@ -178,56 +279,11 @@ function renderLobby() {
   c.appendChild(pGrid);
 
   const settingsPanel = h('div', 'glass', [], { style: 'width:100%;max-width:420px;padding:16px;border-radius:16px;margin:8px 0' });
+  settingsPanel.appendChild(h('div', 'section-label', [state.mode === 'exam' ? L('Educational Mode', 'الوضع التعليمي', 'Eğitim Modu') : L('Fun Mode', 'الوضع الترفيهي', 'Eğlence Modu')], { style: 'margin-bottom:4px;font-weight:800;color:#38bdf8;font-size:12px' }));
   settingsPanel.appendChild(h('div', 'section-label', [L('Game Settings', 'إعدادات اللعبة', 'Oyun Ayarları')], { style: 'margin-bottom:10px' }));
 
-  const catGrid = h('div', 'category-grid', [], { style: 'margin-bottom:12px' });
-  Object.entries(CATEGORIES).forEach(([key, cat]) => {
-    const sel = state.selectedCategories.includes(key);
-    const btn = h('button', `cat-btn ${sel ? 'selected' : 'unselected'}`, [`${cat.emoji} ${L(cat.name, cat.nameAr)}`], {
-      style: sel ? cat.css : '',
-      onclick: () => {
-        sound.click();
-        if (sel) { if (state.selectedCategories.length > 1) state.selectedCategories = state.selectedCategories.filter(c => c !== key); }
-        else state.selectedCategories.push(key);
-        ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds }));
-        render();
-      }
-    });
-    catGrid.appendChild(btn);
-  });
-  settingsPanel.appendChild(catGrid);
-
-  const settRow = h('div', 'settings-grid', [], { style: 'margin-bottom:0' });
-  const qBox = h('div', 'setting-box glass');
-  qBox.appendChild(h('div', 'setting-label', [L('Questions', 'عدد الأسئلة', 'Sorular')]));
-  const qSel = h('select', 'setting-select');
-  [5, 8, 10, 12, 15].forEach(n => {
-    const opt = h('option', '', [String(n)], { value: n });
-    if (n === state.numQuestions) opt.selected = true;
-    qSel.appendChild(opt);
-  });
-  qSel.onchange = e => {
-    state.numQuestions = +e.target.value;
-    ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds }));
-  };
-  qBox.appendChild(qSel);
-  settRow.appendChild(qBox);
-
-  const tBox = h('div', 'setting-box glass');
-  tBox.appendChild(h('div', 'setting-label', [L('Timer (sec)', 'الوقت (ثوانٍ)', 'Süre (sn)')]));
-  const tSel = h('select', 'setting-select');
-  [10, 15, 20, 30, 0].forEach(n => {
-    const opt = h('option', '', [n === 0 ? L('Off', 'بدون', 'Kapalı') : String(n)], { value: n });
-    if (n === state.timerSeconds) opt.selected = true;
-    tSel.appendChild(opt);
-  });
-  tSel.onchange = e => {
-    state.timerSeconds = +e.target.value;
-    ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds }));
-  };
-  tBox.appendChild(tSel);
-  settRow.appendChild(tBox);
-  settingsPanel.appendChild(settRow);
+  renderSelectionGrid(settingsPanel, true);
+  appendSettingsRow(settingsPanel);
   c.appendChild(settingsPanel);
 
   const controls = h('div', 'host-controls', [], { style: 'width:100%;max-width:420px' });
@@ -335,7 +391,7 @@ function renderGame() {
     c.appendChild(h('div', 'paused-chip', [L('⏸ TIMER PAUSED — waiting for host', '⏸ تم إيقاف المؤقت — بانتظار المضيف', '⏸ SÜRE DURDURULDU — ev sahibi bekleniyor')]));
   }
 
-  const cat = CATEGORIES[q.category] || { name: 'General', emoji: '🧠', css: 'background:#475569' };
+  const cat = CATEGORIES[q.category] || EXAM_CATEGORIES[q.category] || { name: 'General', emoji: '🧠', css: 'background:#475569' };
   c.appendChild(h('div', 'category-badge', [`${cat.emoji} ${L(cat.name, cat.nameAr, cat.nameTr)}`], { style: cat.css + ';margin-bottom:16px;color:white' }));
 
   if (state.timerSeconds > 0) {

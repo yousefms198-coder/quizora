@@ -1,0 +1,122 @@
+module.exports = {
+  yks: {
+    name: 'YKS • TYT / AYT / YDT',
+    nameAr: 'YKS — دخول الجامعة التركية',
+    nameTr: 'YKS • TYT / AYT / YDT',
+    emoji: '🎓',
+    color: 'from-sky-500 to-blue-700',
+    questions: [
+      { "q": "What is the capital of Turkey?", "qAr": "ما هي عاصمة تركيا؟", "qTr": "Türkiye'nin başkenti neresidir?", "options": ["Istanbul", "Izmir", "Ankara", "Bursa"], "optionsAr": ["إسطنبول", "إزمير", "أنقرة", "بورصة"], "optionsTr": ["İstanbul", "İzmir", "Ankara", "Bursa"], "correct": 2 },
+      { "q": "In which year was the Republic of Turkey proclaimed?", "qAr": "في أي عام أُعلنت الجمهورية التركية؟", "qTr": "Cumhuriyet hangi yıl ilan edildi?", "options": ["1920", "1923", "1930", "1938"], "optionsAr": ["1920", "1923", "1930", "1938"], "optionsTr": ["1920", "1923", "1930", "1938"], "correct": 1 },
+      { "q": "In which year did Atatürk receive the surname 'Atatürk'?", "qAr": "في أي عام مُنح أتاتورك اسم العائلة «أتاتورك»؟", "qTr": "Atatürk'e 'Atatürk' soyadı hangi yıl verildi?", "options": ["1923", "1930", "1934", "1938"], "optionsAr": ["1923", "1930", "1934", "1938"], "optionsTr": ["1923", "1930", "1934", "1938"], "correct": 2 },
+      { "q": "Who wrote the Turkish national anthem (İstiklal Marşı)?", "qAr": "من هو شاعر النشيد الوطني التركي؟", "qTr": "İstiklal Marşı'nın şairi kimdir?", "options": ["Mehmet Akif Ersoy", "Necip Fazıl Kısakürek", "Ahmet Hamdi Tanpınar", "Yahya Kemal"], "optionsAr": ["محمد عاكف أرسوي", "نجيب فاضل", "أحمد حمدي تانبينار", "يحيى كمال"], "optionsTr": ["Mehmet Akif Ersoy", "Necip Fazıl Kısakürek", "Ahmet Hamdi Tanpınar", "Yahya Kemal"], "correct": 0 },
+      { "q": "Which is the longest river that flows entirely within Turkey?", "qAr": "ما هو أطول نهر يجري بالكامل داخل تركيا؟", "qTr": "Türkiye sınırları içinde akan en uzun nehir hangisidir?", "options": ["Kyzylyrmak", "Euphrates", "Tigris", "Sakarya"], "optionsAr": ["كزيل إيرماك", "الفرات", "دجلة", "ساكاريا"], "optionsTr": ["Kızılırmak", "Fırat", "Dicle", "Sakarya"], "correct": 0 },
+      { "q": "How many geographical regions does Turkey have?", "qAr": "كم منطقة جغرافية في تركيا؟", "qTr": "Türkiye kaç coğrafi bölgeye ayrılır?", "options": ["5", "6", "7", "8"], "optionsAr": ["5", "6", "7", "8"], "optionsTr": ["5", "6", "7", "8"], "correct": 2 },
+      { "q": "Which is regarded as the first Turkish state?", "qAr": "ما هي الدولة التي تُعد أول دولة تركية؟", "qTr": "İlk Türk devleti olarak kabul edilen devlet hangisidir?", "options": ["Ottoman Empire", "Great Seljuk Empire", "Asian Hun State", "Ghaznavid Empire"], "optionsAr": ["الدولة العثمانية", "السلاجقة العظام", "دولة الهون الآسيوية", "الغزنويون"], "optionsTr": ["Osmanlı Devleti", "Büyük Selçuklu", "Asya Hun Devleti", "Gazneliler"], "correct": 2 },
+      { "q": "How many grams does 1 litre of water weigh?", "qAr": "كم غراماً يزن لتر واحد من الماء؟", "qTr": "1 litre su kaç gramdır?", "options": ["100", "1000", "10000", "10"], "optionsAr": ["100", "1000", "10000", "10"], "optionsTr": ["100", "1000", "10000", "10"], "correct": 1 },
+      { "q": "Which of the following is a physics concept?", "qAr": "أي مما يلي مفهوم فيزيائي؟", "qTr": "Hangisi fizik bilimine ait bir kavramdır?", "options": ["Force", "Cell", "History", "Morphology"], "optionsAr": ["القوة", "الخلية", "التاريخ", "الصرف"], "optionsTr": ["Kuvvet", "Hücre", "Tarih", "Morfoloji"], "correct": 0 },
+      { "q": "In which direction does the Sun set?", "qAr": "في أي اتجاه تغرب الشمس؟", "qTr": "Güneş hangi yönde batar?", "options": ["East", "West", "North", "South"], "optionsAr": ["الشرق", "الغرب", "الشمال", "الجنوب"], "optionsTr": ["Doğu", "Batı", "Kuzey", "Güney"], "correct": 1 },
+      { "q": "How many months are there in a year?", "qAr": "كم شهراً في السنة؟", "qTr": "Bir yıl kaç aydan oluşur?", "options": ["10", "11", "12", "13"], "optionsAr": ["10", "11", "12", "13"], "optionsTr": ["10", "11", "12", "13"], "correct": 2 },
+      { "q": "What is the approximate value of pi (π)?", "qAr": "ما القيمة التقريبية للعدد باي؟", "qTr": "Pi sayısının yaklaşık değeri hangisidir?", "options": ["2.14", "3.14", "4.14", "1.14"], "optionsAr": ["2،14", "3،14", "4،14", "1،14"], "optionsTr": ["2,14", "3,14", "4,14", "1,14"], "correct": 1 },
+      { "q": "On which strait does the city of Istanbul lie?", "qAr": "على أي مضيق تقع مدينة إسطنبول؟", "qTr": "İstanbul hangi boğaz üzerinde yer alır?", "options": ["Dardanelles", "Bosphorus", "Gibraltar", "Suez"], "optionsAr": ["الدردنيل", "البوسفور", "جبل طارق", "السويس"], "optionsTr": ["Çanakkale Boğazı", "İstanbul Boğazı", "Cebelitarık", "Süveyş"], "correct": 1 },
+      { "q": "Which of the following is an even number?", "qAr": "أي مما يلي عدد زوجي؟", "qTr": "Hangisi bir çift sayıdır?", "options": ["3", "5", "8", "9"], "optionsAr": ["3", "5", "8", "9"], "optionsTr": ["3", "5", "8", "9"], "correct": 2 },
+      { "q": "Which of the following is a topic of grammar (morphology)?", "qAr": "أي مما يلي موضوع من موضوعات النحو؟", "qTr": "Hangisi dil bilgisi (biçim bilgisi) konusudur?", "options": ["Verb", "Mountain", "Water", "Sky"], "optionsAr": ["الفعل", "الجبل", "الماء", "السماء"], "optionsTr": ["Fiil", "Dağ", "Su", "Gökyüzü"], "correct": 0 }
+    ]
+  },
+  yosdgs: {
+    name: 'YÖS & DGS',
+    nameAr: 'YÖS و DGS',
+    nameTr: 'YÖS & DGS',
+    emoji: '🌍',
+    color: 'from-teal-500 to-cyan-600',
+    questions: [
+      { "q": "How many items are in a dozen?", "qAr": "كم عدد الوحدة في الدستة؟", "qTr": "Bir düzine kaç adettir?", "options": ["10", "12", "20", "15"], "optionsAr": ["10", "12", "20", "15"], "optionsTr": ["10", "12", "20", "15"], "correct": 1 },
+      { "q": "What is 12 × 12?", "qAr": "كم ناتج 12 × 12؟", "qTr": "12 × 12 kaçtır?", "options": ["124", "142", "144", "154"], "optionsAr": ["124", "142", "144", "154"], "optionsTr": ["124", "142", "144", "154"], "correct": 2 },
+      { "q": "What is 25% of 100?", "qAr": "كم يساوي 25% من 100؟", "qTr": "100'ün %25'i kaçtır?", "options": ["25", "30", "40", "50"], "optionsAr": ["25", "30", "40", "50"], "optionsTr": ["25", "30", "40", "50"], "correct": 0 },
+      { "q": "What is the sum of the interior angles of a triangle?", "qAr": "كم مجموع الزوايا الداخلية للمثلث؟", "qTr": "Bir üçgenin iç açılarının toplamı kaç derecedir?", "options": ["90", "180", "270", "360"], "optionsAr": ["90", "180", "270", "360"], "optionsTr": ["90", "180", "270", "360"], "correct": 1 },
+      { "q": "Which of the following is a prime number?", "qAr": "أي مما يلي عدد أولي؟", "qTr": "Hangisi asal sayıdır?", "options": ["6", "8", "9", "7"], "optionsAr": ["6", "8", "9", "7"], "optionsTr": ["6", "8", "9", "7"], "correct": 3 },
+      { "q": "What is 9 squared?", "qAr": "كم يساوي مربع العدد 9؟", "qTr": "9'un karesi kaçtır?", "options": ["72", "81", "90", "99"], "optionsAr": ["72", "81", "90", "99"], "optionsTr": ["72", "81", "90", "99"], "correct": 1 },
+      { "q": "How many seconds are in 30 minutes?", "qAr": "كم ثانية في 30 دقيقة؟", "qTr": "30 dakika kaç saniyedir?", "options": ["300", "1800", "2000", "1500"], "optionsAr": ["300", "1800", "2000", "1500"], "optionsTr": ["300", "1800", "2000", "1500"], "correct": 1 },
+      { "q": "2, 4, 6, 8 → which number comes next?", "qAr": "2، 4، 6، 8 ← ما الرقم التالي؟", "qTr": "2, 4, 6, 8 → sıradaki sayı hangisidir?", "options": ["9", "10", "12", "14"], "optionsAr": ["9", "10", "12", "14"], "optionsTr": ["9", "10", "12", "14"], "correct": 1 },
+      { "q": "How many sides does a square have?", "qAr": "كم ضلعاً للمربع؟", "qTr": "Bir karede kaç kenar vardır?", "options": ["3", "4", "5", "6"], "optionsAr": ["3", "4", "5", "6"], "optionsTr": ["3", "4", "5", "6"], "correct": 1 },
+      { "q": "What is the largest two-digit natural number?", "qAr": "ما هو أكبر عدد طبيعي مكوّن من رقمين؟", "qTr": "İki basamaklı en büyük doğal sayı hangisidir?", "options": ["90", "98", "99", "100"], "optionsAr": ["90", "98", "99", "100"], "optionsTr": ["90", "98", "99", "100"], "correct": 2 },
+      { "q": "What is 3 × 3 + 3?", "qAr": "كم ناتج 3 × 3 + 3؟", "qTr": "3 × 3 + 3 kaçtır?", "options": ["9", "12", "15", "18"], "optionsAr": ["9", "12", "15", "18"], "optionsTr": ["9", "12", "15", "18"], "correct": 1 },
+      { "q": "How many minutes are there between 15:30 and 16:30?", "qAr": "كم دقيقة بين الساعة 15:30 و 16:30؟", "qTr": "Saat 15:30'dan 16:30'a kadar kaç dakika vardır?", "options": ["30", "45", "60", "90"], "optionsAr": ["30", "45", "60", "90"], "optionsTr": ["30", "45", "60", "90"], "correct": 2 },
+      { "q": "How many grams are in 1 kilogram?", "qAr": "كم غراماً في الكيلوغرام الواحد؟", "qTr": "1 kilogram kaç gramdır?", "options": ["10", "100", "1000", "10000"], "optionsAr": ["10", "100", "1000", "10000"], "optionsTr": ["10", "100", "1000", "10000"], "correct": 2 },
+      { "q": "5, 10, 15, ? → which number comes next?", "qAr": "5، 10، 15 ← الرقم التالي؟", "qTr": "5, 10, 15, ? → bir sonraki sayı hangisidir?", "options": ["16", "18", "20", "25"], "optionsAr": ["16", "18", "20", "25"], "optionsTr": ["16", "18", "20", "25"], "correct": 2 },
+      { "q": "A shop has 40 pens. If half are sold, how many pens remain?", "qAr": "في دكان 40 قلماً، إذا بِيع النصف فكم يتبقى؟", "qTr": "Bir kırtasiyede 40 kalem vardır; yarısı satılırsa kaç kalem kalır?", "options": ["10", "15", "20", "25"], "optionsAr": ["10", "15", "20", "25"], "optionsTr": ["10", "15", "20", "25"], "correct": 2 }
+    ]
+  },
+  ales: {
+    name: 'ALES',
+    nameAr: 'ALES',
+    nameTr: 'ALES',
+    emoji: '📊',
+    color: 'from-indigo-500 to-blue-600',
+    questions: [
+      { "q": "Which number is divisible by 4?", "qAr": "أي عدد يقبل القسمة على 4؟", "qTr": "Hangi sayı 4'e tam bölünür?", "options": ["15", "23", "34", "40"], "optionsAr": ["15", "23", "34", "40"], "optionsTr": ["15", "23", "34", "40"], "correct": 3 },
+      { "q": "If x + 5 = 12, what is x?", "qAr": "إذا كان x + 5 = 12 فما قيمة x؟", "qTr": "x + 5 = 12 ise x kaçtır?", "options": ["5", "6", "7", "8"], "optionsAr": ["5", "6", "7", "8"], "optionsTr": ["5", "6", "7", "8"], "correct": 2 },
+      { "q": "What is one third of 15?", "qAr": "كم يساوي ثلث العدد 15؟", "qTr": "15 sayısının üçte biri kaçtır?", "options": ["3", "5", "7", "10"], "optionsAr": ["3", "5", "7", "10"], "optionsTr": ["3", "5", "7", "10"], "correct": 1 },
+      { "q": "Which positive number has a square of 25?", "qAr": "ما هو العدد الموجب الذي مربعه 25؟", "qTr": "Karesi 25 olan pozitif sayı hangisidir?", "options": ["5", "15", "25", "50"], "optionsAr": ["5", "15", "25", "50"], "optionsTr": ["5", "15", "25", "50"], "correct": 0 },
+      { "q": "2, 4, 8, 16 → which number comes next?", "qAr": "2، 4، 8، 16 ← الرقم التالي؟", "qTr": "2, 4, 8, 16 → sıradaki sayı hangisidir?", "options": ["24", "30", "32", "64"], "optionsAr": ["24", "30", "32", "64"], "optionsTr": ["24", "30", "32", "64"], "correct": 2 },
+      { "q": "What is the difference between +5 and −2?", "qAr": "ما الفرق بين +5 و −2؟", "qTr": "+5 ile −2 arasındaki fark kaçtır?", "options": ["3", "5", "7", "2"], "optionsAr": ["3", "5", "7", "2"], "optionsTr": ["3", "5", "7", "2"], "correct": 2 },
+      { "q": "What is 0! (zero factorial)?", "qAr": "كم يساوي مضروب الصفر 0!؟", "qTr": "0! kaçtır?", "options": ["0", "1", "2", "10"], "optionsAr": ["0", "1", "2", "10"], "optionsTr": ["0", "1", "2", "10"], "correct": 1 },
+      { "q": "A father is 40 and his son is 10. In how many years will the father be twice as old as the son?", "qAr": "الأب عمره 40 وابنه 10. بعد كم سنة يصبح عمر الأب ضعف عمر الابن؟", "qTr": "Baba 40, oğlu 10 yaşındadır. Kaç yıl sonra babanın yaşı oğlunun iki katı olur?", "options": ["10", "15", "20", "25"], "optionsAr": ["10", "15", "20", "25"], "optionsTr": ["10", "15", "20", "25"], "correct": 2 },
+      { "q": "In a class of 30 students, 3/5 are girls. How many are boys?", "qAr": "في صف من 30 طالباً، 3/5 منهم إناث. كم عدد الذكور؟", "qTr": "Bir sınıftaki 30 öğrencinin 3/5'i kızdır. Kaç öğrenci erkektir?", "options": ["10", "12", "15", "18"], "optionsAr": ["10", "12", "15", "18"], "optionsTr": ["10", "12", "15", "18"], "correct": 1 },
+      { "q": "The sum of three consecutive even numbers is 30. What is the middle one?", "qAr": "مجموع ثلاثة أعداد زوجية متتالية 30. ما هو العدد الأوسط؟", "qTr": "Ardışık üç çift sayının toplamı 30 ise ortanca sayı kaçtır?", "options": ["8", "9", "10", "12"], "optionsAr": ["8", "9", "10", "12"], "optionsTr": ["8", "9", "10", "12"], "correct": 2 },
+      { "q": "10% of which number equals 5?", "qAr": "ما العدد الذي يمثل 10% منه الرقم 5؟", "qTr": "%10'u 5 olan sayı kaçtır?", "options": ["45", "50", "55", "500"], "optionsAr": ["45", "50", "55", "500"], "optionsTr": ["45", "50", "55", "500"], "correct": 1 },
+      { "q": "What is the perimeter of a rectangle with length 10 and width 5?", "qAr": "ما محيط مستطيل طوله 10 وعرضه 5؟", "qTr": "Uzun kenarı 10, kısa kenarı 5 olan bir dikdörtgenin çevresi kaçtır?", "options": ["15", "25", "30", "50"], "optionsAr": ["15", "25", "30", "50"], "optionsTr": ["15", "25", "30", "50"], "correct": 2 },
+      { "q": "Using the letters A, B and C once each, how many different 3-letter arrangements can be made?", "qAr": "باستخدام الأحرف A و B و C مرة واحدة، كم ترتيباً مختلفاً من 3 أحرف يمكن تكوينه؟", "qTr": "A, B ve C harfleri birer kez kullanılarak kaç farklı 3 harfli sıralama yazılabilir?", "options": ["3", "6", "9", "12"], "optionsAr": ["3", "6", "9", "12"], "optionsTr": ["3", "6", "9", "12"], "correct": 1 },
+      { "q": "How many hours are there from 09:00 to 12:00?", "qAr": "كم ساعة من الساعة 09:00 إلى 12:00؟", "qTr": "Saat 09:00'dan 12:00'a kadar kaç saat vardır?", "options": ["2", "3", "4", "5"], "optionsAr": ["2", "3", "4", "5"], "optionsTr": ["2", "3", "4", "5"], "correct": 1 },
+      { "q": "What is 40% of 150?", "qAr": "كم يساوي 40% من 150؟", "qTr": "150 sayısının %40'ı kaçtır?", "options": ["40", "50", "60", "70"], "optionsAr": ["40", "50", "60", "70"], "optionsTr": ["40", "50", "60", "70"], "correct": 2 }
+    ]
+  },
+  yds: {
+    name: 'YDS / e-YDS',
+    nameAr: 'اختبار اللغة الإنجليزية (YDS)',
+    nameTr: 'YDS / e-YDS',
+    emoji: '🔤',
+    color: 'from-blue-500 to-indigo-600',
+    questions: [
+      { "q": "Which word is a synonym of 'happy'?", "qAr": "ما مرادف كلمة 'happy'؟", "qTr": "'Happy' kelimesinin eş anlamlısı hangisidir?", "options": ["sad", "angry", "glad", "tired"], "optionsAr": ["حزين", "غاضب", "سعيد", "متعب"], "optionsTr": ["üzgün", "kızgın", "mutlu", "yorgun"], "correct": 2 },
+      { "q": "What is the plural of 'child'?", "qAr": "ما هي صيغة جمع كلمة 'child'؟", "qTr": "'Child' kelimesinin çoğulu hangisidir?", "options": ["childs", "childes", "children", "childrens"], "optionsAr": ["children", "childs", "childes", "childrens"], "optionsTr": ["childs", "childes", "children", "childrens"], "correct": 2 },
+      { "q": "Which is an uncountable noun in English?", "qAr": "أي مما يلي اسم لا يُعد في الإنجليزية؟", "qTr": "Hangisi İngilizcede sayılamaz bir isimdir?", "options": ["book", "chair", "apple", "water"], "optionsAr": ["كتاب", "كرسي", "تفاحة", "ماء"], "optionsTr": ["kitap", "sandalye", "elma", "su"], "correct": 3 },
+      { "q": "Which is an irregular verb?", "qAr": "أي مما يلي فعل شاذ؟", "qTr": "Hangisi düzensiz bir fiildir?", "options": ["play", "go", "walk", "jump"], "optionsAr": ["يلعب", "يذهب", "يمشي", "يقفز"], "optionsTr": ["oynamak", "gitmek", "yürümek", "zıplamak"], "correct": 1 },
+      { "q": "Which verb fits: 'He ——— to school every day.'?", "qAr": "ما الفعل المناسب: 'He ——— to school every day.'؟", "qTr": "'He ——— to school every day.' cümlesine uygun fiil hangisidir?", "options": ["go", "goes", "going", "gone"], "optionsAr": ["go", "goes", "going", "gone"], "optionsTr": ["go", "goes", "going", "gone"], "correct": 1 },
+      { "q": "What is the Turkish translation of 'book'?", "qAr": "ما ترجمة كلمة 'book'؟", "qTr": "'Book' kelimesinin Türkçesi hangisidir?", "options": ["kapı", "kitap", "masa", "kalem"], "optionsAr": ["باب", "كتاب", "طاولة", "قلم"], "optionsTr": ["kapı", "kitap", "masa", "kalem"], "correct": 1 },
+      { "q": "How many articles (a, an, the) does English have?", "qAr": "كم أداة تعريف وتنكير (a, an, the) في الإنجليزية؟", "qTr": "İngilizcede kaç tane belirteç (article: a, an, the) vardır?", "options": ["2", "3", "4", "5"], "optionsAr": ["2", "3", "4", "5"], "optionsTr": ["2", "3", "4", "5"], "correct": 1 },
+      { "q": "Which is a question word?", "qAr": "أي مما يلي أداة استفهام؟", "qTr": "Hangisi soru sözcüğüdür?", "options": ["who", "red", "run", "sit"], "optionsAr": ["who", "أحمر", "يجري", "يجلس"], "optionsTr": ["kim", "kırmızı", "koşmak", "oturmak"], "correct": 0 },
+      { "q": "What is the opposite of 'small'?", "qAr": "ما عكس كلمة 'small'؟", "qTr": "'Small' kelimesinin zıttı hangisidir?", "options": ["tiny", "big", "short", "dark"], "optionsAr": ["صغير جداً", "كبير", "قصير", "مظلم"], "optionsTr": ["küçücük", "büyük", "kısa", "koyu"], "correct": 1 },
+      { "q": "What is the past tense of 'eat'?", "qAr": "ما هو الزمن الماضي لفعل 'eat'؟", "qTr": "'Eat' fiilinin geçmiş zaman hali hangisidir?", "options": ["eated", "ate", "eaten", "eats"], "optionsAr": ["eated", "ate", "eaten", "eats"], "optionsTr": ["eated", "ate", "eaten", "eats"], "correct": 1 },
+      { "q": "Which is a modal verb in English?", "qAr": "أي مما يلي فعل ناقص (modal) في الإنجليزية؟", "qTr": "Hangisi İngilizcede bir modal fiildir?", "options": ["eat", "can", "blue", "table"], "optionsAr": ["يأكل", "يستطيع", "أزرق", "طاولة"], "optionsTr": ["yemek", "can", "mavi", "masa"], "correct": 1 },
+      { "q": "How many letters are in the English alphabet?", "qAr": "كم حرفاً في الأبجدية الإنجليزية؟", "qTr": "İngiliz alfabesinde kaç harf vardır?", "options": ["24", "25", "26", "28"], "optionsAr": ["24", "25", "26", "28"], "optionsTr": ["24", "25", "26", "28"], "correct": 2 },
+      { "q": "Which word is spelled correctly?", "qAr": "أي كلمة كُتبت إملائياً بشكل صحيح؟", "qTr": "Hangi kelime doğru yazılmıştır?", "options": ["beautifull", "beatiful", "beautiful", "beautful"], "optionsAr": ["beautifull", "beatiful", "beautiful", "beautful"], "optionsTr": ["beautifull", "beatiful", "beautiful", "beautful"], "correct": 2 },
+      { "q": "Which word completes the collocation 'make a ———'?", "qAr": "ما الكلمة المناسبة لعبارة 'make a ———'؟", "qTr": "'Make a ———' kalıbına uygun kelime hangisidir?", "options": ["book", "decision", "orange", "house"], "optionsAr": ["كتاب", "قرار", "برتقالة", "منزل"], "optionsTr": ["kitap", "karar", "portakal", "ev"], "correct": 1 },
+      { "q": "What is the Turkish translation of 'water'?", "qAr": "ما ترجمة كلمة 'water'؟", "qTr": "'Water' kelimesinin Türkçesi hangisidir?", "options": ["ateş", "su", "toprak", "hava"], "optionsAr": ["نار", "ماء", "تراب", "هواء"], "optionsTr": ["ateş", "su", "toprak", "hava"], "correct": 1 }
+    ]
+  },
+  yokdil: {
+    name: 'YÖKDİL',
+    nameAr: 'YÖKDİL',
+    nameTr: 'YÖKDİL',
+    emoji: '📚',
+    color: 'from-violet-500 to-indigo-600',
+    questions: [
+      { "q": "Which English word means 'sonuç' (result)?", "qAr": "ما الكلمة الإنجليزية التي تعني «النتيجة»؟", "qTr": "'Sonuç' kelimesinin İngilizce karşılığı hangisidir?", "options": ["poor", "result", "sharp", "bring"], "optionsAr": ["فقير", "نتيجة", "حاد", "يُحضر"], "optionsTr": ["zavallı", "sonuç", "keskin", "getirmek"], "correct": 1 },
+      { "q": "What is the main argument of a research paper called?", "qAr": "ماذا يُسمى الحجة الرئيسية لورقة بحثية؟", "qTr": "Bir araştırma makalesinin ana düşüncesine ne denir?", "options": ["thesis", "preface", "footnote", "appendix"], "optionsAr": ["الأطروحة", "المقدمة", "الحاشية", "الملحق"], "optionsTr": ["tez", "önsöz", "dipnot", "ek"], "correct": 0 },
+      { "q": "Which is a citation verb used in academic writing?", "qAr": "أي مما يلي فعل اقتباس يُستخدم في الكتابة الأكاديمية؟", "qTr": "Hangisi akademik yazılarda kullanılan bir alıntı fiilidir?", "options": ["argue", "apple", "dusty", "giant"], "optionsAr": ["يجادل/يطرح", "تفاحة", "مغبر", "عملاق"], "optionsTr": ["savunmak", "elma", "tozlu", "dev"], "correct": 0 },
+      { "q": "What does 'therefore' mean?", "qAr": "ماذا تعني كلمة 'therefore'؟", "qTr": "'Therefore' kelimesinin anlamı hangisidir?", "options": ["because", "as a result", "however", "although"], "optionsAr": ["لأن", "وبالتالي", "ومع ذلك", "على الرغم من"], "optionsTr": ["çünkü", "bu nedenle", "ancak", "her ne kadar"], "correct": 1 },
+      { "q": "What is a synonym of 'significant'?", "qAr": "ما مرادف كلمة 'significant'؟", "qTr": "'Significant' kelimesinin eş anlamlısı hangisidir?", "options": ["important", "minor", "tiny", "trivial"], "optionsAr": ["مهم", "بسيط", "صغير", "تافه"], "optionsTr": ["önemli", "önemsiz", "küçücük", "değersiz"], "correct": 0 },
+      { "q": "What is the opposite of 'increase'?", "qAr": "ما عكس كلمة 'increase'؟", "qTr": "'Increase' kelimesinin zıttı hangisidir?", "options": ["decrease", "rise", "grow", "expand"], "optionsAr": ["انخفاض", "ارتفاع", "نمو", "توسع"], "optionsTr": ["azalma", "artış", "büyüme", "genişleme"], "correct": 0 },
+      { "q": "Which is a more formal word for 'get'?", "qAr": "ما الكلمة الأكثر رسمية من 'get'؟", "qTr": "'Get' fiilinin daha biçimsel karşılığı hangisidir?", "options": ["obtain", "grab", "fetch", "catch"], "optionsAr": ["يحصل على", "يمسك", "يُحضر", "يُلحق"], "optionsTr": ["elde etmek", "kapmak", "getirmek", "yakalamak"], "correct": 0 },
+      { "q": "Which word fits: 'The ——— of the study were presented at the conference.'?", "qAr": "ما الكلمة المناسبة: 'The ——— of the study were presented'؟", "qTr": "'The ——— of the study were presented at the conference.' boşluğuna uygun kelime hangisidir?", "options": ["founded", "findings", "finded", "find"], "optionsAr": ["تأسس", "نتائج", "وُجدت", "يجد"], "optionsTr": ["kuruldu", "bulgular", "bulundu", "bulmak"], "correct": 1 },
+      { "q": "What is 'however' used for?", "qAr": "لأي غرض تُستخدم كلمة 'however'؟", "qTr": "'However' ne için kullanılır?", "options": ["listing ideas", "contrasting ideas", "introducing examples", "time order"], "optionsAr": ["سرد الأفكار", "المقابلة بين الأفكار", "ذكر الأمثلة", "الترتيب الزمني"], "optionsTr": ["fikirleri sıralamak", "fikirleri karşılaştırmak", "örnek vermek", "zaman sırası"], "correct": 1 },
+      { "q": "Which prefix means 'again'?", "qAr": "أي بادئة تعني «مرة أخرى»؟", "qTr": "'Tekrar' anlamı katan ön ek (prefix) hangisidir?", "options": ["pre-", "re-", "dis-", "un-"], "optionsAr": ["pre-", "re-", "dis-", "un-"], "optionsTr": ["pre-", "re-", "dis-", "un-"], "correct": 1 },
+      { "q": "Which English verb means 'examine carefully'?", "qAr": "ما الفعل الإنجليزي الذي يعني «الفحص بعناية»؟", "qTr": "'Dikkatlice incelemek' anlamındaki İngilizce fiil hangisidir?", "options": ["investigate", "purchase", "deliver", "suggest"], "optionsAr": ["يحقق/يفحص", "يشتري", "يُسلّم", "يقترح"], "optionsTr": ["araştırmak", "satın almak", "teslim etmek", "önermek"], "correct": 0 },
+      { "q": "Which auxiliary verb fits: 'The data ——— analyzed.'?", "qAr": "ما الفعل المساعد المناسب: 'The data ——— analyzed.'؟", "qTr": "'The data ——— analyzed.' cümlesine uygun yardımcı fiil hangisidir?", "options": ["is", "was", "were", "be"], "optionsAr": ["is", "was", "were", "be"], "optionsTr": ["is", "was", "were", "be"], "correct": 2 },
+      { "q": "Where is 'in conclusion' usually used?", "qAr": "أين تُستخدم عادةً عبارة 'in conclusion'؟", "qTr": "'In conclusion' genellikle nerede kullanılır?", "options": ["at the beginning", "in the middle", "at the end", "only in references"], "optionsAr": ["في البداية", "في المنتصف", "في النهاية", "في المراجع فقط"], "optionsTr": ["başlangıçta", "ortada", "sonda", "sadece kaynaklarda"], "correct": 2 },
+      { "q": "What is a synonym of 'method'?", "qAr": "ما مرادف كلمة 'method'؟", "qTr": "'Method' kelimesinin eş anlamlısı hangisidir?", "options": ["procedure", "coffee", "mountain", "pillow"], "optionsAr": ["إجراء/أسلوب", "قهوة", "جبل", "وسادة"], "optionsTr": ["prosedür", "kahve", "dağ", "yastık"], "correct": 0 },
+      { "q": "What is a synonym of 'objective' (aim)?", "qAr": "ما مرادف كلمة 'objective' (هدف)؟", "qTr": "'Objective' (hedef) kelimesinin eş anlamlısı hangisidir?", "options": ["aim", "floor", "noise", "color"], "optionsAr": ["غاية/هدف", "أرضية", "ضجيج", "لون"], "optionsTr": ["amaç", "zemin", "gürültü", "renk"], "correct": 0 }
+    ]
+  }
+};

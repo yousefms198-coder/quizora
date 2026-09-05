@@ -11,6 +11,23 @@ const CATEGORIES = {
   islam: { name: 'Islam & Arab World', nameAr: 'الإسلام والعالم العربي', nameTr: 'İslam ve Arap Dünyası', emoji: '🕌', color: 'from-emerald-500 to-teal-700', css: 'background: linear-gradient(135deg, #10b981, #0f766e)' },
 };
 
+const EXAM_CATEGORIES = {
+  yks: { name: 'YKS • TYT / AYT / YDT', nameAr: 'YKS — دخول الجامعة التركية', nameTr: 'YKS • TYT / AYT / YDT', emoji: '🎓', color: 'from-sky-500 to-blue-700', css: 'background: linear-gradient(135deg, #0ea5e9, #1d4ed8)' },
+  yosdgs: { name: 'YÖS & DGS', nameAr: 'YÖS و DGS', nameTr: 'YÖS & DGS', emoji: '🌍', color: 'from-teal-500 to-cyan-600', css: 'background: linear-gradient(135deg, #14b8a6, #0891b2)' },
+  ales: { name: 'ALES', nameAr: 'ALES', nameTr: 'ALES', emoji: '📊', color: 'from-indigo-500 to-blue-600', css: 'background: linear-gradient(135deg, #6366f1, #2563eb)' },
+  yds: { name: 'YDS / e-YDS', nameAr: 'اختبار اللغة الإنجليزية (YDS)', nameTr: 'YDS / e-YDS', emoji: '🔤', color: 'from-blue-500 to-indigo-600', css: 'background: linear-gradient(135deg, #3b82f6, #4f46e5)' },
+  yokdil: { name: 'YÖKDİL', nameAr: 'YÖKDİL', nameTr: 'YÖKDİL', emoji: '📚', color: 'from-violet-500 to-indigo-600', css: 'background: linear-gradient(135deg, #8b5cf6, #4f46e5)' },
+  kpss: { name: 'KPSS', nameAr: 'امتحان الوظائف العامة (KPSS)', nameTr: 'KPSS', emoji: '🏛️', color: 'from-amber-500 to-orange-600', css: 'background: linear-gradient(135deg, #f59e0b, #ea580c)' },
+  ekpss: { name: 'EKPSS', nameAr: 'امتحان الوظائف لذوي الاحتياجات (EKPSS)', nameTr: 'EKPSS', emoji: '🤝', color: 'from-emerald-500 to-green-600', css: 'background: linear-gradient(135deg, #10b981, #16a34a)' },
+  mebags: { name: 'MEB-AGS', nameAr: 'امتحان أكاديمية المعلمين (MEB-AGS)', nameTr: 'MEB-AGS', emoji: '👩‍🏫', color: 'from-pink-500 to-rose-600', css: 'background: linear-gradient(135deg, #ec4899, #e11d48)' },
+  tus: { name: 'TUS', nameAr: 'امتحان التخصص الطبي (TUS)', nameTr: 'TUS', emoji: '🩺', color: 'from-cyan-600 to-sky-700', css: 'background: linear-gradient(135deg, #0891b2, #0369a1)' },
+  ydus: { name: 'YDUS', nameAr: 'امتحان التخصص الفرعي (YDUS)', nameTr: 'YDUS', emoji: '🧬', color: 'from-purple-500 to-fuchsia-600', css: 'background: linear-gradient(135deg, #a855f7, #c026d3)' },
+  dus: { name: 'DUS', nameAr: 'امتحان التخصص في طب الأسنان (DUS)', nameTr: 'DUS', emoji: '🦷', color: 'from-slate-400 to-slate-600', css: 'background: linear-gradient(135deg, #94a3b8, #475569)' },
+  eus: { name: 'EUS', nameAr: 'امتحان التخصص في الصيدلة (EUS)', nameTr: 'EUS', emoji: '💊', color: 'from-green-500 to-emerald-700', css: 'background: linear-gradient(135deg, #22c55e, #047857)' },
+  hmgs: { name: 'HMGS', nameAr: 'امتحان دخول المهن القانونية (HMGS)', nameTr: 'HMGS', emoji: '⚖️', color: 'from-stone-400 to-neutral-600', css: 'background: linear-gradient(135deg, #a8a29e, #525252)' },
+  lgs: { name: 'LGS', nameAr: 'امتحان الانتقال إلى الثانوية (LGS)', nameTr: 'LGS', emoji: '🏫', color: 'from-orange-500 to-red-500', css: 'background: linear-gradient(135deg, #f97316, #ef4444)' },
+};
+
 let appLang = 'en';
 try { appLang = localStorage.getItem('quizora_lang') || 'en'; } catch (e) {}
 

@@ -4510,11 +4510,17 @@ const CATEGORIES = {
   }
 };
 
-function buildQuestions(categories, numQuestions) {
+const EXAM_CATEGORIES_1 = require('./exams-data-1.js');
+const EXAM_CATEGORIES_2 = require('./exams-data-2.js');
+const EXAM_CATEGORIES_3 = require('./exams-data-3.js');
+const EXAMS = Object.assign({}, EXAM_CATEGORIES_1, EXAM_CATEGORIES_2, EXAM_CATEGORIES_3);
+
+function buildQuestions(categories, numQuestions, mode) {
+  const bank = mode === 'exam' ? EXAMS : CATEGORIES;
   let pool = [];
   categories.forEach(cat => {
-    if (CATEGORIES[cat]) {
-      pool = pool.concat(CATEGORIES[cat].questions.map(q => ({ ...q, category: cat })));
+    if (bank[cat]) {
+      pool = pool.concat(bank[cat].questions.map(q => ({ ...q, category: cat })));
     }
   });
   for (let i = pool.length - 1; i > 0; i--) {
@@ -4570,6 +4576,7 @@ wss.on('connection', (ws) => {
         timeLeft: msg.timerSeconds !== undefined ? msg.timerSeconds : 20,
         paused: false,
         phase: 'lobby',
+        mode: msg.mode === 'exam' ? 'exam' : 'fun',
         selectedCategories: msg.categories || ['general', 'movies', 'family'],
         numQuestions: msg.numQuestions || 10,
         frozenTimers: {},
@@ -4619,7 +4626,7 @@ wss.on('connection', (ws) => {
       const powerupTypes = ['freeze', 'double', 'steal'];
       room.powerups[name] = powerupTypes[room.players.length % powerupTypes.length];
 
-      ws.send(JSON.stringify({ type: 'joined', code, player, categories: room.selectedCategories, numQuestions: room.numQuestions, powerup: room.powerups[name] }));
+      ws.send(JSON.stringify({ type: 'joined', code, player, categories: room.selectedCategories, numQuestions: room.numQuestions, mode: room.mode, powerup: room.powerups[name] }));
       broadcast(room, { type: 'player_joined', player, players: room.players }, ws.id);
       broadcast(room, { type: 'player_list', players: room.players });
     }
@@ -4629,7 +4636,7 @@ wss.on('connection', (ws) => {
       if (!room || !ws.isHost) return;
       if (room.players.length < 1) return;
 
-      room.questions = buildQuestions(room.selectedCategories, room.numQuestions);
+      room.questions = buildQuestions(room.selectedCategories, room.numQuestions, room.mode);
       room.currentQ = 0;
       room.phase = 'playing';
       room.answeredThisRound = {};
@@ -4642,6 +4649,7 @@ wss.on('connection', (ws) => {
           roundNum: room.questions.indexOf(q) + 1
         })),
         totalQuestions: room.questions.length,
+        mode: room.mode,
         currentQuestion: {
           q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q, options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options, category: q.category,
           round: 1
@@ -4930,6 +4938,7 @@ type: 'new_question',
     },
     scores: room.scores,
     round: room.currentQ + 1,
+    mode: room.mode,
     timerSeconds: room.timerSeconds,
   });
 

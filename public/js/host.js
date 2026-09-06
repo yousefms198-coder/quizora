@@ -248,7 +248,6 @@ function renderLanding() {
     badges.appendChild(b);
   });
   c.appendChild(badges);
-  c.appendChild(h('div', 'landing-footer', [L('Built with AI — Family Build-Off 2026', 'صُنع بالذكاء الاصطناعي — مسابقة بناء العائلات 2026', 'Yapay Zeka ile Yapıldı — Aile Build-Off 2026')]));
   return c;
 }
 
@@ -1478,11 +1477,12 @@ function renderSettings() {
 /* ======================== PRACTICE ======================== */
 function renderPractice() {
   const c = h('div', 'practice-container', [], { style: 'min-height:100vh;padding:20px;display:flex;flex-direction:column;align-items:center;gap:14px;max-width:720px;margin:0 auto' });
-  const top = h('div', '', [], { style: 'width:100%;display:flex;justify-content:space-between;align-items:center' });
-  top.appendChild(h('div', 'font-display', [L('Practice Tests', 'اختبارات الممارسة', 'Pratik Testleri')], { style: 'font-weight:800;font-size:18px' }));
+  const top = h('div', '', [], { style: 'width:100%;display:flex;align-items:center;gap:8px' });
   top.appendChild(h('button', 'btn-ghost', ['← ' + L('Back', 'رجوع', 'Geri')], {
+    style: 'flex:0 0 auto',
     onclick: () => { quitPractice(); state.screen = 'landing'; render(); }
   }));
+  top.appendChild(h('div', 'font-display', [L('Practice Tests', 'اختبارات الممارسة', 'Pratik Testleri')], { style: 'font-weight:800;font-size:18px;flex:1;text-align:center' }));
   c.appendChild(top);
 
   if (!state.practice) state.practice = { pick: { categories: ['yks'], num: 5, mode: 'instant', timer: 0 } };

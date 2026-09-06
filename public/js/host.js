@@ -55,6 +55,8 @@ function h(tag, cls, children, attrs) {
     if (k.startsWith('on')) e.addEventListener(k.slice(2).toLowerCase(), v);
     else if (k === 'html') e.innerHTML = v;
     else if (k === 'dataset') Object.entries(v).forEach(([dk, dv]) => e.dataset[dk] = dv);
+    else if (k === 'disabled') { if (v) e.setAttribute('disabled', ''); else e.removeAttribute('disabled'); }
+    else if (k === 'checked') { if (v) e.setAttribute('checked', ''); else e.removeAttribute('checked'); }
     else e.setAttribute(k, v);
   });
   (Array.isArray(children) ? children : [children]).forEach(c => {
@@ -1784,12 +1786,12 @@ function renderSettings() {
 /* ======================== PRACTICE ======================== */
 function renderPractice() {
   const c = h('div', 'practice-container', [], { style: 'min-height:100vh;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;max-width:720px;margin:0 auto' });
-  const top = h('div', '', [], { style: 'width:100%;display:flex;align-items:center;gap:8px' });
+  const top = h('div', 'practice-top', [], { style: 'width:100%;display:flex;align-items:center;justify-content:space-between;position:relative' });
+  top.appendChild(h('div', '', [], { style: 'width:60px' }));
+  top.appendChild(h('div', 'font-display', [L('Practice Tests', 'اختبارات الممارسة', 'Pratik Testleri')], { style: 'font-weight:800;font-size:18px;position:absolute;left:50%;transform:translateX(-50%);width:max-content;max-width:78%;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis' }));
   top.appendChild(h('button', 'btn-ghost', ['← ' + L('Back', 'رجوع', 'Geri')], {
-    style: 'flex:0 0 auto',
     onclick: () => { quitPractice(); state.screen = 'landing'; render(); }
   }));
-  top.appendChild(h('div', 'font-display', [L('Practice Tests', 'اختبارات الممارسة', 'Pratik Testleri')], { style: 'font-weight:800;font-size:18px;flex:1;text-align:center' }));
   c.appendChild(top);
 
   if (!state.practice) state.practice = { pick: { bank: 'exam', format: 'test', categories: ['yks'], num: 5, mode: 'instant', timer: 0 } };
@@ -1918,7 +1920,6 @@ function buildFlashcardView(c) {
   const card = t.cards[t.current];
   const meta = (t.pick.bank === 'exam' ? EXAM_CATEGORIES : CATEGORIES)[card.category] || { name: card.category, emoji: '📘', css: 'background:#475569' };
   const lq = Lq(card);
-  const letters = ['A', 'B', 'C', 'D'];
 
   c.appendChild(h('div', '', [L('Card', 'بطاقة', 'Kart') + ' ' + (t.current + 1) + ' / ' + t.cards.length], { style: 'color:#94a3b8;font-size:13px;width:100%' }));
   c.appendChild(h('div', 'category-badge', [`${meta.emoji} ${L(meta.name, meta.nameAr, meta.nameTr)}`], { style: meta.css + ';color:white;align-self:flex-start' }));
@@ -1936,16 +1937,8 @@ function buildFlashcardView(c) {
 
   const back = h('div', 'flash-back', []);
   back.appendChild(h('div', '', [L('Answer', 'الإجابة', 'Cevap')], { style: 'font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#22c55e;margin-bottom:12px;font-weight:700' }));
-  lq.options.forEach((opt, i) => {
-    const row = h('div', '', [], { style: 'display:flex;gap:8px;align-items:flex-start;text-align:left;padding:5px 0' });
-    row.appendChild(h('div', 'option-letter', [letters[i]]));
-    row.appendChild(h('span', '', [opt]));
-    if (i === card.correct) { row.style.color = '#4ade80'; row.style.fontWeight = '700'; }
-    else row.style.color = '#94a3b8';
-    back.appendChild(row);
-  });
-  const correctHint = h('div', '', [L('Answer', 'الإجابة', 'Cevap') + ': ' + (letters[card.correct] || '?')], { style: 'margin-top:12px;font-weight:800;color:#4ade80' });
-  back.appendChild(correctHint);
+  const answer = (lq.options && lq.options[card.correct]) || '';
+  back.appendChild(h('div', 'flash-answer', [answer]));
 
   flipCard.appendChild(face);
   flipCard.appendChild(back);

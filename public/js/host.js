@@ -73,6 +73,9 @@ const ICONS = {
   grad: [['path', { d: 'M2 8l10-5 10 5-10 5Z' }], ['path', { d: 'M6 10.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-5.5' }], ['path', { d: 'M22 8v6' }]],
   users: [['circle', { cx: 9, cy: 8, r: 3.5 }], ['path', { d: 'M2.5 20c0-3.8 3-6 6.5-6s6.5 2.2 6.5 6' }], ['circle', { cx: 17, cy: 9, r: 2.5 }], ['path', { d: 'M17.5 14.7c2.4.6 4 2.3 4 5.3' }]],
   sparkle: [['path', { d: 'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9Z' }]],
+  'arrow-left': [['path', { d: 'M19 12H5' }], ['path', { d: 'M12 19l-7-7 7-7' }]],
+  settings: [['circle', { cx: 12, cy: 12, r: 3 }], ['path', { d: 'M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z' }]],
+  logout: [['path', { d: 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4' }], ['path', { d: 'M16 17l5-5-5-5' }], ['path', { d: 'M21 12H9' }]],
 };
 
 function hIcon(name, cls) {
@@ -126,6 +129,7 @@ function render() {
     player_answer: renderPlayerAnswer,
     player_result: renderPlayerResult,
     practice: renderPractice,
+    dashboard: renderDashboard,
   };
   const fn = screens[state.screen];
   const cornerScreens = ['landing', 'join', 'lobby', 'game', 'gameover', 'practice'];
@@ -1486,10 +1490,108 @@ function accountChip() {
     }
   }));
   wrap.appendChild(h('button', 'btn-ghost icon-chip', [state.user.avatar || '😎'], {
-    title: state.user.username + ' — ' + L('Account Settings', 'إعدادات الحساب', 'Hesap Ayarları'),
-    onclick: () => { sound.click(); state.pendingAvatar = undefined; state.settingsOpen = true; render(); }
+    title: state.user.username + ' — ' + L('Dashboard', 'لوحة التحكم', 'Panel'),
+    onclick: () => { sound.click(); state.screen = 'dashboard'; render(); }
   }));
   return wrap;
+}
+
+/* ======================== DASHBOARD ======================== */
+function renderDashboard() {
+  const u = state.user;
+  const c = h('div', 'dashboard-container');
+  if (!u) { state.screen = 'landing'; render(); return c; }
+
+  /* --- back + header --- */
+  const top = h('div', 'dash-top');
+  top.appendChild(h('button', 'btn-ghost', [hIcon('arrow-left', 'ic ic-s'), ' ' + L('Back', 'رجوع', 'Geri')], {
+    onclick: () => { sound.click(); state.screen = 'landing'; render(); }
+  }));
+  c.appendChild(top);
+
+  c.appendChild(h('div', 'dash-avatar', [u.avatar || '😎']));
+  c.appendChild(h('div', 'font-display dash-name', [u.username || 'Player']));
+  c.appendChild(h('div', 'dash-sub', [u.email || '']));
+
+  /* --- quick actions --- */
+  const actions = h('div', 'dash-actions');
+  const cards = [
+    ['play', L('Host a Quiz', 'إنشاء لعبة', 'Yarışma Oluştur'), '#38bdf8', () => { sound.click(); state.screen = 'landing'; render(); }],
+    ['users', L('Join a Quiz', 'الانضمام', 'Oyuna Katıl'), '#22c55e', () => { sound.click(); state.screen = 'join'; state.isHost = false; state.inputCode = ''; render(); }],
+    ['grad', L('Practice', 'التدريب', 'Pratik'), '#f59e0b', () => { sound.click(); state.practice = { pick: { categories: ['yks'], num: 5, mode: 'instant', timer: 0 } }; state.practiceView = 'setup'; state.screen = 'practice'; render(); }],
+  ];
+  cards.forEach(([icon, label, color, onclick]) => {
+    const card = h('div', 'dash-card glass', [], { onclick });
+    card.appendChild(h('div', 'dash-card-icon', [hIcon(icon, 'ic ic-l')], { style: `color:${color}` }));
+    card.appendChild(h('div', 'dash-card-label font-display', [label]));
+    actions.appendChild(card);
+  });
+  c.appendChild(actions);
+
+  /* --- stats --- */
+  const stats = u.stats || {};
+  const tests = stats.tests || 0;
+  const avgScore = tests > 0 ? Math.round((stats.scoreSum || 0) / tests) : 0;
+  const correctTot = stats.correctTot || 0;
+  const answerTot = stats.answerTot || 0;
+  const accuracy = answerTot > 0 ? Math.round((correctTot / answerTot) * 100) : 0;
+
+  c.appendChild(h('div', 'section-label', [L('Your Stats', 'إحصائياتك', 'İstatistikler')], { style: 'margin:20px 0 10px;text-align:center' }));
+  const statsGrid = h('div', 'dash-stats');
+  const statData = [
+    [L('Tests', 'الاختبارات', 'Testler'), String(tests)],
+    [L('Avg Score', 'متوسط الدرجات', 'Ort. Puan'), avgScore + '%'],
+    [L('Correct', 'صحيحة', 'Doğru'), correctTot + '/' + answerTot],
+    [L('Accuracy', 'الدقة', 'Doğruluk'), accuracy + '%'],
+  ];
+  statData.forEach(([label, val]) => {
+    const s = h('div', 'dash-stat glass');
+    s.appendChild(h('div', 'dash-stat-val font-display', [val]));
+    s.appendChild(h('div', 'dash-stat-label', [label]));
+    statsGrid.appendChild(s);
+  });
+  c.appendChild(statsGrid);
+
+  /* --- exam performance --- */
+  const examStats = u.examStats || {};
+  const examKeys = Object.keys(examStats);
+  if (examKeys.length > 0) {
+    c.appendChild(h('div', 'section-label', [L('Exam Performance', 'نتائج الامتحانات', 'Sınav Sonuçları')], { style: 'margin:20px 0 10px;text-align:center' }));
+    const examList = h('div', 'dash-exams');
+    examKeys.forEach(key => {
+      const cat = EXAM_CATEGORIES[key];
+      if (!cat) return;
+      const es = examStats[key];
+      const tot = es.tot || 1;
+      const pct = Math.round(((es.correct || 0) / tot) * 100);
+      const row = h('div', 'dash-exam glass');
+      const left = h('div', 'dash-exam-left');
+      left.appendChild(h('span', '', [cat.emoji]));
+      left.appendChild(h('span', 'dash-exam-name', [L(cat.name, cat.nameAr, cat.nameTr)]));
+      row.appendChild(left);
+      const right = h('div', 'dash-exam-right');
+      right.appendChild(h('div', 'dash-exam-best', [L('Best', 'الأفضل', 'En İyi') + ': ' + (es.best || 0) + '%']));
+      const barWrap = h('div', 'dash-bar-wrap');
+      barWrap.appendChild(h('div', 'dash-bar-fill', [], { style: `width:${pct}%` }));
+      right.appendChild(barWrap);
+      row.appendChild(right);
+      examList.appendChild(row);
+    });
+    c.appendChild(examList);
+  }
+
+  /* --- settings + logout --- */
+  const footer = h('div', 'dash-footer');
+  footer.appendChild(h('button', 'btn-ghost', [hIcon('settings', 'ic ic-s'), ' ' + L('Settings', 'الإعدادات', 'Ayarlar')], {
+    onclick: () => { sound.click(); state.pendingAvatar = undefined; state.settingsOpen = true; render(); }
+  }));
+  footer.appendChild(h('button', 'btn-ghost', [hIcon('logout', 'ic ic-s'), ' ' + L('Logout', 'تسجيل الخروج', 'Çıkış')], {
+    style: 'color:#f87171',
+    onclick: () => { sound.click(); logout(); state.screen = 'landing'; }
+  }));
+  c.appendChild(footer);
+
+  return c;
 }
 
 function renderAuthModal() {

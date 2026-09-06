@@ -499,8 +499,9 @@ function renderGame() {
         <circle class="timer-ring-progress ${colorClass}" cx="50" cy="50" r="44"
           stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"/>
       </svg>
-      <div class="timer-text ${colorClass}"${state.paused ? ' style="filter:grayscale(0.8)"' : ''}>${state.paused ? 'Ⅱ' : state.timeLeft}</div>
+      <div class="timer-text ${colorClass}">${state.paused ? '‖' : state.timeLeft}</div>
     `;
+    timerContainer.classList.toggle('is-paused', !!state.paused);
     masthead.appendChild(timerContainer);
   }
   c.appendChild(masthead);
@@ -578,18 +579,14 @@ function renderGame() {
   qCard.appendChild(h('div', 'question-text', [lq.text]));
   c.appendChild(qCard);
 
-  /* --- Host join strip: big code + QR so late joiners can still get in --- */
+  /* --- Late-join QR (compact, left column — stays out of the question area) --- */
   if (state.isHost && state.roomCode) {
-    const joinStrip = h('div', 'host-join-strip');
-    const joinInfo = h('div', 'host-join-info');
-    joinInfo.appendChild(h('div', 'host-join-title', [L('Joining late?', 'دخلت متأخراً؟', 'Geç mi kaldın?')]));
-    joinInfo.appendChild(h('div', 'host-join-url', [], { id: 'host-join-url' }, [state.joinUrl || L('Loading…', 'جارٍ التحميل…', 'Yükleniyor…')]));
-    const joinCode = h('div', 'host-join-code', [h('span', 'host-join-code-label', ['CODE']), h('b', '', [String(state.roomCode)])]);
+    const joinCard = h('div', 'host-join-card');
+    joinCard.appendChild(h('div', 'host-join-title', [L('JOIN LATE', 'انضم متأخراً', 'GEÇ KATIL')]));
     const joinQr = h('div', 'host-join-qr host-join-qr-preview', [], { id: 'host-join-qr' });
-    joinStrip.appendChild(joinInfo);
-    joinStrip.appendChild(joinCode);
-    joinStrip.appendChild(joinQr);
-    c.appendChild(joinStrip);
+    joinCard.appendChild(joinQr);
+    joinCard.appendChild(h('div', 'host-join-code', [h('span', 'host-join-code-label', ['CODE']), h('b', '', [String(state.roomCode)])]));
+    c.appendChild(joinCard);
     setTimeout(() => injectHostJoinQr(), 100);
   }
 

@@ -639,7 +639,6 @@ html[dir="rtl"] body, html[dir="rtl"] .font-display { font-family: 'Cairo', syst
   .host-ranking-rail { grid-column: 1; grid-row: 6; order: 5; }
   .reveal-now-btn { grid-column: 1; }
 }
-}
 
 /* Center the question + options + presence block (host HUD) at all widths */
 .game-container > .question-card,
@@ -854,6 +853,22 @@ input[type='text'], input[type='email'], input[type='password'], select {
 }
 .timer-text.warning { color: #f59e0b; }
 .timer-text.danger { color: #ef4444; animation: timerPulse 0.5s ease-in-out infinite; }
+
+/* Paused timer state */
+.timer-container.is-paused .timer-ring-progress { stroke: #f59e0b; filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.6)); }
+.timer-container.is-paused .timer-text { color: #fbbf24; font-size: 26px; }
+.timer-container.is-paused::after {
+  content: 'PAUSED';
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  transform: translateX(-50%);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  color: #fbbf24;
+  text-shadow: 0 0 12px rgba(245, 158, 11, 0.5);
+}
 
 /* ===================== MINI SCORES ===================== */
 .mini-scores {
@@ -1895,17 +1910,26 @@ input[type='text'], input[type='email'], input[type='password'], select {
 
 /* ===== PAUSED INDICATOR ===== */
 .paused-chip {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1200;
   display: inline-block;
-  margin: 0 auto 12px;
-  padding: 6px 14px;
+  margin: 0;
+  padding: 8px 18px;
   border-radius: 999px;
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.55);
   color: #fbbf24;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  white-space: nowrap;
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.45), 0 0 24px rgba(245, 158, 11, 0.25);
+  backdrop-filter: blur(8px);
   animation: pulse-glow 1.5s ease infinite;
+  pointer-events: none;
 }
 @keyframes pulse-glow {
   0%, 100% { opacity: 1; }
@@ -2482,41 +2506,38 @@ input[type='text'], input[type='email'], input[type='password'], select {
   animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ===== HOST JOIN STRIP (mid-game entry for late joiners) ===== */
-.host-join-strip {
+/* ===== HOST LATE-JOIN QR (compact card, left column) ===== */
+.host-join-card {
+  grid-column: 1;
+  grid-row: 3 / 6;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 10px;
   width: 100%;
-  max-width: 720px;
+  max-width: 200px;
   margin: 0 auto;
-  padding: 14px 20px;
+  padding: 16px 14px;
   border-radius: 16px;
   background: rgba(59, 130, 246, 0.05);
   border: 1px solid rgba(59, 130, 246, 0.16);
   animation: fadeUp 0.4s 0.3s ease forwards;
   opacity: 0;
+  align-self: start;
 }
-.host-join-info { flex: 1; min-width: 0; }
-.host-join-title {
+.host-join-card .host-join-title {
   font-size: 11px;
   font-weight: 800;
   color: #94a3b8;
-  letter-spacing: 0.08em;
-  margin-bottom: 3px;
+  letter-spacing: 0.14em;
 }
-.host-join-url {
-  font-size: 13px;
-  font-weight: 600;
-  color: #93c5fd;
-  word-break: break-all;
-}
-.host-join-code {
+.host-join-card .host-join-code {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  padding: 6px 16px;
-  border-radius: 12px;
+  gap: 8px;
+  padding: 5px 14px;
+  border-radius: 10px;
   background: rgba(15, 23, 42, 0.7);
   border: 1px solid rgba(59, 130, 246, 0.3);
   flex-shrink: 0;
@@ -2529,21 +2550,21 @@ input[type='text'], input[type='email'], input[type='password'], select {
 }
 .host-join-code b {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 900;
   letter-spacing: 0.14em;
   color: #3b82f6;
   text-shadow: 0 0 20px rgba(59, 130, 246, 0.35);
 }
 .host-join-qr {
-  width: 54px;
-  height: 54px;
-  border-radius: 10px;
+  width: 110px;
+  height: 110px;
+  border-radius: 12px;
   background: #fff;
-  padding: 4px;
+  padding: 6px;
   flex-shrink: 0;
 }
-.host-join-qr img { width: 100%; height: 100%; border-radius: 6px; display: block; }
+.host-join-qr img { width: 100%; height: 100%; border-radius: 8px; display: block; }
 .host-join-qr-preview {
   display: flex;
   align-items: center;
@@ -2551,16 +2572,15 @@ input[type='text'], input[type='email'], input[type='password'], select {
   color: #334155;
   font-size: 10px;
 }
-@media (max-width: 640px) {
-  .host-join-strip { flex-wrap: wrap; gap: 12px; }
-  .host-join-url { font-size: 12px; }
+@media (max-width: 1100px) {
+  .host-join-card { grid-column: 1; grid-row: 3; max-width: 220px; }
 }
 
 /* ===== BIG-SCREEN PROJECTION (live question) ===== */
 @media (min-width: 1200px) {
   .game-container {
     max-width: 1280px;
-    padding: 24px 340px 40px 32px;   /* room for the pinned rail on the right */
+    padding: 20px 32px 40px;   /* rail is a real grid column now — no extra padding */
   }
   .game-container > .question-card,
   .game-container > .options-grid,

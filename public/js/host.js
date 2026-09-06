@@ -513,7 +513,7 @@ function renderGame() {
     const sorted = Object.entries(state.scores).sort((a, b) => b[1] - a[1]);
     if (sorted.length > 0) {
       const rail = h('div', 'host-ranking-rail');
-      rail.appendChild(h('div', 'host-rail-title', [L('LIVE', 'مباشر', 'CANLI'), ' ', L('RANKING', 'الترتيب', 'SIRALAMA')]));
+      rail.appendChild(h('div', 'host-rail-title', [h('span', 'host-live-dot', []), L('LIVE', 'مباشر', 'CANLI'), ' ', L('RANKING', 'الترتيب', 'SIRALAMA')]));
       const maxScore = sorted[0] ? sorted[0][1] : 1;
       sorted.forEach(([name, score], i) => {
         const player = state.players.find(p => p.name === name);
@@ -527,7 +527,12 @@ function renderGame() {
         entry.appendChild(left);
         const pts = h('div', 'host-rail-fillwrap');
         pts.appendChild(bar);
-        entry.appendChild(h('div', 'host-rail-score font-display', [String(score)]));
+        const scoreEl = h('div', 'host-rail-score font-display', [String(score)]);
+        const change = state.scoreChanges ? state.scoreChanges[name] : undefined;
+        if (change !== undefined && change !== 0) {
+          scoreEl.appendChild(h('span', `host-score-float ${change > 0 ? 'positive' : 'negative'}`, [(change > 0 ? '+' : '') + change]));
+        }
+        entry.appendChild(scoreEl);
         entry.appendChild(pts);
         rail.appendChild(entry);
       });
@@ -618,8 +623,10 @@ function renderGame() {
     ]));
     state.players.forEach(p => {
       const ans = state.answered[p.name];
-      const cls = ans !== undefined ? 'answer-chip answered' : 'answer-chip waiting';
-      const icon = ans !== undefined ? spanCheck() : spanDot();
+      const isCorrect = state.showReveal && state.revealData?.correctPlayers?.includes(p.name);
+      let cls = ans !== undefined ? 'answer-chip answered' : 'answer-chip waiting';
+      if (isCorrect) cls += ' chip-correct';
+      const icon = isCorrect ? spanCheck() : (ans !== undefined ? spanCheck() : spanDot());
       answerStatus.appendChild(h('div', cls, [h('span', 'ans-emoji', [p.emoji]), h('span', 'ans-name', [p.name]), icon]));
     });
     const metaRow = h('div', 'host-meta-row');
@@ -1197,6 +1204,7 @@ function handleHostMessage(msg) {
       break;
 
     case 'player_answered':
+      captureScoreDelta(msg.scores);
       state.scores = msg.scores;
       if (state.screen === 'game') render();
       break;
@@ -1413,6 +1421,23 @@ function handlePlayerMessage(msg) {
   }
 }
 
+/* Record per-player score deltas since last render (for +N bursts) */
+function captureScoreDelta(newScores) {
+  if (!state.scores || Object.keys(state.scores).length === 0) return;
+  const deltas = {};
+  const names = new Set([...Object.keys(state.scores), ...Object.keys(newScores)]);
+  names.forEach(name => {
+    const prev = state.scores[name] || 0;
+    const next = newScores[name] || 0;
+    const diff = next - prev;
+    if (diff !== 0) deltas[name] = diff;
+  });
+  if (Object.keys(deltas).length > 0) {
+    state.scoreChanges = Object.assign({}, deltas);
+    setTimeout(() => { state.scoreChanges = {}; }, 1500);
+  }
+}
+
 function updateTimer() {
   const progress = document.querySelector('.timer-ring-progress');
   const text = document.querySelector('.timer-text');
@@ -1445,8 +1470,8 @@ function fireConfetti() {
   const duration = 4000;
   const end = Date.now() + duration;
   (function frame() {
-    confetti({ particleCount: 4, angle: 60, origin: { x: 0 }, colors: ['#38bdf8', '#a78bfa', '#f472b6', '#22c55e', '#fbbf24'] });
-    confetti({ particleCount: 4, angle: 120, origin: { x: 1 }, colors: ['#38bdf8', '#a78bfa', '#f472b6', '#22c55e', '#fbbf24'] });
+    confetti({ particleCount: 4, angle: 60, origin: { x: 0 }, colors: ['#3b82f6', '#6366f1', '#22d3ee', '#34d399', '#fbbf24'] });
+    confetti({ particleCount: 4, angle: 120, origin: { x: 1 }, colors: ['#3b82f6', '#6366f1', '#22d3ee', '#34d399', '#fbbf24'] });
     if (Date.now() < end) requestAnimationFrame(frame);
   })();
 }

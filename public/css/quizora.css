@@ -1977,7 +1977,7 @@ input[type='text'], input[type='email'], input[type='password'], select {
   .controller-bottom { order: 8; margin-top: auto; }
 
   /* Bigger touch targets for answer options */
-  .controller-option { min-height: 92px; padding: 18px 12px 14px; justify-content: flex-start; }
+  .controller-option { min-height: 92px; padding: 12px 12px 16px; justify-content: flex-start; }
   .controller-option-text { font-size: 16px; }
 
   /* Question readability on phones */

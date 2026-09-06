@@ -121,6 +121,8 @@ function startCreate() {
 }
 
 function render() {
+  const screenChanged = state._lastScreen !== state.screen;
+  state._lastScreen = state.screen;
   app.innerHTML = '';
   const screens = {
     landing: renderLanding,
@@ -141,6 +143,21 @@ function render() {
   if (fn) app.appendChild(fn());
   if (state.authOpen) app.appendChild(renderAuthModal());
   if (state.settingsOpen) app.appendChild(renderSettings());
+  if (screenChanged && !document.hidden) {
+    app.classList.remove('view-enter');
+    requestAnimationFrame(() => {
+      void app.offsetWidth;
+      app.classList.add('view-enter');
+    });
+  }
+}
+
+function stateLoading() {
+  return h('div', 'state-waiting brand-loading', [
+    h('div', 'brand-spinner', []),
+    h('div', 'state-title font-display', [L('PREPARING', 'جارٍ التجهيز…', 'HAZIRLANIYOR')]),
+    h('div', 'state-sub', [L('Loading…', 'جارٍ التحميل…', 'Yükleniyor…')])
+  ]);
 }
 
 function langCyclePill() {
@@ -464,7 +481,7 @@ async function injectHostJoinQr() {
 /* ======================== GAME ======================== */
 function renderGame() {
   const q = state.questions[state.currentQ];
-  if (!q) return h('div', '', ['Loading...']);
+  if (!q) return stateLoading();
   const lq = Lq(q);
 
   const c = h('div', 'game-container');
@@ -998,7 +1015,7 @@ function renderPlayerWaiting() {
 
 function renderPlayerAnswer() {
   const q = state.questions[state.currentQ];
-  if (!q) return h('div', 'state-waiting', [h('div', 'state-title font-display', ['Loading...'])]);
+  if (!q) return stateLoading();
   const lq = Lq(q);
 
   const c = h('div', 'controller-container');

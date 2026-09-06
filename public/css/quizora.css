@@ -3942,3 +3942,179 @@ html[dir="rtl"] .cat-btn.selected::after { right: auto; left: 9px; }
   .controller-option-letter { width: 34px; height: 34px; font-size: 14px; margin-bottom: 6px; }
   .controller-option-text { font-size: 15px; line-height: 1.25; }
 }
+
+/* ================================================================
+   GLOBAL POLISH PASS
+   One shared motion language for Host / Player / Results / Homepage:
+   consistent easing tokens, tactile press feedback, keyboard focus
+   rings, on-brand loading/empty states, and a single screen-entrance
+   transition. Pure overrides — the elevated per-screen design stays.
+   ================================================================ */
+
+:root {
+  --motion-fast: 140ms;
+  --motion-base: 220ms;
+  --motion-slow: 380ms;
+  --ease-press: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ring-focus: rgba(56, 189, 248, 0.7);
+}
+
+/* No gray tap-flash on any interactive element */
+button, [role='button'], .act-card, .cat-btn, .mode-btn,
+.player-chip, .presence-avatar, .powerup-btn, input, select, textarea {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* ---------- Tactile, unified press ---------- */
+.btn-primary:active, .btn-success:active, .start-btn:active,
+.btn-ghost:active, .back-btn:active, .mode-btn:active,
+.cat-btn:active, .lang-pill:active, .corner-login:active,
+.player-chip:active, .host-qb-btn:active, .badge:active,
+.powerup-btn:active, .option-btn:active, .stat-card:active {
+  transform: translateY(0) scale(0.96);
+}
+
+.btn-primary, .btn-success, .start-btn {
+  transition: transform var(--motion-base) var(--ease-press),
+              box-shadow var(--motion-base) var(--ease-press),
+              background var(--motion-base) ease;
+  will-change: transform;
+}
+.btn-ghost, .back-btn, .mode-btn, .cat-btn, .lang-pill,
+.corner-login, .player-chip, .host-qb-btn, .badge, .powerup-btn {
+  transition: transform var(--motion-fast) var(--ease-press),
+              background var(--motion-base) ease,
+              border-color var(--motion-base) ease,
+              color var(--motion-base) ease,
+              box-shadow var(--motion-base) ease,
+              filter var(--motion-base) ease;
+}
+
+/* Answer options: pressing pops, correct stays lit, wrong shakes */
+.option-btn { transition: transform var(--motion-fast) var(--ease-press), border-color var(--motion-base) ease, background var(--motion-base) ease, box-shadow var(--motion-base) ease, opacity var(--motion-base) ease; }
+.option-btn.correct { box-shadow: 0 0 26px rgba(34, 197, 94, 0.22), inset 0 0 14px rgba(34, 197, 94, 0.1); }
+.option-btn.wrong { animation: shake 0.4s ease; }
+.controller-option { transition: transform var(--motion-fast) var(--ease-press), border-color var(--motion-base) ease, background var(--motion-base) ease, box-shadow var(--motion-base) ease; }
+
+/* ---------- Screen-entrance transition ---------- */
+@keyframes viewEnter {
+  0% { opacity: 0; transform: translateY(16px) scale(0.995); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+#app.view-enter {
+  animation: viewEnter var(--motion-slow) var(--ease-press);
+  -webkit-animation: viewEnter var(--motion-slow) var(--ease-press);
+}
+
+/* ---------- Brand loader / waiting states ---------- */
+.brand-loading { gap: 20px; }
+.brand-spinner {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  position: relative;
+  animation: brandSpin 1.1s linear infinite;
+}
+.brand-spinner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid rgba(56, 189, 248, 0.12);
+  border-top-color: #38bdf8;
+  border-right-color: rgba(56, 189, 248, 0.55);
+  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.45));
+}
+.brand-spinner::after {
+  content: '';
+  position: absolute;
+  inset: 13px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.55), transparent 70%);
+  animation: brandPulse 1.6s ease-in-out infinite;
+}
+@keyframes brandSpin { to { transform: rotate(360deg); } }
+@keyframes brandPulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.18); }
+}
+.state-waiting .state-title { color: #f1f5f9; text-shadow: 0 0 22px rgba(56, 189, 248, 0.25); }
+.state-waiting .state-sub { color: #64748b; letter-spacing: 0.02em; }
+
+/* ---------- Empty states, on-brand ---------- */
+.empty-players {
+  border: 1px dashed rgba(148, 163, 184, 0.22);
+  border-radius: 18px;
+  margin: 6px 0;
+  transition: border-color var(--motion-base) ease, background var(--motion-base) ease;
+}
+.empty-players:hover { border-color: rgba(56, 189, 248, 0.45); background: rgba(56, 189, 248, 0.04); }
+.empty-players-icon { animation: floatY 2.6s ease-in-out infinite; }
+.empty-players-text { color: #64748b; }
+.presence-empty {
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px dashed rgba(148, 163, 184, 0.18);
+  text-align: center;
+  animation: fadeUp 0.4s ease;
+}
+
+/* ---------- Toast micro-feedback ---------- */
+.app-toast {
+  backdrop-filter: blur(14px);
+  background: rgba(10, 15, 30, 0.92);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 26px rgba(56, 189, 248, 0.12);
+}
+.app-toast.show { animation: toastIn var(--motion-base) var(--ease-pop); }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px) scale(0.96); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+.app-toast.toast-copy { box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 26px rgba(34, 197, 94, 0.2); }
+.app-toast.toast-error { border-color: rgba(239, 68, 68, 0.45); color: #fca5a5; }
+
+/* ---------- Score / rank feedback glow ---------- */
+.score-change { text-shadow: 0 0 12px currentColor; }
+
+/* ---------- Keyboard focus rings ---------- */
+.btn-primary:focus-visible, .btn-success:focus-visible, .btn-ghost:focus-visible,
+.back-btn:focus-visible, .start-btn:focus-visible, .mode-btn:focus-visible,
+.cat-btn:focus-visible, .lang-pill:focus-visible, .corner-login:focus-visible,
+.player-chip:focus-visible, .host-qb-btn:focus-visible, .badge:focus-visible,
+.powerup-btn:focus-visible, .option-btn:focus-visible, .controller-option:focus-visible,
+.stat-card:focus-visible, select:focus-visible, textarea:focus-visible,
+input:not([type='radio']):not([type='checkbox']):focus-visible {
+  outline: 2px solid var(--ring-focus);
+  outline-offset: 2px;
+  border-radius: max(6px, 0.35em);
+}
+
+/* ---------- Inputs focus glow ---------- */
+input, select, textarea {
+  transition: border-color var(--motion-base) ease, box-shadow var(--motion-base) ease;
+}
+.input-field:focus, select:focus,
+input[type='text']:focus, input[type='number']:focus, input[type='password']:focus,
+input[type='email']:focus, textarea:focus {
+  border-color: rgba(56, 189, 248, 0.55);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.14), 0 0 22px rgba(56, 189, 248, 0.12);
+  outline: none;
+}
+
+/* ---------- Particle field: fade at edges for a vignette feel ---------- */
+#particles-canvas {
+  -webkit-mask-image: radial-gradient(ellipse at 50% 40%, black 50%, transparent 88%);
+  mask-image: radial-gradient(ellipse at 50% 40%, black 50%, transparent 88%);
+}
+
+/* ---------- Accessibility: honor reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

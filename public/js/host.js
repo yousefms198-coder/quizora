@@ -131,6 +131,7 @@ function render() {
     player_waiting: renderPlayerWaiting,
     player_answer: renderPlayerAnswer,
     player_result: renderPlayerResult,
+    player_gameover: renderPlayerGameOver,
     practice: renderPractice,
     dashboard: renderDashboard,
   };
@@ -708,14 +709,22 @@ function showRevealOverlay(data) {
     const lbSection = h('div', 'reveal-leaderboard');
     lbSection.appendChild(h('div', 'reveal-lb-title', [L('STANDINGS', 'الترتيب', 'SIRALAMA')]));
     const medals = ['🥇', '🥈', '🥉'];
+    const maxScore = data.ranked[0] ? data.ranked[0].score : 1;
     data.ranked.forEach((entry, i) => {
-      const row = h('div', `reveal-lb-row rank-anim`, [], { style: `animation-delay: ${i * 0.1 + 0.5}s` });
-      row.appendChild(h('div', 'reveal-lb-rank', [medals[i] || `#${i + 1}`]));
+      const isLeader = i === 0;
+      const scoredThisRound = data.correctPlayers?.includes(entry.name);
+      const row = h('div', `reveal-lb-row${isLeader ? ' leader' : ''}${scoredThisRound ? ' gained' : ''} rank-anim`, [], { style: `animation-delay: ${i * 0.1 + 0.5}s` });
+      row.appendChild(h('div', 'reveal-lb-rank', [isLeader ? '👑' : (medals[i] || `#${i + 1}`)]));
       const info = h('div', 'reveal-lb-info');
       info.appendChild(h('div', 'reveal-lb-name', [`${entry.emoji} ${entry.name}`]));
       if (entry.streak >= 2) info.appendChild(h('div', 'reveal-lb-streak', [`🔥 ${entry.streak} ${L('streak', 'سلسلة', 'seri')}`]));
+      if (scoredThisRound) info.appendChild(h('div', 'reveal-lb-correct', [L('scored ✓', 'سجل نقاط ✓', 'puan aldı ✓')]));
       row.appendChild(info);
-      row.appendChild(h('div', 'reveal-lb-score font-display', [String(entry.score)]));
+      const scoreWrap = h('div', 'reveal-lb-scorewrap');
+      scoreWrap.appendChild(h('div', 'reveal-lb-score font-display', [String(entry.score)]));
+      scoreWrap.appendChild(h('div', 'reveal-lb-bar', [h('div', 'reveal-lb-fill', [], { style: `width:${Math.max((entry.score / maxScore) * 100, 4)}%` })]));
+      row.appendChild(scoreWrap);
+      if (isLeader) row.appendChild(h('span', 'reveal-lb-leader', [L('LEADER', 'المتصدر', 'LİDER')]));
       lbSection.appendChild(row);
     });
     overlay.appendChild(lbSection);
@@ -754,30 +763,83 @@ function showPowerupNotification(message) {
 }
 
 /* ======================== GAME OVER ======================== */
+function gameOverRanked() {
+  return Object.entries(state.scores).sort((a, b) => b[1] - a[1]);
+}
+
+function buildPodium(ranked, opts) {
+  const podium = h('div', 'podium');
+  const tiers = [
+    ranked[1] ? { rank: 2, name: ranked[1][0], score: ranked[1][1] } : null,
+    ranked[0] ? { rank: 1, name: ranked[0][0], score: ranked[0][1] } : null,
+    ranked[2] ? { rank: 3, name: ranked[2][0], score: ranked[2][1] } : null,
+  ];
+  tiers.forEach((t) => {
+    if (!t) return;
+    const tier = h('div', `podium-tier rank-${t.rank}`);
+    const player = state.players.find(p => p.name === t.name);
+    const isMe = opts?.me === t.name;
+    if (t.rank === 1) tier.appendChild(h('div', 'podium-crown', ['👑']));
+    tier.appendChild(h('div', `podium-avatar r${t.rank}${isMe ? ' me' : ''}`, [
+      h('span', '', [player?.emoji || '🙂'])
+    ], { style: `--av:${avatarTint(t.name)}` }));
+    tier.appendChild(h('div', 'podium-name font-display', [t.name.split(' ')[0]]));
+    const scoreEl = h('div', 'podium-score font-display', ['0'], { id: `podium-score-${t.rank}` });
+    tier.appendChild(scoreEl);
+    const labels = {
+      1: L('CHAMPION', 'بطل الغرفة', 'ODA ŞAMPİYONU'),
+      2: L('RUNNER UP', 'الوصيف', 'İKİNCİ'),
+      3: L('THIRD PLACE', 'المركز الثالث', 'ÜÇÜNCÜ')
+    };
+    tier.appendChild(h('div', 'podium-label', [labels[t.rank]]));
+    tier.appendChild(h('div', 'podium-taunt', [
+      t.rank === 1 ? L('Top of the room', 'في صدارة الغرفة', 'Odanın zirvesinde')
+        : t.rank === 2 ? L('So close!', 'قريب جداً!', 'Çok yakındı!')
+        : L('Great fight', 'قتال رائع', 'Harika mücadele')
+    ]));
+    tier.appendChild(h('div', `podium-base pb-${t.rank}`));
+    podium.appendChild(tier);
+  });
+
+  setTimeout(() => {
+    ranked.slice(0, 3).forEach((arr, i) => {
+      const rank = i + 1;
+      const el = document.getElementById(`podium-score-${rank}`);
+      if (el) countUp(el, arr[1], 850 + i * 160);
+    });
+  }, opts?.countDelay ?? 600);
+  return podium;
+}
+
 function renderGameOver() {
   const c = h('div', 'gameover-container');
-  const ranked = Object.entries(state.scores).sort((a, b) => b[1] - a[1]);
-
-  c.appendChild(h('h2', 'font-display gameover-title', [L('Game Over!', 'انتهت اللعبة!', 'Oyun Bitti!')]));
+  const t = h('div', 'gameover-trophy', ['🏆']);
+  c.appendChild(t);
+  c.appendChild(h('div', 'go-kicker', [L('THE ROOM HAS A WINNER', 'للغرفة بطل', 'ODANIN ŞAMPİYONU VAR')]));
+  c.appendChild(h('h2', 'font-display gameover-title', [L('Final Results', 'النتائج النهائية', 'SONUÇLAR')]));
   c.appendChild(h('p', 'gameover-subtitle', [L('Great game, everyone', 'لعبة رائعة من الجميع', 'Harika bir oyundu, millet')]));
 
-  /* --- Winner spotlight --- */
-  if (ranked.length > 0) {
-    const player = state.players.find(p => p.name === ranked[0][0]);
-    const wc = h('div', 'winner-spotlight');
-    wc.appendChild(h('div', 'winner-crown', ['👑']));
-    wc.appendChild(h('div', 'winner-label', [L('CHAMPION OF THE ROOM', 'بطل الغرفة', 'ODANIN ŞAMPİYONU')]));
-    wc.appendChild(h('div', 'winner-name font-display', [player?.emoji || '🎉', ' ', String(ranked[0][0])]));
-    const winnerScore = h('div', 'winner-score-count font-display', ['0'], { id: 'winner-score-count' });
-    wc.appendChild(winnerScore);
-    wc.appendChild(h('div', 'winner-score-unit', [L('points', 'نقطة', 'puan')]));
-    c.appendChild(wc);
+  const ranked = gameOverRanked();
 
-    setTimeout(() => {
-      const el = document.getElementById('winner-score-count');
-      if (el) countUp(el, ranked[0][1], 900);
-      fireConfetti();
-    }, 600);
+  if (ranked.length > 0) {
+    c.appendChild(buildPodium(ranked, { countDelay: 800 }));
+    setTimeout(fireConfetti, 1000);
+  }
+
+  /* --- Full ranking (all players beyond podium) --- */
+  if (ranked.length > 3) {
+    const section = h('div', 'final-ranking');
+    section.appendChild(h('div', 'fr-title', [L('FULL RANKING', 'الترتيب الكامل', 'TAM SIRALAMA')]));
+    ranked.slice(3).forEach(([name, score], i) => {
+      const player = state.players.find(p => p.name === name);
+      const row = h('div', 'fr-row', [], { style: `animation-delay: ${1.2 + i * 0.08}s` });
+      row.appendChild(h('div', 'fr-pos', [String(i + 4)]));
+      row.appendChild(h('div', `avatar avatar-sm`, [h('span', '', [player?.emoji || '🙂'])], { style: `--av:${avatarTint(name)}` }));
+      row.appendChild(h('div', 'fr-name', [name.split(' ')[0]]));
+      row.appendChild(h('div', 'fr-score font-display', [String(score)]));
+      section.appendChild(row);
+    });
+    c.appendChild(section);
   }
 
   if (state.playerStats && Object.keys(state.playerStats).length > 0) {
@@ -785,7 +847,7 @@ function renderGameOver() {
     ranked.forEach(([name], i) => {
       const stats = state.playerStats[name];
       if (!stats) return;
-      const card = h('div', `stat-card glass rank-${Math.min(i + 1, 3)}`, [], { style: `animation-delay: ${0.5 + i * 0.12}s` });
+      const card = h('div', `stat-card glass rank-${Math.min(i + 1, 3)}`, [], { style: `animation-delay: ${1.4 + i * 0.1}s` });
       card.appendChild(h('div', 'stat-rank', [i === 0 ? '👑' : `#${i + 1}`]));
       card.appendChild(h('div', 'stat-name', [`${stats.emoji} ${name}`]));
       card.appendChild(h('div', 'stat-score font-display', [String(stats.score)]));
@@ -798,25 +860,10 @@ function renderGameOver() {
       statsCards.appendChild(card);
     });
     c.appendChild(statsCards);
-  } else {
-    const lb = h('div', 'leaderboard');
-    const medals = ['🥇', '🥈', '🥉'];
-    ranked.forEach(([name, score], i) => {
-      const player = state.players.find(p => p.name === name);
-      const entry = h('div', `lb-entry rank-${Math.min(i + 1, 3)}`, [], { style: `animation-delay: ${0.5 + i * 0.1}s` });
-      entry.appendChild(h('div', 'lb-rank', [medals[i] || `${i + 1}`]));
-      const info = h('div', 'lb-info');
-      info.appendChild(h('div', 'lb-name', [`${player?.emoji || ''} ${name}`]));
-      if (state.streaks[name] > 0) info.appendChild(h('div', 'lb-streak', [`🔥 ${state.streaks[name]} ${L('streak', 'سلسلة', 'seri')}`]));
-      entry.appendChild(info);
-      entry.appendChild(h('div', 'lb-score font-display', [String(score)]));
-      lb.appendChild(entry);
-    });
-    c.appendChild(lb);
   }
 
   const actions = h('div', 'gameover-actions');
-  actions.appendChild(h('button', 'btn-primary', [L('Play Again', 'العب مجدداً', 'Tekrar Oyna')], {
+  actions.appendChild(h('button', 'btn-primary go-play-btn', [L('Play Again', 'العب مجدداً', 'Tekrar Oyna')], {
     onclick: () => { sound.click(); ws.send(JSON.stringify({ type: 'restart_game' })); }
   }));
   actions.appendChild(h('button', 'btn-ghost', [L('Leave Game', 'مغادرة اللعبة', 'Oyundan Ayrıl')], {
@@ -1190,7 +1237,81 @@ function renderPlayerResult() {
   return c;
 }
 
-/* ======================== PLAYER JOIN ======================== */
+function renderPlayerGameOver() {
+  const c = h('div', 'player-waiting');
+
+  c.appendChild(playerTopBar());
+
+  const ranked = gameOverRanked();
+  const myIdx = ranked.findIndex(([n]) => n === state.playerName);
+  const myRank = myIdx >= 0 ? myIdx + 1 : 0;
+  const myScore = state.scores[state.playerName] || 0;
+
+  const hero = h('div', 'pw-hero');
+  hero.appendChild(h('div', 'pw-hourglass', ['🏆']));
+  hero.appendChild(h('div', 'pw-title font-display', [L('FINAL RESULTS', 'النتائج النهائية', 'SONUÇLAR')]));
+  hero.appendChild(h('div', 'pw-sub', [
+    myRank > 0
+      ? (myRank === 1
+        ? L('You are the CHAMPION of the room!', 'أنت بطل الغرفة!', 'Odanın şampiyonusun!')
+        : L(`You finished #${myRank}`, `أنهيت في المركز #${myRank}`, `#${myRank} olarak bitirdin`))
+      : L('Great game, everyone', 'لعبة رائعة من الجميع', 'Harika bir oyundu, millet')
+  ]));
+  c.appendChild(hero);
+
+  if (ranked.length > 0) {
+    c.appendChild(buildPodium(ranked, { me: state.playerName, countDelay: 700 }));
+    if (myRank === 1) { setTimeout(() => { fireConfetti(); }, 900); }
+  }
+
+  /* --- My rank callout (if not on podium) --- */
+  if (myRank > 3) {
+    const callout = h('div', 'pw-myrank glass');
+    callout.appendChild(h('div', 'pw-myrank-label', [L('YOUR RANK', 'ترتيبك', 'SIRAN')]));
+    callout.appendChild(h('div', 'pw-myrank-num font-display', [`#${myRank}`]));
+    callout.appendChild(h('div', 'pw-myrank-score', [L('Final score', 'النتيجة النهائية', 'Son puan'), ` · `, h('b', '', [String(myScore)])]));
+    c.appendChild(callout);
+  }
+
+  /* --- Full ranking --- */
+  if (ranked.length > 0) {
+    const section = h('div', 'final-ranking pw-fr');
+    section.appendChild(h('div', 'fr-title', [L('FULL RANKING', 'الترتيب الكامل', 'TAM SIRALAMA')]));
+    const medals = ['🥇', '🥈', '🥉'];
+    ranked.slice(0, 8).forEach(([name, score], i) => {
+      const isMe = name === state.playerName;
+      const player = state.players.find(p => p.name === name);
+      const row = h('div', `fr-row${isMe ? ' me' : ''}`, [], { style: `animation-delay: ${0.5 + i * 0.06}s` });
+      row.appendChild(h('div', 'fr-pos', [medals[i] || String(i + 1)]));
+      row.appendChild(h('div', 'avatar avatar-sm', [h('span', '', [player?.emoji || '🙂'])], { style: `--av:${avatarTint(name)}` }));
+      row.appendChild(h('div', 'fr-name', [name.split(' ')[0]]));
+      if (isMe) row.appendChild(h('span', 'pw-s-you', [L('YOU', 'أنت', 'SEN')]));
+      row.appendChild(h('div', 'fr-score font-display', [String(score)]));
+      section.appendChild(row);
+    });
+    c.appendChild(section);
+  }
+
+  c.appendChild(h('button', 'btn-ghost pw-leave', [L('Leave', 'مغادرة', 'Ayrıl')], {
+    onclick: () => {
+      sound.click();
+      removeRevealOverlay();
+      if (ws) { try { ws.close(); } catch {} }
+      state.screen = 'landing';
+      state.isHost = true;
+      state.roomCode = null;
+      state.playerName = '';
+      state.myPowerup = null;
+      state.players = [];
+      state.scores = {};
+      state.streaks = {};
+      render();
+    }
+  }));
+
+  return c;
+}
+
 function renderJoin() {
   const c = h('div', 'join-container');
   const card = h('div', 'join-card glass-strong');
@@ -1570,8 +1691,11 @@ function handlePlayerMessage(msg) {
 
     case 'game_over':
       state.scores = msg.scores;
+      state.playerStats = msg.playerStats || state.playerStats;
+      state.totalQuestions = msg.totalQuestions || state.totalQuestions;
       removeRevealOverlay();
-      state.screen = 'player_waiting';
+      state.screen = 'player_gameover';
+      sound.win();
       render();
       break;
 

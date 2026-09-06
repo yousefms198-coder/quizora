@@ -125,8 +125,44 @@ html[dir="rtl"] body, html[dir="rtl"] .font-display { font-family: 'Cairo', syst
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 24px;
+  padding: 76px 24px 24px;
   text-align: center;
+}
+
+.corner-widget {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  pointer-events: none;
+}
+.corner-widget > * { pointer-events: auto; }
+.lang-pill {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: border-color 0.15s ease;
+}
+.lang-pill:hover { border-color: #38bdf8; }
+.icon-chip {
+  width: 40px;
+  padding: 6px 0 !important;
+  font-size: 15px;
+}
+.corner-login {
+  padding: 8px 14px !important;
+  font-size: 12px !important;
+  font-weight: 700;
 }
 
 .landing-title {
@@ -340,6 +376,18 @@ html[dir="rtl"] body, html[dir="rtl"] .font-display { font-family: 'Cairo', syst
 
 @media (max-width: 600px) {
   .options-grid { grid-template-columns: 1fr; }
+}
+
+/* iOS keeps the page unzoomed when focusing inputs ≥16px font size */
+input[type='text'], input[type='email'], input[type='password'], select {
+  font-size: 16px !important;
+}
+
+@media (max-width: 380px) {
+  .controller-options { grid-template-columns: 1fr; }
+  .controller-option { min-height: 82px; padding: 14px 10px; font-size: 15px; }
+  .state-emoji { font-size: 50px; }
+  .reveal-verdict { font-size: 2.4rem; }
 }
 
 .option-btn {
@@ -594,6 +642,10 @@ html[dir="rtl"] body, html[dir="rtl"] .font-display { font-family: 'Cairo', syst
   min-height: 100vh;
   min-height: 100dvh;
   padding: 16px;
+  padding-top: max(16px, env(safe-area-inset-top));
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
   max-width: 500px;
   margin: 0 auto;
   width: 100%;

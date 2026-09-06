@@ -101,25 +101,28 @@ function render() {
     practice: renderPractice,
   };
   const fn = screens[state.screen];
+  const cornerScreens = ['landing', 'join', 'lobby', 'game', 'gameover', 'practice'];
+  if (cornerScreens.includes(state.screen)) app.appendChild(renderCornerWidget());
   if (fn) app.appendChild(fn());
   if (state.authOpen) app.appendChild(renderAuthModal());
   if (state.settingsOpen) app.appendChild(renderSettings());
 }
 
-function renderLangToggle(container) {
-  const seg = h('div', 'lang-toggle');
-  const langs = [
-    ['en', '🌍 English'],
-    ['ar', '🌐 العربية'],
-    ['tr', '🇹🇷 Türkçe'],
-  ];
-  langs.forEach(([id, label]) => {
-    const b = h('button', `lang-btn ${appLang === id ? 'active' : ''}`, [label], {
-      onclick: () => { setLang(id); sound.click(); render(); }
-    });
-    seg.appendChild(b);
+function langCyclePill() {
+  const order = ['en', 'ar', 'tr'];
+  const labels = { en: 'EN', ar: 'عربية', tr: 'TR' };
+  const next = order[(order.indexOf(appLang) + 1) % order.length];
+  return h('button', 'lang-pill', ['🌍 ' + labels[appLang]], {
+    title: L('Language', 'اللغة', 'Dil'),
+    onclick: () => { setLang(next); sound.click(); render(); }
   });
-  container.appendChild(seg);
+}
+
+function renderCornerWidget() {
+  const w = h('div', 'corner-widget');
+  w.appendChild(accountChip());
+  w.appendChild(langCyclePill());
+  return w;
 }
 
 /* ======================== DASHBOARD ======================== */
@@ -216,11 +219,6 @@ function renderLanding() {
   c.appendChild(h('div', 'font-display landing-title', ['QUIZORA']));
   c.appendChild(h('div', 'landing-subtitle', ['THE ROOM IS YOUR GAME SHOW']));
   c.appendChild(h('div', 'landing-tagline', [L('Create a game. Invite everyone. Then let the chaos begin.', 'أنشئ لعبة. ادعُ الجميع. ثم دع الفوضى تبدأ!', 'Bir oyun oluştur. Herkesi davet et. Sonra kaos başlasın!')]))
-
-  const langRow = h('div', 'lang-row', [], { style: 'display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap' });
-  renderLangToggle(langRow);
-  langRow.appendChild(accountChip());
-  c.appendChild(langRow);
 
   const tabs = h('div', '', []);
   renderModeTabs(tabs);
@@ -822,10 +820,6 @@ function renderJoin() {
 
   c.appendChild(h('button', 'back-btn', ['←'], { style: 'position:absolute;top:16px;left:16px', onclick: () => { sound.click(); state.screen = 'landing'; state.isHost = true; render(); } }));
 
-  const langRow = h('div', 'lang-row');
-  renderLangToggle(langRow);
-  c.appendChild(langRow);
-
   card.appendChild(h('div', 'join-logo font-display', ['QUIZORA']));
   card.appendChild(h('div', 'join-subtitle', [L('Enter the room code from the host screen', 'أدخل رمز الغرفة المعروض على شاشة المضيف', 'Ev sahibi ekranındaki oda kodunu gir')]));
 
@@ -1308,26 +1302,26 @@ function logout() {
 }
 
 function accountChip() {
-  const wrap = h('div', '', [], { style: 'display:flex;gap:8px;align-items:center' });
-  if (state.user) {
-    wrap.appendChild(h('button', 'btn-success', ['📝 ' + L('Practice', 'تدريب', 'Pratik')], {
-      onclick: () => {
-        sound.click();
-        state.practice = { pick: { categories: ['yks'], num: 5, mode: 'instant', timer: 0 } };
-        state.practiceView = 'setup';
-        state.screen = 'practice';
-        render();
-      }
-    }));
-    wrap.appendChild(h('button', 'btn-ghost', [state.user.avatar + ' ' + state.user.username + ' ⚙️'], {
-      title: L('Account Settings', 'إعدادات الحساب', 'Hesap Ayarları'),
-      onclick: () => { sound.click(); state.pendingAvatar = undefined; state.settingsOpen = true; render(); }
-    }));
-  } else {
-    wrap.appendChild(h('button', 'btn-ghost', ['🔐 ' + L('Login / Sign Up', 'تسجيل الدخول / إنشاء حساب', 'Giriş / Kayıt Ol')], {
+  if (!state.user) {
+    return h('button', 'btn-primary corner-login', [L('🔐 Login', '🔐 دخول', '🔐 Giriş')], {
       onclick: () => { sound.click(); state.authOpen = true; render(); }
-    }));
+    });
   }
+  const wrap = h('div', '', [], { style: 'display:flex;gap:6px' });
+  wrap.appendChild(h('button', 'btn-ghost icon-chip', ['📝'], {
+    title: L('Practice Tests', 'اختبارات التمرين', 'Pratik Testleri'),
+    onclick: () => {
+      sound.click();
+      state.practice = { pick: { categories: ['yks'], num: 5, mode: 'instant', timer: 0 } };
+      state.practiceView = 'setup';
+      state.screen = 'practice';
+      render();
+    }
+  }));
+  wrap.appendChild(h('button', 'btn-ghost icon-chip', [state.user.avatar || '😎'], {
+    title: state.user.username + ' — ' + L('Account Settings', 'إعدادات الحساب', 'Hesap Ayarları'),
+    onclick: () => { sound.click(); state.pendingAvatar = undefined; state.settingsOpen = true; render(); }
+  }));
   return wrap;
 }
 

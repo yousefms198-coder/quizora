@@ -1,4 +1,4 @@
-const PARTICLE_COLORS = ['rgba(56,189,248,0.4)', 'rgba(167,139,250,0.3)', 'rgba(244,114,182,0.3)', 'rgba(251,191,36,0.2)'];
+const PARTICLE_COLORS = ['rgba(56,189,248,0.35)', 'rgba(99,102,241,0.25)', 'rgba(244,114,182,0.2)', 'rgba(251,191,36,0.15)'];
 
 class ParticleSystem {
   constructor(canvas) {
@@ -21,28 +21,29 @@ class ParticleSystem {
   init() {
     this.particles = [];
     this.shapes = [];
-    const count = Math.min(60, Math.floor(window.innerWidth / 20));
+    const count = Math.min(45, Math.floor(window.innerWidth / 28));
     for (let i = 0; i < count; i++) {
       this.particles.push({
         x: Math.random() * this.canvas.width,
         y: Math.random() * this.canvas.height,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        r: Math.random() * 2 + 0.5,
+        vx: (Math.random() - 0.5) * 0.2,
+        vy: (Math.random() - 0.5) * 0.15,
+        r: Math.random() * 1.5 + 0.3,
         color: PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)],
         pulse: Math.random() * Math.PI * 2,
+        pulseSpeed: 0.008 + Math.random() * 0.015,
       });
     }
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 4; i++) {
       this.shapes.push({
         x: Math.random() * this.canvas.width,
         y: Math.random() * this.canvas.height,
-        vx: (Math.random() - 0.5) * 0.15,
-        vy: (Math.random() - 0.5) * 0.15,
-        size: Math.random() * 80 + 40,
-        color: PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)].replace(/[\d.]+\)$/, '0.08)'),
+        vx: (Math.random() - 0.5) * 0.08,
+        vy: (Math.random() - 0.5) * 0.08,
+        size: Math.random() * 60 + 30,
+        color: PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)].replace(/[\d.]+\)$/, '0.04)'),
         rotation: Math.random() * Math.PI * 2,
-        rotSpeed: (Math.random() - 0.5) * 0.005,
+        rotSpeed: (Math.random() - 0.5) * 0.003,
         type: Math.floor(Math.random() * 3),
       });
     }
@@ -86,13 +87,13 @@ class ParticleSystem {
     this.particles.forEach(p => {
       p.x += p.vx;
       p.y += p.vy;
-      p.pulse += 0.02;
+      p.pulse += p.pulseSpeed;
       if (p.x < 0) p.x = this.canvas.width;
       if (p.x > this.canvas.width) p.x = 0;
       if (p.y < 0) p.y = this.canvas.height;
       if (p.y > this.canvas.height) p.y = 0;
 
-      const alpha = 0.5 + Math.sin(p.pulse) * 0.3;
+      const alpha = 0.4 + Math.sin(p.pulse) * 0.25;
       this.ctx.beginPath();
       this.ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
       this.ctx.fillStyle = p.color.replace(/[\d.]+\)$/, `${alpha})`);

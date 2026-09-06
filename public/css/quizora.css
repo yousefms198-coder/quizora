@@ -251,6 +251,14 @@ html[dir="rtl"] body, html[dir="rtl"] .font-display { font-family: 'Cairo', syst
   gap: 6px;
 }
 
+@media (max-width:600px) {
+  .landing-container { padding-top: 64px; }
+  .corner-widget { flex-direction: row; top: 10px; right: 10px; gap: 8px; }
+  .corner-login, .lang-pill { padding: 6px 10px !important; font-size: 11px !important; }
+  .icon-chip { width: 34px; padding: 5px 0 !important; }
+  .corner-login svg, .lang-pill svg, .icon-chip svg { width: 14px; height: 14px; }
+}
+
 /* --- Kicker --- */
 .landing-kicker {
   display: inline-flex;

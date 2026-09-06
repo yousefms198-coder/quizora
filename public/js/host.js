@@ -65,6 +65,33 @@ function h(tag, cls, children, attrs) {
   return e;
 }
 
+const ICONS = {
+  lock: [['rect', { x: 5, y: 11, width: 14, height: 9, rx: 2 }], ['path', { d: 'M8 11V7a4 4 0 0 1 8 0v4' }]],
+  edit: [['path', { d: 'M17 3a2.8 2.8 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z' }]],
+  globe: [['circle', { cx: 12, cy: 12, r: 9 }], ['path', { d: 'M3 12h18' }], ['path', { d: 'M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18Z' }]],
+  play: [['path', { d: 'M5 3.5l15 8.5-15 8.5Z' }]],
+  grad: [['path', { d: 'M2 8l10-5 10 5-10 5Z' }], ['path', { d: 'M6 10.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-5.5' }], ['path', { d: 'M22 8v6' }]],
+  users: [['circle', { cx: 9, cy: 8, r: 3.5 }], ['path', { d: 'M2.5 20c0-3.8 3-6 6.5-6s6.5 2.2 6.5 6' }], ['circle', { cx: 17, cy: 9, r: 2.5 }], ['path', { d: 'M17.5 14.7c2.4.6 4 2.3 4 5.3' }]],
+  sparkle: [['path', { d: 'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9Z' }]],
+};
+
+function hIcon(name, cls) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '2');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  if (cls) svg.classList.add(cls);
+  (ICONS[name] || []).forEach(([tag, attrs]) => {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const k in attrs) el.setAttribute(k, attrs[k]);
+    svg.appendChild(el);
+  });
+  return svg;
+}
+
 function startCreate() {
   state.isHost = true;
   const sendCreate = () => {
@@ -112,7 +139,7 @@ function langCyclePill() {
   const order = ['en', 'ar', 'tr'];
   const labels = { en: 'EN', ar: 'عربية', tr: 'TR' };
   const next = order[(order.indexOf(appLang) + 1) % order.length];
-  return h('button', 'lang-pill', ['🌍 ' + labels[appLang]], {
+  return h('button', 'lang-pill', [hIcon('globe', 'ic ic-s'), labels[appLang]], {
     title: L('Language', 'اللغة', 'Dil'),
     onclick: () => { setLang(next); sound.click(); render(); }
   });
@@ -133,11 +160,11 @@ function currentBank() {
 function renderModeTabs(container) {
   const tabs = h('div', 'mode-tabs');
   const modes = [
-    ['fun', '🎮', L('Fun Mode', 'الوضع الترفيهي', 'Eğlence Modu')],
-    ['exam', '🎓', L('Educational Mode', 'الوضع التعليمي', 'Eğitim Modu')],
+    ['fun', 'play', L('Fun Mode', 'الوضع الترفيهي', 'Eğlence Modu')],
+    ['exam', 'grad', L('Educational Mode', 'الوضع التعليمي', 'Eğitim Modu')],
   ];
   modes.forEach(([m, icon, label]) => {
-    const b = h('button', `mode-btn ${state.mode === m ? 'active' : ''}`, [`${icon} ${label}`], {
+    const b = h('button', `mode-btn ${state.mode === m ? 'active' : ''}`, [hIcon(icon, 'ic'), ' ' + label], {
       onclick: () => {
         sound.click();
         state.mode = m;
@@ -216,9 +243,10 @@ function appendSettingsRow(panel) {
 /* ======================== LANDING / DASHBOARD ======================== */
 function renderLanding() {
   const c = h('div', 'landing-container');
+  c.appendChild(h('div', 'landing-kicker', [L('The Family Quiz Game Show', 'مسابقة الأسرة التلفزيونية', 'Aile Bilgi Yarışması')]));
   c.appendChild(h('div', 'font-display landing-title', ['QUIZORA']));
-  c.appendChild(h('div', 'landing-subtitle', ['THE ROOM IS YOUR GAME SHOW']));
-  c.appendChild(h('div', 'landing-tagline', [L('Create a game. Invite everyone. Then let the chaos begin.', 'أنشئ لعبة. ادعُ الجميع. ثم دع الفوضى تبدأ!', 'Bir oyun oluştur. Herkesi davet et. Sonra kaos başlasın!')]))
+  c.appendChild(h('div', 'landing-subtitle', [L('HOST. INVITE. PLAY.', 'استضف. ادعُ. العب.', 'KUR. DAVET ET. OYNA.')]));
+  c.appendChild(h('div', 'landing-tagline', [L('Turn any room into a live game show in seconds.', 'حوّل أي غرفة إلى برنامج مسابقات مباشر في ثوانٍ.', 'Her odayı saniyeler içinde canlı bir yarışmaya dönüştür.')]))
 
   const tabs = h('div', '', []);
   renderModeTabs(tabs);
@@ -241,9 +269,9 @@ function renderLanding() {
   c.appendChild(actions);
 
   const badges = h('div', 'landing-badges');
-  [['👨‍👩‍👧‍👦', L('Friends & Family', 'أصدقاء وعائلة', 'Arkadaşlar ve Aile')], ['🎓', L('Exam Prep', 'التحضير للامتحانات', 'Sınav Hazırlığı')], ['🎉', L('Party Time', 'وقت الحفلات', 'Parti Zamanı')]].forEach(([icon, label]) => {
+  [['users', L('Friends & Family', 'أصدقاء وعائلة', 'Arkadaşlar ve Aile')], ['grad', L('Exam Prep', 'التحضير للامتحانات', 'Sınav Hazırlığı')], ['sparkle', L('Party Time', 'وقت الحفلات', 'Parti Zamanı')]].forEach(([icon, label]) => {
     const b = h('div', 'badge glass');
-    b.appendChild(h('span', 'badge-icon', [icon]));
+    b.appendChild(h('span', 'badge-icon', [hIcon(icon, 'ic ic-m')]));
     b.appendChild(document.createTextNode(label));
     badges.appendChild(b);
   });
@@ -254,7 +282,7 @@ function renderLanding() {
 /* ======================== LOBBY ======================== */
 function renderLobby() {
   const c = h('div', 'lobby-container', [], { style: 'padding:20px;gap:12px' });
-  c.appendChild(h('div', '', ['🎮'], { style: 'font-size:40px;margin-bottom:4px' }));
+  c.appendChild(h('div', '', [hIcon('play', 'ic ic-l')], { style: 'display:flex;justify-content:center;margin-bottom:4px' }));
   c.appendChild(h('h2', 'font-display', [L('Waiting for Players', 'بانتظار اللاعبين', 'Oyuncular Bekleniyor')], { style: 'font-size:1.5rem;font-weight:800;margin-bottom:2px' }));
   c.appendChild(h('p', '', [L('Scan QR or enter code on your phone', 'امسح الرمز أو أدخل رمز الغرفة من هاتفك', 'Telefonunla QR kodu tara veya kodu gir')], { style: 'color:#64748b;font-size:13px;margin-bottom:12px' }));
 
@@ -1302,12 +1330,12 @@ function logout() {
 
 function accountChip() {
   if (!state.user) {
-    return h('button', 'btn-primary corner-login', [L('🔐 Login', '🔐 دخول', '🔐 Giriş')], {
+    return h('button', 'btn-primary corner-login', [hIcon('lock', 'ic ic-s'), L('Login', 'تسجيل الدخول', 'Giriş')], {
       onclick: () => { sound.click(); state.authOpen = true; render(); }
     });
   }
   const wrap = h('div', '', [], { style: 'display:flex;gap:6px' });
-  wrap.appendChild(h('button', 'btn-ghost icon-chip', ['📝'], {
+  wrap.appendChild(h('button', 'btn-ghost icon-chip', [hIcon('edit', 'ic')], {
     title: L('Practice Tests', 'اختبارات التمرين', 'Pratik Testleri'),
     onclick: () => {
       sound.click();
@@ -1330,7 +1358,7 @@ function renderAuthModal() {
   });
   const card = h('div', 'glass-strong', [], { style: 'width:100%;max-width:420px;padding:20px;border-radius:16px;position:relative' });
   card.appendChild(h('button', 'btn-ghost', ['✕'], { style: 'position:absolute;top:10px;right:10px;flex:0 0 auto', onclick: () => { sound.click(); state.authOpen = false; render(); } }));
-  card.appendChild(h('div', 'section-label', [L('🔐 Login / Sign Up', '🔐 تسجيل الدخول / إنشاء حساب', '🔐 Giriş / Kayıt Ol')], { style: 'font-weight:800;color:#38bdf8;font-size:14px;margin-bottom:8px' }));
+  card.appendChild(h('div', 'section-label', [L('Login / Sign Up', 'تسجيل الدخول / إنشاء حساب', 'Giriş / Kayıt Ol')], { style: 'font-weight:800;color:#38bdf8;font-size:14px;margin-bottom:8px' }));
   card.appendChild(h('div', '', [L('Log in or create an account to take practice tests and track your scores.', 'سجّل الدخول أو أنشئ حساباً لدخول اختبارات الممارسة وتتبع نتائجك.', 'Pratik testleri çözmek ve puanlarınızı takip etmek için giriş yapın veya hesap oluşturun.')], { style: 'color:#64748b;font-size:12px;margin-bottom:12px' }));
 
   let mode = 'login';

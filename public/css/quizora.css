@@ -3682,6 +3682,9 @@ input:-webkit-autofill:focus {
 /* ---------- Hero: logo / subtitle / tagline ---------- */
 .landing-title {
   background: linear-gradient(120deg, #f0f9ff 0%, #bae6fd 28%, #38bdf8 55%, #22d3ee 78%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 0 45px rgba(56, 189, 248, 0.35)) drop-shadow(0 6px 30px rgba(0, 0, 0, 0.5));
 }
 .landing-subtitle {

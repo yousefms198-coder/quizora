@@ -3622,6 +3622,266 @@ input:-webkit-autofill:focus {
 }
 
 /* ================================================================
+   HOMEPAGE ELEVATION
+   Brings the landing experience up to the premium dark-space
+   game-show standard of the Host / Player / Results screens:
+   ambient glow orbs, luminous hero hierarchy, glowing action
+   cards with clear affordance, premium segmented mode toggle,
+   and polished category pills — same glass/gradient/glow language.
+   ================================================================ */
+
+/* ---------- Ambient glow orbs (landing only) ---------- */
+.landing-container::before,
+.landing-container::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  pointer-events: none;
+  z-index: -1;
+}
+.landing-container::before {
+  width: 420px; height: 420px;
+  top: -120px; left: -120px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.16), transparent 65%);
+  animation: orbDrift 14s ease-in-out infinite alternate;
+}
+.landing-container::after {
+  width: 380px; height: 380px;
+  bottom: -100px; right: -100px;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.10), transparent 65%);
+  animation: orbDrift 18s ease-in-out infinite alternate-reverse;
+}
+@keyframes orbDrift {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(40px, 30px) scale(1.08); }
+}
+
+/* ---------- Hero: kicker badge ---------- */
+.landing-kicker {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.12), rgba(34, 211, 238, 0.08));
+  box-shadow: 0 0 24px rgba(59, 130, 246, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.landing-kicker::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 50%;
+  left: -60%;
+  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  animation: kickerShine 3.6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes kickerShine {
+  0% { left: -60%; }
+  55%, 100% { left: 130%; }
+}
+
+/* ---------- Hero: logo / subtitle / tagline ---------- */
+.landing-title {
+  background: linear-gradient(120deg, #f0f9ff 0%, #bae6fd 28%, #38bdf8 55%, #22d3ee 78%, #3b82f6 100%);
+  filter: drop-shadow(0 0 45px rgba(56, 189, 248, 0.35)) drop-shadow(0 6px 30px rgba(0, 0, 0, 0.5));
+}
+.landing-subtitle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: #7dd3fc;
+  text-shadow: 0 0 18px rgba(56, 189, 248, 0.35);
+}
+.landing-subtitle::before,
+.landing-subtitle::after {
+  content: '';
+  height: 1px;
+  width: min(72px, 14vw);
+}
+.landing-subtitle::before { background: linear-gradient(90deg, transparent, rgba(125, 211, 252, 0.6)); }
+.landing-subtitle::after { background: linear-gradient(90deg, rgba(125, 211, 252, 0.6), transparent); }
+.landing-tagline {
+  color: #94a3b8;
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  max-width: 420px;
+}
+
+/* ---------- Action cards: row layout, glow, arrow affordance ---------- */
+.act-card {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 20px;
+  border-radius: 22px;
+}
+.act-card::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 60%;
+  left: -80%;
+  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  transform: skewX(-18deg);
+  transition: left 0.6s ease;
+  pointer-events: none;
+}
+.act-card:hover::after { left: 130%; }
+.act-card:focus-visible { outline: 2px solid #3b82f6; outline-offset: 3px; }
+.act-text { flex: 1; min-width: 0; text-align: left; }
+html[dir="rtl"] .act-text { text-align: right; }
+.act-sub { color: #94a3b8; }
+.act-arrow {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  color: #475569;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+html[dir="rtl"] .act-arrow { transform: scaleX(-1); }
+
+/* Create = blue energy, Join = green energy */
+.act-create {
+  border-color: rgba(59, 130, 246, 0.28);
+  background: linear-gradient(160deg, rgba(59, 130, 246, 0.14), rgba(59, 130, 246, 0.03));
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), 0 0 28px rgba(59, 130, 246, 0.10);
+}
+.act-create::before { background: linear-gradient(160deg, rgba(59, 130, 246, 0.12), transparent 55%); }
+.act-create:hover {
+  border-color: rgba(59, 130, 246, 0.55);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35), 0 0 36px rgba(59, 130, 246, 0.20);
+}
+.act-create .act-icon {
+  background: linear-gradient(135deg, #60a5fa, #2563eb);
+  border-color: rgba(147, 197, 253, 0.5);
+  box-shadow: 0 0 18px rgba(59, 130, 246, 0.5);
+}
+.act-create:hover .act-arrow { color: #60a5fa; transform: translateX(5px); }
+.act-join {
+  border-color: rgba(34, 197, 94, 0.28);
+  background: linear-gradient(160deg, rgba(34, 197, 94, 0.12), rgba(34, 197, 94, 0.02));
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), 0 0 28px rgba(34, 197, 94, 0.10);
+}
+.act-join::before { background: linear-gradient(160deg, rgba(34, 197, 94, 0.10), transparent 55%); }
+.act-join:hover {
+  border-color: rgba(34, 197, 94, 0.55);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35), 0 0 36px rgba(34, 197, 94, 0.20);
+}
+.act-join .act-icon {
+  background: linear-gradient(135deg, #4ade80, #16a34a);
+  border-color: rgba(134, 239, 172, 0.5);
+  box-shadow: 0 0 18px rgba(34, 197, 94, 0.5);
+}
+.act-join:hover .act-arrow { color: #4ade80; transform: translateX(5px); }
+.act-icon { margin-bottom: 0; flex-shrink: 0; }
+.act-icon .ic { width: 24px; height: 24px; }
+html[dir="rtl"] .act-create:hover .act-arrow,
+html[dir="rtl"] .act-join:hover .act-arrow { transform: scaleX(-1) translateX(5px); }
+
+/* ---------- Mode toggle: full-width premium segment ---------- */
+.landing-section { max-width: 480px; }
+.landing-section .mode-tabs {
+  display: flex;
+  width: 100%;
+  padding: 5px;
+  border-radius: 18px;
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  background: rgba(10, 15, 30, 0.85);
+  box-shadow: 0 0 24px rgba(59, 130, 246, 0.10);
+}
+.landing-section .mode-btn {
+  flex: 1;
+  justify-content: center;
+  padding: 12px 8px;
+  font-size: 13px;
+  border-radius: 13px;
+}
+.landing-section .mode-btn.active {
+  box-shadow: 0 4px 22px rgba(59, 130, 246, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* ---------- Config panel + category pills ---------- */
+.config-panel {
+  position: relative;
+  overflow: hidden;
+  max-width: 480px;
+  padding: 22px;
+  border-radius: 24px;
+  background: linear-gradient(165deg, rgba(59, 130, 246, 0.08), rgba(255, 255, 255, 0.03) 45%, rgba(34, 211, 238, 0.04));
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45), 0 0 44px rgba(59, 130, 246, 0.08);
+}
+.config-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 8%; right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(125, 211, 252, 0.5), transparent);
+  pointer-events: none;
+}
+.config-panel .section-label {
+  text-align: center;
+  color: #7dd3fc;
+  letter-spacing: 0.28em;
+  font-size: 11px;
+}
+.config-panel .category-grid { gap: 10px; }
+.cat-btn {
+  position: relative;
+  transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.2s ease, border-color 0.15s ease;
+}
+.cat-btn:hover { transform: translateY(-2px); }
+.cat-btn:active { transform: scale(0.97); }
+.cat-btn.selected {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35), 0 0 18px rgba(59, 130, 246, 0.18);
+}
+.cat-btn.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 7px; right: 9px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: rgba(2, 6, 16, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+html[dir="rtl"] .cat-btn.selected::after { right: auto; left: 9px; }
+
+/* ---------- Corner chrome: login + language ---------- */
+.lang-pill:hover { box-shadow: 0 0 16px rgba(59, 130, 246, 0.3); }
+.corner-login { box-shadow: 0 4px 18px rgba(59, 130, 246, 0.35); }
+.corner-login:hover { box-shadow: 0 6px 24px rgba(59, 130, 246, 0.5); }
+
+/* ---------- Utility badges ---------- */
+.badge {
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(59, 130, 246, 0.07), rgba(255, 255, 255, 0.015));
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.badge:hover {
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.12);
+  transform: translateY(-2px);
+}
+
+/* ---------- Landing on phones ---------- */
+@media (max-width: 640px) {
+  .landing-container { padding-top: 70px; }
+  .landing-container::before { width: 280px; height: 280px; top: -90px; left: -90px; }
+  .landing-container::after { width: 260px; height: 260px; bottom: -70px; right: -70px; }
+  .act-card { padding: 18px 16px; gap: 12px; }
+  .act-icon { width: 48px; height: 48px; }
+  .act-title { font-size: 19px; }
+  .config-panel { padding: 18px 16px; border-radius: 20px; }
+  .landing-section .mode-btn { font-size: 12px; padding: 11px 6px; }
+}
+
+/* ================================================================
    MOBILE HUD ANTI-OVERLAP PASS
    Players are on phones: every screen is pinned to 100dvh with
    overflow hidden. Anything taller than the viewport gets clipped

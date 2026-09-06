@@ -260,20 +260,28 @@ function renderLanding() {
 
   /* --- Primary action cards: Create / Join (first CTA) --- */
   const actionCards = h('div', 'landing-cards');
-  const createCard = h('div', 'act-card act-create', [], {
-    onclick: () => { sound.click(); startCreate(); }
-  });
-  createCard.appendChild(h('div', 'act-icon', [hIcon('play', 'ic')], { style: 'color:#38bdf8' }));
-  createCard.appendChild(h('div', 'act-title font-display', [L('Create a Game', 'إنشاء لعبة', 'Oyun Oluştur')]));
-  createCard.appendChild(h('div', 'act-sub', [L('Host on the big screen', 'استضف على الشاشة الكبيرة', 'Büyük ekranda kur')]));
+  const goCreate = () => { sound.click(); startCreate(); };
+  const goJoin = () => { sound.click(); state.screen = 'join'; state.isHost = false; state.inputCode = ''; render(); };
+  const cardKey = fn => e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } };
+
+  const createCard = h('div', 'act-card act-create', [
+    h('div', 'act-icon', [hIcon('play', 'ic')], { style: 'color:#fff' }),
+    h('div', 'act-text', [
+      h('div', 'act-title font-display', [L('Create a Game', 'إنشاء لعبة', 'Oyun Oluştur')]),
+      h('div', 'act-sub', [L('Host on the big screen', 'استضف على الشاشة الكبيرة', 'Büyük ekranda kur')])
+    ]),
+    h('div', 'act-arrow', ['→'], { 'aria-hidden': 'true' })
+  ], { role: 'button', tabindex: '0', onclick: goCreate, onkeydown: cardKey(goCreate) });
   actionCards.appendChild(createCard);
 
-  const joinCard = h('div', 'act-card act-join', [], {
-    onclick: () => { sound.click(); state.screen = 'join'; state.isHost = false; state.inputCode = ''; render(); }
-  });
-  joinCard.appendChild(h('div', 'act-icon', [hIcon('users', 'ic')], { style: 'color:#22c55e' }));
-  joinCard.appendChild(h('div', 'act-title font-display', [L('Join a Game', 'الانضمام إلى لعبة', 'Bir Oyuna Katıl')]));
-  joinCard.appendChild(h('div', 'act-sub', [L('Play on your phone', 'العب على هاتفك', 'Telefonunda oyna')]));
+  const joinCard = h('div', 'act-card act-join', [
+    h('div', 'act-icon', [hIcon('users', 'ic')], { style: 'color:#fff' }),
+    h('div', 'act-text', [
+      h('div', 'act-title font-display', [L('Join a Game', 'الانضمام إلى لعبة', 'Bir Oyuna Katıl')]),
+      h('div', 'act-sub', [L('Play on your phone', 'العب على هاتفك', 'Telefonunda oyna')])
+    ]),
+    h('div', 'act-arrow', ['→'], { 'aria-hidden': 'true' })
+  ], { role: 'button', tabindex: '0', onclick: goJoin, onkeydown: cardKey(goJoin) });
   actionCards.appendChild(joinCard);
   c.appendChild(actionCards);
 

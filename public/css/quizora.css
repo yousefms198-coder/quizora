@@ -1977,7 +1977,7 @@ input[type='text'], input[type='email'], input[type='password'], select {
   .controller-bottom { order: 8; margin-top: auto; }
 
   /* Bigger touch targets for answer options */
-  .controller-option { min-height: 92px; padding: 16px 12px; }
+  .controller-option { min-height: 92px; padding: 18px 12px 14px; justify-content: flex-start; }
   .controller-option-text { font-size: 16px; }
 
   /* Question readability on phones */
@@ -3154,7 +3154,6 @@ input:-webkit-autofill:focus {
   font-weight: 900;
   margin-bottom: 8px;
   color: #fff;
-  transform: translateY(-7px);
 }
 .ol-a { background: linear-gradient(135deg, #60a5fa, #3b82f6); box-shadow: 0 0 14px rgba(59,130,246,0.45); }
 .ol-b { background: linear-gradient(135deg, #2dd4bf, #14b8a6); box-shadow: 0 0 14px rgba(20,184,166,0.45); }

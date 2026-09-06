@@ -1976,8 +1976,10 @@ input[type='text'], input[type='email'], input[type='password'], select {
   .controller-options, .controller-locked, .powerup-container { order: 7; }
   .controller-bottom { order: 8; margin-top: auto; }
 
-  /* Bigger touch targets for answer options */
-  .controller-option { min-height: 92px; padding: 12px 12px 16px; justify-content: flex-start; }
+  /* Bigger touch targets for answer options (sizing lives in the
+     anti-overlap pass at the end of the file so it wins over the
+     elevated tile rules) */
+  .controller-option { justify-content: flex-start; }
   .controller-option-text { font-size: 16px; }
 
   /* Question readability on phones */
@@ -3612,6 +3614,13 @@ input:-webkit-autofill:focus {
   .podium-label { font-size: 7.5px; letter-spacing: 0.16em; }
 }
 
+/* Small phones, stacked 1-column answer tiles: shrink the letter
+   chip so letter + text fit without bottom clipping. */
+@media (max-width: 400px) {
+  .controller-option { min-height: 78px; }
+  .controller-option-letter { width: 30px; height: 30px; font-size: 13px; margin-bottom: 4px; }
+}
+
 /* ================================================================
    MOBILE HUD ANTI-OVERLAP PASS
    Players are on phones: every screen is pinned to 100dvh with
@@ -3662,4 +3671,11 @@ input:-webkit-autofill:focus {
   .paused-chip { order: 3; }
   .controller-top { gap: 6px; }
   .pw-count { flex-shrink: 0; }
+
+  /* Answer tiles: slim the letter chip + tighten text so the letter
+     and answer always fit inside the tile instead of clipping at
+     the bottom (tile has overflow hidden). */
+  .controller-option { min-height: 100px; padding: 10px 12px 12px; }
+  .controller-option-letter { width: 34px; height: 34px; font-size: 14px; margin-bottom: 6px; }
+  .controller-option-text { font-size: 15px; line-height: 1.25; }
 }

@@ -1669,12 +1669,16 @@ input[type='text'], input[type='email'], input[type='password'], select {
 }
 .reveal-lb-info {
   flex: 1;
+  min-width: 0;
   text-align: left;
 }
 .reveal-lb-name {
   font-size: 14px;
   font-weight: 600;
   color: #f1f5f9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .reveal-lb-streak {
   font-size: 11px;
@@ -1693,6 +1697,7 @@ input[type='text'], input[type='email'], input[type='password'], select {
   align-items: flex-end;
   gap: 3px;
   min-width: 90px;
+  flex-shrink: 0;
 }
 .reveal-lb-score {
   font-size: 18px;
@@ -1792,6 +1797,8 @@ input[type='text'], input[type='email'], input[type='password'], select {
   gap: 6px;
   padding: 8px 16px;
   border-radius: 100px;
+  white-space: nowrap;
+  flex-shrink: 0;
   background: linear-gradient(135deg, rgba(251, 191, 36, 0.12), rgba(251, 146, 36, 0.06));
   border: 1px solid rgba(251, 191, 36, 0.25);
   color: #fbbf24;
@@ -3603,4 +3610,56 @@ input:-webkit-autofill:focus {
   .podium-base.pb-2 { height: 48px; }
   .podium-base.pb-3 { height: 34px; }
   .podium-label { font-size: 7.5px; letter-spacing: 0.16em; }
+}
+
+/* ================================================================
+   MOBILE HUD ANTI-OVERLAP PASS
+   Players are on phones: every screen is pinned to 100dvh with
+   overflow hidden. Anything taller than the viewport gets clipped
+   or visually collides, so on small screens we (1) make the reveal
+   layer scroll, (2) let lists compress instead of the chrome, and
+   (3) tighten vertical rhythm so the leave button stays visible.
+   ================================================================ */
+@media (max-width: 640px) {
+  /* Reveal overlay: allow vertical scroll so the verdict + answer +
+     standings never clip on short phones. */
+  .reveal-overlay {
+    justify-content: flex-start;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: max(20px, env(safe-area-inset-top)) 14px max(28px, env(safe-area-inset-bottom));
+    scrollbar-width: none;
+  }
+  .reveal-overlay::-webkit-scrollbar { display: none; }
+  .reveal-leaderboard {
+    max-height: 44vh;
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-width: thin;
+  }
+  .reveal-answer { margin: 10px 0 6px; }
+  .reveal-points { margin-top: 4px; }
+
+  /* Waiting / result / game-over shells: compress hero & progress so
+     the standings panel absorbs slack instead of pushing the leave
+     button below the clipped 100dvh fold. */
+  .pw-hero { margin: 12px 0 8px; }
+  .pr-hero { margin: 10px 0 0; }
+  .pr-progress { margin: 12px 0 4px; }
+  .pw-standings { flex: 1 1 auto; }
+  .pw-leave { margin-top: 14px; }
+  .waiting-dots { margin-top: 8px; }
+
+  /* Game-over stack fits one screen: shrink podium margins, my-rank
+     callout, and the scrollable full-ranking list. */
+  .podium { margin: 12px auto 6px; }
+  .pw-myrank { margin: 10px 0 2px; padding: 10px 14px; }
+  .pw-fr { max-height: 30vh; margin-top: 10px; }
+  .gameover-title { margin-bottom: 2px; }
+
+  /* Answer screen: keep the paused chip in the question flow instead
+     of jumping to order 0 (top of the HUD). */
+  .paused-chip { order: 3; }
+  .controller-top { gap: 6px; }
+  .pw-count { flex-shrink: 0; }
 }

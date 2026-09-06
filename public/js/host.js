@@ -43,6 +43,7 @@ let state = {
   settingsOpen: false,
   authOpen: false,
   pendingAvatar: undefined,
+  lastAnswer: null,
 };
 
 const app = document.getElementById('app');
@@ -847,21 +848,84 @@ function countUp(el, target, duration) {
 }
 
 /* ======================== PLAYER SCREENS ======================== */
+const AV_COLORS = ['#3b82f6', '#14b8a6', '#8b5cf6', '#f59e0b', '#ec4899', '#22c55e', '#06b6d4', '#f97316'];
+function avatarTint(name) {
+  let h = 0;
+  const s = String(name || '');
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return AV_COLORS[h % AV_COLORS.length];
+}
+
+function playerRank(name) {
+  if (!name) return -1;
+  const ranked = Object.entries(state.scores || {}).sort((a, b) => b[1] - a[1]);
+  return ranked.findIndex(([n]) => n === name) + 1;
+}
+
+/* Presence strip: live avatars with answered-state rings (phone) */
+function presenceStrip(extraClass) {
+  const strip = h('div', 'controller-avatars' + (extraClass ? ' ' + extraClass : ''));
+  state.players.forEach(p => {
+    const tint = avatarTint(p.name);
+    const answered = state.answered && state.answered[p.name] !== undefined;
+    const me = p.name === state.playerName;
+    const avatar = h('div', `presence-avatar${answered ? ' answered' : ''}${me ? ' me' : ''}`, [
+      h('span', 'presence-emoji', [p.emoji || '🙂'])
+    ], { style: `--av:${tint}` });
+    avatar.appendChild(h('span', 'presence-name', [p.name.split(' ')[0]]));
+    strip.appendChild(avatar);
+  });
+  if (state.players.length === 0) {
+    strip.appendChild(h('div', 'presence-empty', [L('No players yet', 'لا يوجد لاعبون بعد', 'Henüz oyuncu yok')]));
+  }
+  return strip;
+}
+
+function playerTopBar() {
+  const top = h('div', 'pw-top');
+  top.appendChild(h('div', 'controller-room-badge glass', [hIcon('users', 'ic ic-s'), `ROOM `, h('b', 'pw-room-code', [String(state.roomCode || '')])]));
+  top.appendChild(h('div', 'pw-count glass', [`👥 `, h('b', '', [String(state.players.length)])]));
+  return top;
+}
+
 function renderPlayerWaiting() {
-  const c = h('div', 'state-waiting');
-  c.appendChild(h('div', 'state-emoji', ['⏳']));
-  c.appendChild(h('div', 'state-title font-display', [L('Waiting for the host...', 'بانتظار المضيف…', 'Ev sahibi bekleniyor…')]));
-  c.appendChild(h('div', 'state-sub', [L('The game will start soon', 'ستبدأ اللعبة قريباً', 'Oyun yakında başlayacak')]));
-  c.appendChild(h('div', '', [], { style: 'margin-top:8px' }));
-  c.appendChild(h('div', 'controller-score', [L('Playing as', 'تلعب باسم', 'Oynayan:'), ` `, h('span', '', [state.playerName || ''])]));
+  const c = h('div', 'player-waiting');
+
+  c.appendChild(playerTopBar());
+
+  const hero = h('div', 'pw-hero');
+  hero.appendChild(h('div', 'pw-hourglass', ['⏳']));
+  hero.appendChild(h('div', 'pw-title font-display', [L('Waiting for the host…', 'بانتظار المضيف…', 'Ev sahibi bekleniyor…')]));
+  hero.appendChild(h('div', 'pw-sub', [L('The room is filling up — the game starts when the host says GO', 'الغرفة تمتلئ الآن — ستبدأ اللعبة عندما يبدأ المضيف', 'Oda doluyor — oyun ev sahibi başlattığında başlar')]));
+  const dots = h('div', 'waiting-dots', []);
+  for (let i = 0; i < 3; i++) dots.appendChild(h('span', '', []));
+  hero.appendChild(dots);
+  c.appendChild(hero);
+
+  const me = state.players.find(p => p.name === state.playerName);
+  const you = h('div', 'pw-you-card glass', [
+    h('div', 'avatar avatar-lg', [h('span', '', [me?.emoji || '🙂'])], { style: `--av:${avatarTint(state.playerName)}` }),
+    h('div', 'pw-you-meta', [
+      h('div', 'pw-you-label', [L('YOU', 'أنت', 'SEN')]),
+      h('div', 'pw-you-name font-display', [state.playerName || ''])
+    ])
+  ]);
+  c.appendChild(you);
 
   if (state.myPowerup) {
-    const puIcons = { freeze: L('❄️ Freeze Timer', '❄️ تجميد المؤقت', '❄️ Sayacı Dondur'), double: L('✨ Double Points', '✨ نقاط مضاعفة', '✨ Çift Puan'), steal: L('🦊 Steal Points', '🦊 سرقة النقاط', '🦊 Puan Çal') };
-    c.appendChild(h('div', 'player-powerup-badge', [puIcons[state.myPowerup] || state.myPowerup], { style: 'margin-top:12px' }));
+    const puIcons = { freeze: '❄️', double: '✨', steal: '🦊' };
+    const puLabels = { freeze: L('Freeze Timer', 'تجميد المؤقت', 'Sayacı Dondur'), double: L('Double Points', 'نقاط مضاعفة', 'Çift Puan'), steal: L('Steal Points', 'سرقة النقاط', 'Puan Çal') };
+    you.appendChild(h('div', 'player-powerup-badge', [`${puIcons[state.myPowerup] || '✨'} ${puLabels[state.myPowerup] || state.myPowerup}`]));
   }
 
-  c.appendChild(h('button', 'btn-ghost', [L('Leave', 'مغادرة', 'Ayrıl')], {
-    style: 'margin-top:20px;font-size:12px;padding:8px 20px',
+  const live = h('div', 'pw-live-head');
+  live.appendChild(h('span', 'pw-live-dot', []));
+  live.appendChild(h('div', 'pw-live-text', [L(`LIVE · ${state.players.length} in the room`, `مباشر · ${state.players.length} في الغرفة`, `CANLI · ${state.players.length} odada`)]));
+  c.appendChild(live);
+
+  c.appendChild(presenceStrip('pw-grid'));
+
+  c.appendChild(h('button', 'btn-ghost pw-leave', [L('Leave', 'مغادرة', 'Ayrıl')], {
     onclick: () => {
       sound.click();
       if (ws) ws.close();
@@ -873,6 +937,7 @@ function renderPlayerWaiting() {
       render();
     }
   }));
+
   return c;
 }
 
@@ -883,17 +948,28 @@ function renderPlayerAnswer() {
 
   const c = h('div', 'controller-container');
 
+  /* --- Top bar: room badge · countdown · players --- */
   const top = h('div', 'controller-top');
-  top.appendChild(h('div', 'controller-room-badge glass', [hIcon('users', 'ic ic-s'), `ROOM ${state.roomCode}`]));
+  top.appendChild(h('div', 'controller-room-badge glass', [hIcon('users', 'ic ic-s'), `ROOM `, h('b', 'pw-room-code', [String(state.roomCode)])]));
+
+  if (state.timerSeconds > 0) {
+    const fillClass = state.timeLeft <= 5 ? 'danger' : state.timeLeft <= 10 ? 'warning' : '';
+    top.appendChild(h('div', `controller-time-chip${state.paused ? ' paused' : ''}`, [
+      h('span', `controller-time-num ${fillClass}`, [state.paused ? '‖' : String(Math.max(state.timeLeft, 0))], { id: 'controller-time-num' }),
+      h('span', 'controller-time-s', [L('SEC', 'ث', 'SN')])
+    ]));
+  }
+
+  top.appendChild(h('div', 'pw-count glass', [hIcon('users', 'ic ic-s'), ` `, h('b', '', [String(state.players.length)])]));
+  c.appendChild(top);
 
   if (state.timerSeconds > 0) {
     const pct = state.timerSeconds > 0 ? state.timeLeft / state.timerSeconds : 1;
     const fillClass = state.timeLeft <= 5 ? 'danger' : state.timeLeft <= 10 ? 'warning' : '';
     const barContainer = h('div', 'controller-timer-bar');
     barContainer.appendChild(h('div', `controller-timer-fill ${fillClass}`, [], { style: `width: ${pct * 100}%` }));
-    top.appendChild(barContainer);
+    c.appendChild(barContainer);
   }
-  c.appendChild(top);
 
   const roundInfo = h('div', 'controller-round', [L(`Q${state.currentQ + 1} of ${state.questions.length}`, `سؤال ${state.currentQ + 1} من ${state.questions.length}`, `Soru ${state.currentQ + 1}/${state.questions.length}`)]);
   c.appendChild(roundInfo);
@@ -902,25 +978,46 @@ function renderPlayerAnswer() {
     c.appendChild(h('div', 'paused-chip', [L('⏸ TIMER PAUSED — waiting for host', '⏸ تم إيقاف المؤقت — بانتظار المضيف', '⏸ SÜRE DURDURULDU — ev sahibi bekleniyor')]));
   }
 
-  c.appendChild(h('div', 'controller-question', [lq.text]));
+  /* --- Question hero (glass card, mirrors host) --- */
+  const qCard = h('div', 'controller-question-card glass');
+  qCard.appendChild(h('div', 'controller-q-kicker', [L(`QUESTION ${state.currentQ + 1}`, `السؤال ${state.currentQ + 1}`, `SORU ${state.currentQ + 1}`)]));
+  qCard.appendChild(h('div', 'controller-question', [lq.text]));
+  c.appendChild(qCard);
+
+  /* --- Live presence: who has answered --- */
+  const presenceHead = h('div', 'controller-presence-head');
+  presenceHead.appendChild(h('span', 'controller-presence-dot', []));
+  presenceHead.appendChild(h('div', 'controller-presence-label', [L('ANSWERS', 'الأجوبة', 'CEVAPLAR')]));
+  c.appendChild(presenceHead);
+  c.appendChild(presenceStrip('ctrl-strip'));
+
+  let answeredCount = 0;
+  state.players.forEach(p => { if (state.answered?.[p.name] !== undefined) answeredCount++; });
 
   if (state.playerAnswer !== null) {
     const locked = h('div', 'controller-locked');
-    locked.appendChild(h('div', 'locked-check', ['✓']));
-    locked.appendChild(h('div', 'locked-text', [L('LOCKED IN', 'تم تأكيد الإجابة', 'KİLİTLENDİ')]));
-    locked.appendChild(h('div', 'locked-sub', [L('Waiting for others…', 'بانتظار اللاعبين الآخرين…', 'Diğer oyuncular bekleniyor…')]));
+    locked.appendChild(h('div', 'locked-ring', [h('div', 'locked-check', ['✓'])]));
+    locked.appendChild(h('div', 'locked-text', [L('ANSWER LOCKED', 'تم تأكيد الإجابة', 'CEVAP KİLİTLENDİ')]));
+    locked.appendChild(h('div', 'locked-sub', [L('Waiting for the room…', 'بانتظار بقية اللاعبين…', 'Oda bekleniyor…')]));
+    const lockBar = h('div', 'locked-bar');
+    lockBar.appendChild(h('div', 'locked-bar-fill', [], { style: `width:${state.players.length ? Math.max((answeredCount / state.players.length) * 100, 8) : 8}%` }));
+    locked.appendChild(lockBar);
+    locked.appendChild(h('div', 'locked-count', [`${answeredCount} / ${state.players.length} ${L('answered', 'أجابوا', 'cevapladı')}`]));
     c.appendChild(locked);
   } else {
     const options = h('div', 'controller-options');
     const letters = ['A', 'B', 'C', 'D'];
+    const OPT_COLORS = ['#3b82f6', '#14b8a6', '#8b5cf6', '#f59e0b'];
     lq.options.forEach((opt, i) => {
-      const btn = h('button', 'controller-option', [
-        h('div', 'controller-option-letter', [letters[i]]),
+      const btn = h('button', `controller-option`, [
+        h('div', `controller-option-letter ol-${letters[i].toLowerCase()}`, [letters[i]]),
         h('span', 'controller-option-text', [opt])
       ], {
+        style: `--opt-c:${OPT_COLORS[i]}`,
         onclick: () => {
           sound.lockIn();
           state.playerAnswer = i;
+          state.answered[state.playerName] = i;
           ws.send(JSON.stringify({ type: 'submit_answer', answer: i }));
           render();
         }
@@ -955,10 +1052,21 @@ function renderPlayerAnswer() {
   }
 
   const bottom = h('div', 'controller-bottom');
+  const scoreRow = h('div', 'controller-score-row');
   const scorePill = h('div', 'controller-score-pill glass');
   scorePill.appendChild(h('div', 'controller-score-label', [L('SCORE', 'النقاط', 'PUAN')]));
   scorePill.appendChild(h('div', 'controller-score font-display', [h('span', '', [String(state.scores[state.playerName] || 0)])]));
-  bottom.appendChild(scorePill);
+  scoreRow.appendChild(scorePill);
+
+  const rank = playerRank(state.playerName);
+  const rankPill = h('div', 'controller-rank-pill glass', [
+    h('span', 'controller-rank-hash', ['#']),
+    h('b', 'font-display', [rank > 0 ? String(rank) : '–']),
+    h('span', 'controller-rank-of', [`/ ${state.players.length}`])
+  ]);
+  scoreRow.appendChild(rankPill);
+  bottom.appendChild(scoreRow);
+
   bottom.appendChild(h('button', 'btn-ghost controller-leave', [L('Leave', 'مغادرة', 'Ayrıl')], {
     onclick: () => {
       sound.click();
@@ -981,15 +1089,84 @@ function renderPlayerAnswer() {
 }
 
 function renderPlayerResult() {
-  const c = h('div', 'state-waiting');
-  c.appendChild(h('div', 'state-emoji', ['⏳']));
-  c.appendChild(h('div', 'state-title font-display', [L('Waiting for next question...', 'بانتظار السؤال التالي…', 'Sonraki soru bekleniyor…')]));
-  c.appendChild(h('div', 'state-sub', [L('Your answer is locked in', 'تم تأكيد إجابتك', 'Cevabın kilitlendi')]));
-  c.appendChild(h('div', '', [], { style: 'margin-top:16px' }));
-  c.appendChild(h('div', 'controller-score', [L('Score:', 'النقاط:', 'Puan:'), ` `, h('span', '', [String(state.scores[state.playerName] || 0)])]));
+  const c = h('div', 'player-waiting');
 
-  c.appendChild(h('button', 'btn-ghost', [L('Leave', 'مغادرة', 'Ayrıl')], {
-    style: 'margin-top:16px;font-size:12px;padding:6px 16px',
+  c.appendChild(playerTopBar());
+
+  const last = state.lastAnswer;
+  const wasCorrect = !!(last && last.correct);
+
+  const hero = h('div', `pr-hero ${wasCorrect ? 'good' : 'neutral'}`);
+  hero.appendChild(h('div', `pr-icon${wasCorrect ? '' : ' wait'}`, [wasCorrect ? '✓' : '⏳']));
+  hero.appendChild(h('div', 'pr-title font-display', wasCorrect
+    ? (last.pointsEarned > 0 ? L('CORRECT!', 'إجابة صحيحة!', 'DOĞRU!') : L('CORRECT!', 'إجابة صحيحة!', 'DOĞRU!'))
+    : L('ANSWER LOCKED', 'تم تأكيد الإجابة', 'CEVAP KİLİTLENDİ')));
+  if (wasCorrect && last && last.pointsEarned) {
+    hero.appendChild(h('div', 'pr-points font-display', [`+${last.pointsEarned}`]));
+  }
+  hero.appendChild(h('div', 'pr-sub', wasCorrect
+    ? L('Nice one — waiting for the next question', 'إجابة رائعة — بانتظار السؤال التالي', 'Harika — sonraki soru bekleniyor')
+    : L('Answer locked — waiting for the reveal', 'تم تأكيد إجابتك — بانتظار الإظهار', 'Cevap kilitli — sonuç bekleniyor')));
+
+  const q = state.questions[state.currentQ];
+  if (last && last.answer !== null && last.answer !== undefined && q) {
+    const letters = ['A', 'B', 'C', 'D'];
+    const optText = Lq(q).options[last.answer];
+    const pick = h('div', 'pr-pick glass', [
+      h('span', `pr-pick-letter ol-${letters[last.answer].toLowerCase()}`, [letters[last.answer]]),
+      h('span', 'pr-pick-text', [optText])
+    ]);
+    hero.appendChild(pick);
+  }
+  c.appendChild(hero);
+
+  let answeredCount = 0;
+  state.players.forEach(p => { if (state.answered?.[p.name] !== undefined) answeredCount++; });
+  const progress = h('div', 'pr-progress');
+  const progressHead = h('div', 'pr-progress-head');
+  progressHead.appendChild(h('div', 'pr-progress-label', [L('Room answering', 'إجابات الغرفة', 'Oda cevaplıyor')]));
+  progressHead.appendChild(h('div', 'pr-progress-count', [`${answeredCount} / ${state.players.length}`]));
+  progress.appendChild(progressHead);
+  const progressBar = h('div', 'pr-progress-bar');
+  progressBar.appendChild(h('div', 'pr-progress-fill', [], { style: `width:${state.players.length ? Math.max((answeredCount / state.players.length) * 100, 6) : 6}%` }));
+  progress.appendChild(progressBar);
+  c.appendChild(progress);
+
+  /* --- Current standings (compact) --- */
+  const ranked = Object.entries(state.scores || {}).sort((a, b) => b[1] - a[1]);
+  if (ranked.length > 0) {
+    const stand = h('div', 'pw-standings');
+    stand.appendChild(h('div', 'pw-s-title', [L('STANDINGS', 'الترتيب', 'SIRALAMA')]));
+    const medals = ['🥇', '🥈', '🥉'];
+    const myName = state.playerName;
+    let shown = 0;
+    ranked.forEach(([name, score], i) => {
+      const isMe = name === myName;
+      if (!isMe && shown >= 5) {
+        const more = ranked.length - shown;
+        stand.appendChild(h('div', 'pw-s-more', [L(`+${more} more…`, `+${more} آخرون…`, `+${more} daha…`)]));
+        return;
+      }
+      shown++;
+      const player = state.players.find(p => p.name === name);
+      const row = h('div', `pw-s-row${isMe ? ' me' : ''}`, [
+        h('div', 'pw-s-rank', [medals[i] || `${i + 1}`]),
+        h('div', 'avatar avatar-sm', [h('span', '', [player?.emoji || '🙂'])], { style: `--av:${avatarTint(name)}` }),
+        h('div', 'pw-s-name', [name.split(' ')[0]])
+      ]);
+      const scoreEl = h('div', 'pw-s-score font-display', [String(score)]);
+      if (isMe) scoreEl.appendChild(h('span', 'pw-s-you', [L('YOU', 'أنت', 'SEN')]));
+      row.appendChild(scoreEl);
+      stand.appendChild(row);
+    });
+    c.appendChild(stand);
+  }
+
+  const dots = h('div', 'waiting-dots', []);
+  for (let i = 0; i < 3; i++) dots.appendChild(h('span', '', []));
+  c.appendChild(dots);
+
+  c.appendChild(h('button', 'btn-ghost pw-leave', [L('Leave', 'مغادرة', 'Ayrıl')], {
     onclick: () => {
       sound.click();
       removeRevealOverlay();
@@ -1020,6 +1197,7 @@ function renderJoin() {
 
   c.appendChild(h('button', 'back-btn', ['←'], { style: 'position:absolute;top:16px;left:16px', onclick: () => { sound.click(); state.screen = 'landing'; state.isHost = true; render(); } }));
 
+  card.appendChild(h('div', 'join-kicker', [L('THE ROOM IS YOUR GAME SHOW', 'الغرفة هي عرضك الترفيهي', 'ODA SENİN GÖSTERIN')]));
   card.appendChild(h('div', 'join-logo font-display', ['QUIZORA']));
   card.appendChild(h('div', 'join-subtitle', [L('Enter the room code from the host screen', 'أدخل رمز الغرفة المعروض على شاشة المضيف', 'Ev sahibi ekranındaki oda kodunu gir')]));
 
@@ -1295,10 +1473,18 @@ function handlePlayerMessage(msg) {
 
     case 'player_list':
       state.players = msg.players;
+      if (['player_waiting', 'player_answer', 'player_result'].includes(state.screen)) render();
       break;
 
     case 'player_left':
       state.players = msg.players;
+      if (['player_waiting', 'player_answer', 'player_result'].includes(state.screen)) render();
+      break;
+
+    case 'player_list_update':
+      state.players = msg.players;
+      state.answered = msg.answered || {};
+      if (['player_answer', 'player_result'].includes(state.screen)) render();
       break;
 
     case 'game_started':
@@ -1308,6 +1494,8 @@ function handlePlayerMessage(msg) {
       state.timerSeconds = msg.timerSeconds;
       state.timeLeft = msg.timerSeconds;
       state.playerAnswer = null;
+      state.lastAnswer = null;
+      state.answered = {};
       state.screen = 'player_answer';
       state.powerups = msg.powerups || {};
       state.myPowerup = msg.powerups?.[state.playerName] || state.myPowerup;
@@ -1325,6 +1513,9 @@ function handlePlayerMessage(msg) {
     case 'answer_confirmed':
       if (msg.correct) sound.correct();
       else sound.wrong();
+      if (msg.newScore !== undefined) state.scores[state.playerName] = msg.newScore;
+      if (msg.answer !== undefined) state.answered[state.playerName] = msg.answer;
+      state.lastAnswer = { correct: !!msg.correct, answer: msg.answer, pointsEarned: msg.pointsEarned || 0 };
       state.screen = 'player_result';
       render();
       break;
@@ -1352,6 +1543,8 @@ function handlePlayerMessage(msg) {
     case 'new_question':
       state.currentQ = msg.round - 1;
       state.playerAnswer = null;
+      state.lastAnswer = null;
+      state.answered = {};
       state.showReveal = false;
       state.revealData = null;
       removeRevealOverlay();
@@ -1458,10 +1651,17 @@ function updateTimer() {
 
 function updatePlayerTimer() {
   const fill = document.querySelector('.controller-timer-fill');
-  if (!fill) return;
   const pct = state.timerSeconds > 0 ? state.timeLeft / state.timerSeconds : 1;
-  fill.style.width = `${pct * 100}%`;
-  fill.className = `controller-timer-fill ${state.timeLeft <= 5 ? 'danger' : state.timeLeft <= 10 ? 'warning' : ''}`;
+  const cls = state.timeLeft <= 5 ? 'danger' : state.timeLeft <= 10 ? 'warning' : '';
+  if (fill) {
+    fill.style.width = `${pct * 100}%`;
+    fill.className = `controller-timer-fill ${cls}`;
+  }
+  const num = document.getElementById('controller-time-num');
+  if (num) {
+    num.textContent = state.paused ? '‖' : String(Math.max(state.timeLeft, 0));
+    num.className = `controller-time-num ${cls}`;
+  }
 
   if (state.timeLeft <= 5 && state.timeLeft > 0) sound.tick();
 }

@@ -35,6 +35,14 @@ app.set('trust proxy', 1);
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
+app.use((req, res, next) => {
+  if (/\.(css|js|html)$/i.test(req.path)) {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+  next();
+});
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
@@ -5269,6 +5277,31 @@ app.post('/api/practice/start', (req, res) => {
       index: i,
       q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q,
       options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options,
+      category: q.category,
+    })),
+  });
+});
+
+app.post('/api/practice/deck', (req, res) => {
+  const user = authUser(req);
+  if (!user) return res.status(401).json({ error: 'Not logged in' });
+  const { categories, numCards, bank } = req.body || {};
+  const source = bank === 'exam' ? EXAMS : CATEGORIES;
+  const cats = Array.isArray(categories) ? categories.filter(c => source[c]) : [];
+  if (cats.length === 0) return res.status(400).json({ error: 'Pick at least one category' });
+  const n = Math.min(Math.max(parseInt(numCards, 10) || 10, 1), 20);
+  const pool = cats.flatMap(c => source[c].questions.map(q => ({ ...q, category: c })));
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const picked = pool.slice(0, n);
+  res.json({
+    cards: picked.map((q, i) => ({
+      index: i,
+      q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q,
+      options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options,
+      correct: q.correct,
       category: q.category,
     })),
   });

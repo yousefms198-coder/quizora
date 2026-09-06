@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QUIZORA — The Room Is Your Game Show</title>
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="QUIZORA">
+  <meta property="og:title" content="QUIZORA — The Room Is Your Game Show">
+  <meta property="og:description" content="Create a game. Invite everyone. Then let the chaos begin.">
+  <meta property="og:image" content="/og-image.png">
+  <meta name="theme-color" content="#0f172a">
+
+  <link rel="stylesheet" href="/css/quizora.css">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+  <canvas id="particles-canvas"></canvas>
+  <div id="app"></div>
+
+  <script src="/js/particles.js"></script>
+  <script src="/js/shared.js"></script>
+  <script src="/js/host.js"></script>
+</body>
+</html>

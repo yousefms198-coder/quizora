@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Quizora — Join Game</title>
+  <link rel="stylesheet" href="/css/quizora.css">
+</head>
+<body>
+  <canvas id="particles-canvas"></canvas>
+  <div id="app"></div>
+  <script src="/js/particles.js"></script>
+  <script src="/js/shared.js"></script>
+  <script src="/js/host.js"></script>
+</body>
+</html>

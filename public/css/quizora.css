@@ -4833,6 +4833,33 @@ html[dir="rtl"] .question-lang-hint { text-align: right; }
   z-index: 60;
 }
 
+/* ---- subscribe strip (landing) ---- */
+.plan-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 22px auto 0;
+  padding: 14px 18px;
+  border-radius: 14px;
+  max-width: 720px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.plan-strip-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+.plan-upgrade-btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 /* ---- responsive ---- */
 @media (max-width: 860px) {
   .plan-grid {

@@ -178,6 +178,13 @@ async function openUpgrade(feature) {
 }
 
 async function submitCheckout(plan, interval) {
+  if (!state.user) {
+    state.upgrade = null;
+    state.authOpen = true;
+    showToast(L('Sign in to subscribe', 'سجّل الدخول للاشتراك', 'Abone olmak için giriş yapın'), 'error');
+    render();
+    return;
+  }
   try {
     const r = await api('/api/billing/checkout', 'POST', { plan, interval });
     if (r && r.user) {
@@ -200,6 +207,7 @@ function renderUpgradeModal() {
   });
   const card = h('div', 'glass-strong upgrade-card', [], { style: 'width:100%;max-width:1000px;padding:22px;border-radius:18px' });
   const feature = state.upgrade ? state.upgrade.feature : 'current';
+  const interval = state.upgrade && state.upgrade.interval ? state.upgrade.interval : billingInterval();
   if (feature !== 'current') card.appendChild(h('div', 'upgrade-why', [hIcon('sparkle', 'ic ic-s'), ' ', L('This is a paid feature.', 'هذه ميزة مدفوعة.', 'Bu ücretli bir özelliktir.')]));
 
   const head = h('div', 'upgrade-head');
@@ -209,9 +217,9 @@ function renderUpgradeModal() {
   card.appendChild(head);
 
   const toggle = h('div', 'billing-toggle');
-  const ints = [['monthly', L('Monthly', 'شهري', 'Aylık')], ['yearly', 'Yearly -20%']];
+  const ints = [['monthly', L('Monthly', 'شهري', 'Aylık')], ['yearly', L('Yearly -20%', 'سنوي -20%', 'Yıllık -20%')]];
   ints.forEach(([v, lab]) => {
-    const b = h('button', `bill-btn${billingInterval() === v ? ' active' : ''}`, [lab], {
+    const b = h('button', `bill-btn${interval === v ? ' active' : ''}`, [lab], {
       onclick: () => { sound.click(); state.upgrade.interval = v; render(); }
     });
     toggle.appendChild(b);
@@ -219,7 +227,6 @@ function renderUpgradeModal() {
   card.appendChild(toggle);
 
   const grid = h('div', 'plan-grid');
-  const interval = billingInterval();
   ORDER.forEach(key => {
     const p = PLANS[key];
     const action = () => { sound.click(); submitCheckout(key, interval); };
@@ -916,6 +923,14 @@ function renderLanding() {
   panel.appendChild(h('div', 'section-label', [L('Game Settings', 'إعدادات اللعبة', 'Oyun Ayarları')], { style: 'margin-bottom:10px;margin-top:8px' }));
   appendSettingsRow(panel);
   c.appendChild(panel);
+
+  /* --- Subscribe strip (always visible) --- */
+  c.appendChild(h('div', 'plan-strip glass', [
+    h('div', 'plan-strip-text', [hIcon('sparkle', 'ic ic-s'), L('Exam packs · Custom questions · No watermark · Unlimited players', 'حزم الامتحانات · أسئلة مخصصة · بدون شعار · لاعبون بلا حدود', 'Sınav paketleri · Özel sorular · Logosuz · Sınırsız oyuncu')]),
+    h('button', 'btn-primary plan-upgrade-btn', [currentPlanId() === 'free' ? L('Subscribe', 'اشتراك', 'Abone Ol') : L('Manage', 'إدارة', 'Yönet')], {
+      onclick: () => { sound.click(); openUpgrade('current'); }
+    })
+  ]));
 
   /* --- Use cases: made for every room --- */
   const usecase = h('div', 'landing-usecases');
@@ -2517,10 +2532,16 @@ function logout() {
 
 function accountChip() {
   if (!state.user) {
-    return h('button', 'btn-primary corner-login', [hIcon('lock', 'ic ic-s'), L('Login', 'تسجيل الدخول', 'Giriş')], {
+    const wrap = h('div', '', [], { style: 'display:flex;gap:6px;align-items:center' });
+    wrap.appendChild(h('button', 'plan-badge plan-premium', ['⭐', ' ', L('Premium', 'بريميوم', 'Premium')], {
+      title: L('See plans & subscribe', 'عرض الخطط والاشتراك', 'Planları gör ve abone ol'),
+      onclick: () => { sound.click(); openUpgrade('current'); }
+    }));
+    wrap.appendChild(h('button', 'btn-primary corner-login', [hIcon('lock', 'ic ic-s'), L('Login', 'تسجيل الدخول', 'Giriş')], {
       'data-tour': 'login',
       onclick: () => { sound.click(); state.authOpen = true; render(); }
-    });
+    }));
+    return wrap;
   }
   const wrap = h('div', '', [], { style: 'display:flex;gap:6px' });
   wrap.appendChild(planBadgeEl());
@@ -2571,7 +2592,7 @@ function renderDashboard() {
           : L('Custom questions: ' + state.billing.customUsed + ' / ' + state.billing.customLimit, 'أسئلة مخصصة: ' + state.billing.customUsed + ' / ' + state.billing.customLimit, 'Özel sorular: ' + state.billing.customUsed + ' / ' + state.billing.customLimit))
         : L(billingInterval() === 'yearly' ? 'Yearly billing' : 'Monthly billing', billingInterval() === 'yearly' ? 'فوترة سنوية' : 'فوترة شهرية', billingInterval() === 'yearly' ? 'Yıllık fatura' : 'Aylık fatura')]),
     ]),
-    h('button', 'btn-primary plan-upgrade-btn', [L('Manage', 'إدارة', 'Yönet')], { onclick: () => { sound.click(); openUpgrade('current'); } })
+    h('button', 'btn-primary plan-upgrade-btn', [planId === 'free' ? L('Subscribe', 'اشترك', 'Abone Ol') : L('Manage', 'إدارة', 'Yönet')], { onclick: () => { sound.click(); openUpgrade('current'); } })
   ]));
 
   /* --- quick actions --- */

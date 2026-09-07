@@ -4440,17 +4440,17 @@ html[dir="rtl"] .question-lang-hint { text-align: right; }
   .host-room-pill { order: 1; padding: 6px 12px; font-size: 11px; letter-spacing: 0.08em; }
   .host-room-code { font-size: 13px; }
   .timer-container.timer-corner {
-    order: 3;
+    order: 1;
+    margin-left: auto;
     width: 74px;
     height: 74px;
-    margin: 0;
   }
   .timer-text { font-size: 20px; }
   .timer-ring-bg, .timer-ring-progress { stroke-width: 5; }
   .round-badge { font-size: 11px; padding: 5px 12px; letter-spacing: 0.08em; }
   .category-badge { font-size: 12px; padding: 5px 10px; margin-bottom: 0; }
   .host-round-line { justify-content: flex-start; }
-  .host-ready { order: 4; width: 100%; max-width: 100%; }
+  .host-ready { order: 3; width: 100%; max-width: 100%; }
   .host-ready-text { font-size: 10.5px; margin-bottom: 3px; }
 
   /* Quickbar: proper touch targets */

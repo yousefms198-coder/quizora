@@ -4234,6 +4234,7 @@ input[type='email']:focus, textarea:focus {
               inset 0 0 30px rgba(56, 189, 248, 0.14);
   transition: left 0.45s var(--ease-press), top 0.45s var(--ease-press),
               width 0.45s var(--ease-press), height 0.45s var(--ease-press),
+              border-radius 0.45s var(--ease-press),
               opacity 0.3s ease;
   pointer-events: none;
   animation: tourSpotIn 0.4s var(--ease-pop);

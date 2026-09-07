@@ -44,6 +44,10 @@ let state = {
   authOpen: false,
   pendingAvatar: undefined,
   lastAnswer: null,
+  tutorialOpen: false,
+  tutSlide: 0,
+  tourStep: null,
+  pendingPractice: false,
 };
 
 const app = document.getElementById('app');
@@ -143,6 +147,8 @@ function render() {
   if (fn) app.appendChild(fn());
   if (state.authOpen) app.appendChild(renderAuthModal());
   if (state.settingsOpen) app.appendChild(renderSettings());
+  if (state.tutorialOpen) app.appendChild(renderTutorialModal());
+  if (state.tourStep !== null) app.appendChild(renderTourOverlay());
   if (screenChanged && !document.hidden) {
     app.classList.remove('view-enter');
     requestAnimationFrame(() => {
@@ -174,7 +180,229 @@ function renderCornerWidget() {
   const w = h('div', 'corner-widget');
   w.appendChild(accountChip());
   w.appendChild(langCyclePill());
+  w.appendChild(h('button', 'btn-ghost icon-chip', [h('span', 'tut-q', ['?'])], {
+    title: L('How it works', 'كيف يعمل التطبيق', 'Nasıl çalışır'),
+    onclick: openTutorial
+  }));
   return w;
+}
+
+/* ======================== FIRST-RUN TUTORIAL ======================== */
+const TUT_KEY = 'quizora_tutorial_done';
+
+function tutorialDone() { try { localStorage.setItem(TUT_KEY, '1'); } catch {} }
+
+function openTutorial() {
+  sound.click();
+  state.tutorialOpen = true;
+  state.tutSlide = 0;
+  state.tourStep = null;
+  render();
+}
+
+function closeTutorial() {
+  sound.click();
+  tutorialDone();
+  state.tutorialOpen = false;
+  state.tourStep = null;
+  render();
+}
+
+function startTour() {
+  sound.click();
+  state.tutorialOpen = false;
+  state.tourStep = 0;
+  render();
+}
+
+function advanceTour() {
+  const steps = buildTourSteps();
+  const n = state.tourStep + 1;
+  if (n >= steps.length) {
+    tutorialDone();
+    state.tourStep = null;
+    render();
+  } else {
+    state.tourStep = n;
+    render();
+  }
+}
+
+function goPractice() {
+  quitPractice();
+  state.practice = { pick: { categories: ['yks'], num: 5, mode: 'instant', timer: 0 } };
+  state.practiceView = 'setup';
+  state.screen = 'practice';
+  tutorialDone();
+  state.tutorialOpen = false;
+  state.tourStep = null;
+  render();
+}
+
+function tryPracticeFromTutorial() {
+  if (!state.user) {
+    state.pendingPractice = true;
+    state.tutorialOpen = false;
+    state.tourStep = null;
+    state.authOpen = true;
+    render();
+    return;
+  }
+  goPractice();
+}
+
+function buildTutorialSlides() {
+  return [
+    {
+      icon: '✦',
+      title: L('Welcome to Quizora', 'مرحباً بك في كويزورا', 'Quizora’ya Hoş Geldin'),
+      sub: L('The room is your game show. One big screen hosts — everyone else plays from their phones.', 'الغرفة هي برنامجك. شاشة كبيرة تستضيف — والبقية يلعبون من هواتفهم.', 'Oda senin yarışma şovun. Bir büyük ekran yönetir — diğerleri telefondan oynar.')
+    },
+    {
+      icon: '🎬',
+      title: L('Host on the big screen', 'قدّم على الشاشة الكبيرة', 'Büyük ekranda sunun'),
+      sub: L('Create a game and cast the room code to your TV or projector. You run the show in real time.', 'أنشئ لعبة واعرض رمز الغرفة على تلفازك أو جهاز العرض. أنت تدير العرض مباشرة.', 'Bir oyun oluşturun ve oda kodunu TV’ye yansıtın. Şovu canlı yönetirsiniz.')
+    },
+    {
+      icon: '📱',
+      title: L('Players join in seconds', 'اللاعبون ينضمون في ثوانٍ', 'Oyuncular saniyeler içinde katılır'),
+      sub: L('Friends open Quizora on their phones, enter the room code, answer fast and fire power-ups.', 'يفتح الأصدقاء كويزورا على هواتفهم ويدخلون رمز الغرفة ويجيبون بسرعة ويستخدمون القوى الخاصة.', 'Arkadaşlar telefonlarında Quizora’yı açar, oda kodunu girer, hızlı cevap verir ve güçleri kullanır.')
+    },
+    {
+      icon: '🏆',
+      title: L('Live reveals & a champion', 'كشف مباشر وبطل للغرفة', 'Canlı cevaplar ve bir şampiyon'),
+      sub: L('Correct answers light up, scores climb in real time, and the podium crowns the room champion.', 'تتوهج الإجابات الصحيحة وتتصاعد النقاط مباشرة، ويتوّج المنصة بطل الغرفة.', 'Doğru cevaplar parlar, skorlar canlı tırmanır ve kürsü oda şampiyonunu taçlandırır.')
+    },
+    {
+      icon: '🃏',
+      title: L('Practice Tests & Flashcards', 'اختبارات التمرين والبطاقات التعليمية', 'Pratik Testleri ve Flashcard’lar'),
+      sub: state.user
+        ? L('Tap the practice pad in the corner to flip flashcards and take solo tests from fun or educational topics.', 'اضغط على زر التمرين في الزاوية لقلب البطاقات وخوض اختبارات منفردة من مواضيع ترفيهية أو تعليمية.', 'Köşedeki pratik alanına dokunarak flashcard’ları çevirin ve eğlenceli veya eğitim konularıyla solo testler çözün.')
+        : L('Log in to unlock solo practice — flashcards and practice tests live in your Dashboard.', 'سجّل الدخول لتفعيل التمرين الفردي — البطاقات واختبارات التمرين موجودة في لوحة التحكم.', 'Solo pratik için giriş yapın — flashcard’lar ve pratik testleri panelinizde.')
+    }
+  ];
+}
+
+function renderTutorialModal() {
+  const slides = buildTutorialSlides();
+  const i = Math.min(state.tutSlide, slides.length - 1);
+  const s = slides[i];
+  const last = i === slides.length - 1;
+
+  const overlay = h('div', 'modal-overlay', [], {
+    onclick: (e) => { if (e.target === overlay) closeTutorial(); }
+  });
+  const card = h('div', 'glass-strong tut-card', []);
+  card.appendChild(h('button', 'btn-ghost tut-x', ['✕'], { onclick: closeTutorial }));
+  card.appendChild(h('div', 'tut-icon', [s.icon]));
+  card.appendChild(h('div', 'tut-title font-display', [s.title]));
+  card.appendChild(h('div', 'tut-sub', [s.sub]));
+
+  const dots = h('div', 'tut-dots', []);
+  slides.forEach((_, k) => dots.appendChild(h('span', `tut-dot${k === i ? ' on' : ''}`, [])));
+  card.appendChild(dots);
+
+  const nav = h('div', 'tut-nav', []);
+  if (!last) {
+    if (i === 0 && state.screen === 'landing') {
+      nav.appendChild(h('button', 'btn-ghost', [L('Tour the UI ▸', 'جولة في الواجهة ▸', 'Arayüz Turu ▸')], {
+        onclick: startTour
+      }));
+    }
+    if (i > 0) nav.appendChild(h('button', 'btn-ghost', [L('Back', 'رجوع', 'Geri')], {
+      onclick: () => { sound.click(); state.tutSlide = i - 1; render(); }
+    }));
+    nav.appendChild(h('button', 'btn-primary', [L('Next', 'التالي', 'İleri')], {
+      onclick: () => { sound.click(); state.tutSlide = i + 1; render(); }
+    }));
+  } else {
+    nav.appendChild(h('button', 'btn-success', [
+      state.user ? L('Try Solo Practice', 'جرّب التمرين الفردي', 'Solo Pratiği Dene') : L('Log in to Practice', 'سجّل للتمرين', 'Pratik için Giriş Yap')
+    ], { onclick: tryPracticeFromTutorial }));
+    nav.appendChild(h('button', 'btn-ghost', [L('Done', 'تم', 'Bitti')], { onclick: closeTutorial }));
+  }
+  card.appendChild(nav);
+  overlay.appendChild(card);
+  return overlay;
+}
+
+function buildTourSteps() {
+  const logged = !!state.user;
+  return [
+    {
+      center: true,
+      title: L('Your home base', 'قاعدتك الرئيسية', 'Ana merkezin'),
+      sub: L('Everything starts here — hosting, joining, and (with an account) solo practice.', 'كل شيء يبدأ من هنا — الاستضافة والانضمام ومع الحساب التدريب الفردي.', 'Her şey burada başlar — sunum, katılım ve hesapla solo pratik.')
+    },
+    {
+      sel: '.act-card.act-create',
+      title: L('Create a Game', 'إنشاء لعبة', 'Oyun Oluştur'),
+      sub: L('The blue card starts a room. Cast the code to your big screen and watch players pour in.', 'البطاقة الزرقاء تبدأ غرفة. اعرض الرمز على الشاشة الكبيرة وشاهد اللاعبين يتدفقون.', 'Mavi kart bir oda başlatır. Kodu büyük ekrana yansıtın ve oyuncuların akın etmesini izleyin.')
+    },
+    {
+      sel: '.act-card.act-join',
+      title: L('Join a Game', 'الانضمام للعبة', 'Oyuna Katıl'),
+      sub: L('The green card opens the join screen — players type the room code shown on the host screen.', 'البطاقة الخضراء تفتح شاشة الانضمام — يدخل اللاعبون رمز الغرفة المعروض على شاشة المضيف.', 'Yeşil kart katılım ekranını açar — oyuncular host ekranındaki oda kodunu yazar.')
+    },
+    {
+      sel: logged ? '[data-tour="practice"]' : '[data-tour="login"]',
+      title: L('Practice & Flashcards', 'التدريب والبطاقات', 'Pratik ve Flashcard’lar'),
+      sub: logged
+        ? L('Tap the pad icon here to open Practice — flashcards and solo tests, anytime.', 'اضغط على أيقونة التمرين هنا لفتح قسم التدريب — بطاقات واختبارات منفردة في أي وقت.', 'Solo pratik için buradaki pratik simgesine dokunun — flashcard’lar ve testler, her zaman.')
+        : L('Log in here to unlock Practice Tests & Flashcards.', 'سجّل الدخول من هنا لتفعيل اختبارات التمرين والبطاقات.', 'Pratik Testleri ve Flashcard’ları açmak için buradan giriş yapın.')
+    },
+    {
+      center: true,
+      title: L("You're all set!", 'أنت جاهز!', 'Hazırsın!'),
+      sub: L('Create one, share the code, and let the show begin.', 'أنشئ لعبة، شارك الرمز، ودع العرض يبدأ.', 'Bir oda oluştur, kodu paylaş ve şov başlasın.')
+    }
+  ];
+}
+
+function renderTourOverlay() {
+  const steps = buildTourSteps();
+  const idx = Math.min(state.tourStep, steps.length - 1);
+  const step = steps[idx];
+  const last = idx === steps.length - 1;
+
+  const root = h('div', 'tour-root');
+  if (!step.center) root.appendChild(h('div', 'tour-spot', [], { id: 'tour-spot' }));
+
+  const tip = h('div', 'tour-tip', []);
+  tip.appendChild(h('div', 'tour-kicker', [last
+    ? L('LAST STEP', 'الخطوة الأخيرة', 'SON ADIM')
+    : L(`STEP ${idx + 1} / ${steps.length}`, `الخطوة ${idx + 1} / ${steps.length}`, `ADIM ${idx + 1} / ${steps.length}`)]));
+  tip.appendChild(h('div', 'tour-tip-title font-display', [step.title]));
+  tip.appendChild(h('div', 'tour-tip-sub', [step.sub]));
+
+  const nav = h('div', 'tut-nav', []);
+  nav.appendChild(h('button', 'btn-ghost', [L('Skip', 'تخطي', 'Geç')], {
+    onclick: () => { tutorialDone(); state.tourStep = null; render(); }
+  }));
+  if (idx > 0) nav.appendChild(h('button', 'btn-ghost', [L('Back', 'رجوع', 'Geri')], {
+    onclick: () => { sound.click(); state.tourStep = idx - 1; render(); }
+  }));
+  nav.appendChild(h('button', last ? 'btn-success' : 'btn-primary', [last ? L('Done', 'تم', 'Bitti') : L('Next', 'التالي', 'İleri')], {
+    onclick: () => { sound.click(); advanceTour(); }
+  }));
+  tip.appendChild(nav);
+  root.appendChild(tip);
+
+  if (!step.center) {
+    const spot = root.querySelector('#tour-spot');
+    const el = step.sel ? document.querySelector(step.sel) : null;
+    if (spot && el) {
+      const r = el.getBoundingClientRect();
+      const pad = 10;
+      spot.style.left = `${Math.max(6, r.left - pad)}px`;
+      spot.style.top = `${Math.max(6, r.top - pad)}px`;
+      spot.style.width = `${r.width + pad * 2}px`;
+      spot.style.height = `${r.height + pad * 2}px`;
+    } else if (spot) {
+      spot.style.display = 'none';
+    }
+  }
+  return root;
 }
 
 /* ======================== DASHBOARD ======================== */
@@ -1888,11 +2116,13 @@ function logout() {
 function accountChip() {
   if (!state.user) {
     return h('button', 'btn-primary corner-login', [hIcon('lock', 'ic ic-s'), L('Login', 'تسجيل الدخول', 'Giriş')], {
+      'data-tour': 'login',
       onclick: () => { sound.click(); state.authOpen = true; render(); }
     });
   }
   const wrap = h('div', '', [], { style: 'display:flex;gap:6px' });
   wrap.appendChild(h('button', 'btn-ghost icon-chip', [hIcon('edit', 'ic')], {
+    'data-tour': 'practice',
     title: L('Practice Tests', 'اختبارات التمرين', 'Pratik Testleri'),
     onclick: () => {
       sound.click();
@@ -2076,7 +2306,12 @@ function renderAuthModal() {
         if (res.user.lang && res.user.lang !== appLang) setLang(res.user.lang);
         state.authOpen = false;
         sound.win();
-        render();
+        if (state.pendingPractice) {
+          state.pendingPractice = false;
+          goPractice();
+        } else {
+          render();
+        }
       } else {
         errEl.textContent = res.errorTr || res.error || L('Something went wrong', 'حدث خطأ', 'Bir şeyler ters gitti');
       }
@@ -2550,6 +2785,9 @@ function checkRoute() {
     }
   }
   state.isHost = true;
+  if (state.screen === 'landing') {
+    try { if (!localStorage.getItem(TUT_KEY)) state.tutorialOpen = true; } catch {}
+  }
   connect();
   render();
 }

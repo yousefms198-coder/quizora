@@ -4118,3 +4118,174 @@ input[type='email']:focus, textarea:focus {
     scroll-behavior: auto !important;
   }
 }
+
+/* ================================================================
+   FIRST-RUN TUTORIAL
+   Welcome slides (replayable via the corner ? button) + an optional
+   guided spot-the-UI tour. Same overlay/z-index family as the auth
+   and settings modals; coach-mark dim uses a spotlight box-shadow so
+   the highlighted target stays fully interactive.
+   ================================================================ */
+.tut-card {
+  width: 100%;
+  max-width: 480px;
+  padding: 30px 24px 24px;
+  border-radius: 22px;
+  position: relative;
+  text-align: center;
+  animation: popIn 0.35s var(--ease-pop);
+}
+.tut-x {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+.tut-icon {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 38px;
+  border-radius: 22px;
+  background: linear-gradient(160deg, rgba(56, 189, 248, 0.18), rgba(8, 145, 178, 0.07));
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  box-shadow: 0 0 32px rgba(56, 189, 248, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  animation: tutorialFloat 3s ease-in-out infinite;
+}
+@keyframes tutorialFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.tut-title {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  margin-bottom: 10px;
+  color: #f1f5f9;
+  text-shadow: 0 0 22px rgba(56, 189, 248, 0.2);
+}
+.tut-sub {
+  font-size: 14px;
+  line-height: 1.65;
+  color: #94a3b8;
+  margin: 0 auto 20px;
+  max-width: 400px;
+}
+.tut-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.tut-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.25);
+  transition: all var(--motion-base) var(--ease-press);
+}
+.tut-dot.on {
+  width: 26px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #38bdf8, #22d3ee);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.55);
+}
+.tut-nav {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.tut-nav .btn-primary,
+.tut-nav .btn-success {
+  padding: 12px 24px;
+  font-size: 14px;
+  border-radius: 12px;
+}
+.tut-nav .btn-ghost {
+  padding: 12px 18px;
+  font-size: 14px;
+  border-radius: 12px;
+}
+
+.tut-q {
+  font-weight: 800;
+}
+
+/* ---------- Guided tour (coach marks) ---------- */
+.tour-root {
+  position: fixed;
+  inset: 0;
+  z-index: 195;
+  pointer-events: none;
+}
+.tour-spot {
+  position: fixed;
+  border-radius: 20px;
+  border: 2px solid rgba(56, 189, 248, 0.8);
+  box-shadow: 0 0 0 9999px rgba(2, 6, 23, 0.78),
+              0 0 34px rgba(56, 189, 248, 0.4),
+              inset 0 0 30px rgba(56, 189, 248, 0.14);
+  transition: left 0.45s var(--ease-press), top 0.45s var(--ease-press),
+              width 0.45s var(--ease-press), height 0.45s var(--ease-press),
+              opacity 0.3s ease;
+  pointer-events: none;
+  animation: tourSpotIn 0.4s var(--ease-pop);
+}
+@keyframes tourSpotIn {
+  from { opacity: 0; transform: scale(1.05); }
+  to { opacity: 1; transform: scale(1); }
+}
+.tour-tip {
+  position: fixed;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  width: min(460px, calc(100vw - 32px));
+  padding: 20px 22px 18px;
+  border-radius: 20px;
+  background: rgba(10, 15, 30, 0.93);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  color: #e2e8f0;
+  text-align: center;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55), 0 0 40px rgba(56, 189, 248, 0.12);
+  pointer-events: auto;
+  z-index: 196;
+  animation: fadeUp 0.4s var(--ease-press);
+}
+.tour-kicker {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #7dd3fc;
+  margin-bottom: 8px;
+}
+.tour-tip-title {
+  font-size: 19px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+.tour-tip-sub {
+  font-size: 13px;
+  line-height: 1.55;
+  color: #94a3b8;
+  margin-bottom: 14px;
+}
+.tour-tip .tut-nav { gap: 8px; }
+.tour-tip .btn-ghost { padding: 10px 16px; font-size: 13px; }
+.tour-tip .btn-primary,
+.tour-tip .btn-success { padding: 10px 20px; font-size: 13px; border-radius: 12px; }
+
+@media (max-width: 640px) {
+  .tour-tip { bottom: 16px; padding: 16px 14px; }
+  .tut-card { padding: 24px 16px 18px; }
+  .tut-icon { width: 62px; height: 62px; font-size: 30px; margin-bottom: 12px; }
+}

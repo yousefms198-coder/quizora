@@ -842,17 +842,40 @@ function renderTourOverlay() {
     const spot = root.querySelector('#tour-spot');
     const el = step.sel ? document.querySelector(step.sel) : null;
     if (spot && el) {
-      const r = el.getBoundingClientRect();
-      const inset = 3;
-      spot.style.left = `${r.left + inset}px`;
-      spot.style.top = `${r.top + inset}px`;
-      spot.style.width = `${Math.max(0, r.width - inset * 2)}px`;
-      spot.style.height = `${Math.max(0, r.height - inset * 2)}px`;
-      const rad = getComputedStyle(el).borderRadius;
-      spot.style.borderRadius = rad && rad !== '0px' ? rad : '18px';
+      const place = () => {
+        const r = el.getBoundingClientRect();
+        const inset = 3;
+        spot.style.left = `${r.left + inset}px`;
+        spot.style.top = `${r.top + inset}px`;
+        spot.style.width = `${Math.max(0, r.width - inset * 2)}px`;
+        spot.style.height = `${Math.max(0, r.height - inset * 2)}px`;
+        const rad = getComputedStyle(el).borderRadius;
+        spot.style.borderRadius = rad && rad !== '0px' ? rad : '18px';
+      };
+      place();
+      // take the user to the target: scroll it into view, spotlight follows
+      try {
+        if (getComputedStyle(el).position !== 'fixed') el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+      } catch (e) {
+        try { el.scrollIntoView(true); } catch (e2) {}
+      }
+      (function track() {
+        if (!spot.isConnected || !el.isConnected) return;
+        place();
+        requestAnimationFrame(track);
+      })();
+      const onScroll = () => {
+        if (!spot.isConnected) { window.removeEventListener('scroll', onScroll, true); return; }
+        place();
+      };
+      window.addEventListener('scroll', onScroll, { capture: true, passive: true });
+      window.addEventListener('resize', onScroll, { passive: true });
     } else if (spot) {
       spot.style.display = 'none';
     }
+  } else {
+    // final step: settle back to a neutral view
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { try { window.scrollTo(0, 0); } catch (e2) {} }
   }
   return root;
 }

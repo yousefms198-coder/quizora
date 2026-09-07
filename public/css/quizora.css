@@ -2850,7 +2850,7 @@ input[type='text'], input[type='email'], input[type='password'], select {
   font-size: 10px;
 }
 @media (max-width: 1100px) {
-  .host-join-card { grid-column: 1; grid-row: 3; max-width: 220px; }
+  .host-join-card { grid-column: 1; grid-row: 7; max-width: 220px; }
 }
 
 /* ===== BIG-SCREEN PROJECTION (live question — stage dominates) ===== */
@@ -4409,3 +4409,110 @@ input[type='email']:focus, textarea:focus {
   min-height: 18px;
 }
 html[dir="rtl"] .question-lang-hint { text-align: right; }
+
+/* ================================================================
+   HOST ON A PHONE — compact, no-overlap layout
+   Desktop / projector (>=700px) is completely untouched.
+   ================================================================ */
+@media (max-width: 700px) {
+  .game-container {
+    padding: 8px 12px 32px;
+    gap: 10px;
+    min-height: 100dvh;
+  }
+
+  /* Masthead: wrap so room code + timer never collide with badges */
+  .host-masthead {
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    padding: 4px 0 8px;
+    margin-bottom: 4px;
+  }
+  .host-meta {
+    order: 2;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 12px;
+  }
+  .host-room-pill { order: 1; padding: 6px 12px; font-size: 11px; letter-spacing: 0.08em; }
+  .host-room-code { font-size: 13px; }
+  .timer-container.timer-corner {
+    order: 3;
+    width: 74px;
+    height: 74px;
+    margin: 0;
+  }
+  .timer-text { font-size: 20px; }
+  .timer-ring-bg, .timer-ring-progress { stroke-width: 5; }
+  .round-badge { font-size: 11px; padding: 5px 12px; letter-spacing: 0.08em; }
+  .category-badge { font-size: 12px; padding: 5px 10px; margin-bottom: 0; }
+  .host-round-line { justify-content: flex-start; }
+  .host-ready { order: 4; width: 100%; max-width: 100%; }
+  .host-ready-text { font-size: 10.5px; margin-bottom: 3px; }
+
+  /* Quickbar: proper touch targets */
+  .host-quickbar { gap: 6px; margin: 0 auto 4px; }
+  .host-qb-btn { padding: 12px 6px; font-size: 13px; min-height: 48px; border-radius: 12px; }
+
+  /* Question hero card */
+  .question-card { padding: 22px 16px; margin-bottom: 8px; border-radius: 18px; }
+  .question-text { font-size: clamp(1.15rem, 5.4vw, 1.55rem); }
+  .question-kicker { font-size: 11px; letter-spacing: 0.18em; }
+  .question-points { font-size: 11px; padding: 4px 12px; }
+
+  /* Options: full-width thumbs */
+  .options-grid { grid-template-columns: 1fr; gap: 8px; }
+  .option-btn { padding: 14px 16px; min-height: 54px; border-radius: 14px; }
+  .option-letter { width: 34px; height: 34px; font-size: 13px; border-radius: 9px; }
+
+  /* Presence + mini scores */
+  .host-meta-row { gap: 8px; margin-top: 4px; }
+  .answer-chip { padding: 5px 10px; font-size: 12px; gap: 5px; }
+  .ans-emoji { font-size: 13px; }
+  .mini-scores { gap: 6px; margin-bottom: 8px; }
+  .mini-score { padding: 5px 10px; font-size: 12px; gap: 4px; }
+  .mini-score .mini-pts { font-size: 13px; }
+
+  /* Late-join card: collapsible horizontal strip (no overlap w/ question) */
+  .host-join-card {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 14px;
+  }
+  .host-join-card .host-join-title { display: none; }
+  .host-join-qr { width: 54px; height: 54px; padding: 4px; }
+  .host-join-card .host-join-code { padding: 4px 12px; }
+  .host-join-code b { font-size: 16px; }
+
+  /* Ranking strip */
+  .host-ranking-rail { border-radius: 12px; padding: 8px; }
+
+  /* Reveal overlay fits portrait phones */
+  .reveal-overlay { padding: 16px; }
+  .reveal-verdict { font-size: clamp(2rem, 9vw, 3rem); }
+  .reveal-answer { font-size: clamp(1.2rem, 5.4vw, 1.7rem); padding: 12px 18px; max-width: 96vw; }
+  .reveal-points { font-size: 1.1rem; }
+  .reveal-next-hint { margin-top: 22px; font-size: 12px; }
+
+  /* Paused chip stays clear of the masthead */
+  .paused-chip { top: 8px; font-size: 11px; padding: 7px 14px; }
+
+  /* Lobby on a phone host */
+  .lobby-container { padding: 18px 14px 32px; }
+  .qr-container { width: 150px; height: 150px; margin: 12px auto; }
+  .room-code-value { letter-spacing: 0.12em; }
+  .lobby-start .start-btn { padding: 16px; font-size: 17px; }
+
+  /* Safe area for notched phones */
+  .game-container { padding-top: max(env(safe-area-inset-top), 8px); padding-bottom: max(env(safe-area-inset-bottom), 32px); }
+  .lobby-container { padding-top: max(env(safe-area-inset-top), 18px); padding-bottom: max(env(safe-area-inset-bottom), 30px); }
+  .corner-widget { top: max(env(safe-area-inset-top), 10px); }
+}

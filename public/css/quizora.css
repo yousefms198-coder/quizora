@@ -4834,6 +4834,16 @@ html[dir="rtl"] .question-lang-hint { text-align: right; }
 }
 
 /* ---- subscribe strip (landing) ---- */
+.free-exam-note {
+  margin: 10px auto 0;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px dashed #3b82f6;
+  color: #93c5fd;
+  font-size: 12px;
+  text-align: center;
+  max-width: 640px;
+}
 .plan-strip {
   display: flex;
   align-items: center;

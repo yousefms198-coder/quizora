@@ -84,6 +84,7 @@
   }
   if (typeof window !== 'undefined') {
     window.PLANS = PLANS;
+    window.ORDER = ORDER;
     window.PLAN_ORDER = ORDER;
     window.planGet = planGet;
     window.planPrice = planPrice;

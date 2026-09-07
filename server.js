@@ -4566,9 +4566,9 @@ wss.on('connection', (ws) => {
     if (msg.type === 'create_room') {
       let code;
       const hostPlan = msg.plan && PLANS[msg.plan] ? msg.plan : 'free';
+      let roomNum = msg.numQuestions || 10;
       if (msg.mode === 'exam' && hostPlan === 'free') {
-        ws.send(JSON.stringify({ type: 'error', code: 'plan', message: 'Exam packs require a Premium or Ultimate plan', messageAr: 'حزم الامتحانات تتطلب خطة Premium أو Ultimate', messageTr: 'Sınav paketleri Premium veya Ultimate plan gerektirir' }));
-        return;
+        roomNum = Math.min(roomNum, FREE_EXAM_LIMIT);
       }
       do { code = generateCode(); } while (rooms.has(code));
       const room = {
@@ -4596,7 +4596,7 @@ wss.on('connection', (ws) => {
         phase: 'lobby',
         mode: msg.mode === 'exam' ? 'exam' : 'fun',
         selectedCategories: msg.categories || ['general', 'movies', 'family'],
-        numQuestions: msg.numQuestions || 10,
+        numQuestions: roomNum,
         questionLang: msg.questionLang === 'perplayer' ? 'perplayer' : 'shared',
         roomLang: (msg.lang === 'ar' || msg.lang === 'tr') ? msg.lang : 'en',
         frozenTimers: {},
@@ -4605,7 +4605,7 @@ wss.on('connection', (ws) => {
       ws.isHost = true;
       ws.roomCode = code;
       rooms.set(code, room);
-      ws.send(JSON.stringify({ type: 'room_created', code }));
+      ws.send(JSON.stringify({ type: 'room_created', code, numQuestions: roomNum }));
     }
 
     if (msg.type === 'join_room') {
@@ -4660,10 +4660,8 @@ wss.on('connection', (ws) => {
       if (!room || !ws.isHost) return;
       if (room.players.length < 1) return;
       if (room.mode === 'exam' && room.plan === 'free') {
-        ws.send(JSON.stringify({ type: 'error', code: 'plan', message: 'Exam packs require a Premium or Ultimate plan', messageAr: 'حزم الامتحانات تتطلب خطة Premium أو Ultimate', messageTr: 'Sınav paketleri Premium veya Ultimate plan gerektirir' }));
-        return;
+        room.numQuestions = Math.min(room.numQuestions || 5, FREE_EXAM_LIMIT);
       }
-
       room.questions = buildQuestions(room.selectedCategories, room.numQuestions, room.mode);
       room.currentQ = 0;
       room.phase = 'playing';
@@ -5076,6 +5074,7 @@ const PLAN_EXAM_ERROR = {
   errorTr: 'Sınav paketleri Premium veya Ultimate plan gerektirir',
   errorAr: 'حزم الامتحانات تتطلب خطة Premium أو Ultimate',
 };
+const FREE_EXAM_LIMIT = 5;
 
 function hashPassword(password, salt) {
   return crypto.scryptSync(String(password), salt, 64).toString('hex');
@@ -5304,11 +5303,12 @@ const practiceTests = new Map();
 app.post('/api/practice/start', (req, res) => {
   const user = authUser(req);
   if (!user) return res.status(401).json({ error: 'Not logged in' });
-  if (!planFeature(user, 'examPacks')) return res.status(403).json(PLAN_EXAM_ERROR);
+  const freeExam = !planFeature(user, 'examPacks');
   const { categories, numQuestions, mode, timerSeconds } = req.body || {};
   const cats = Array.isArray(categories) ? categories.filter(c => EXAMS[c]) : [];
   if (cats.length === 0) return res.status(400).json({ error: 'Pick at least one exam' });
-  const n = Math.min(Math.max(parseInt(numQuestions, 10) || 5, 1), 15);
+  const fullCap = Math.min(Math.max(parseInt(numQuestions, 10) || 5, 1), 15);
+  const n = freeExam ? Math.min(fullCap, FREE_EXAM_LIMIT) : fullCap;
   const thisMode = mode === 'report' ? 'report' : 'instant';
   const pool = cats.flatMap(c => EXAMS[c].questions.map(q => ({ ...q, category: c })));
   for (let i = pool.length - 1; i > 0; i--) {
@@ -5329,6 +5329,7 @@ app.post('/api/practice/start', (req, res) => {
     testId,
     mode: thisMode,
     timerSeconds: practiceTests.get(testId).timerSeconds,
+    freeLimit: freeExam ? FREE_EXAM_LIMIT : null,
     questions: picked.map((q, i) => ({
       index: i,
       q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q,
@@ -5344,18 +5345,20 @@ app.post('/api/practice/deck', (req, res) => {
   const { categories, numCards, bank } = req.body || {};
   let cats;
   let pool;
+  let freeExam = false;
   if (bank === 'custom') {
     if (!planFeature(user, 'customQuestions')) return res.status(403).json({ code: 'plan', error: 'Custom questions require a Premium or Ultimate plan', errorTr: 'Özel sorular Premium veya Ultimate plan gerektirir', errorAr: 'الأسئلة المخصصة تتطلب خطة Premium أو Ultimate' });
     cats = ['custom'];
     pool = (user.customQuestions || []).map(q => ({ ...q, category: 'custom' }));
   } else {
-    if (bank === 'exam' && !planFeature(user, 'examPacks')) return res.status(403).json(PLAN_EXAM_ERROR);
+    freeExam = bank === 'exam' && !planFeature(user, 'examPacks');
     const source = bank === 'exam' ? EXAMS : CATEGORIES;
     cats = Array.isArray(categories) ? categories.filter(c => source[c]) : [];
     if (cats.length === 0) return res.status(400).json({ error: 'Pick at least one category' });
     pool = cats.flatMap(c => source[c].questions.map(q => ({ ...q, category: c })));
   }
-  const n = Math.min(Math.max(parseInt(numCards, 10) || 10, 1), 20);
+  const fullCap = Math.min(Math.max(parseInt(numCards, 10) || 10, 1), 20);
+  const n = freeExam ? Math.min(fullCap, FREE_EXAM_LIMIT) : fullCap;
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];

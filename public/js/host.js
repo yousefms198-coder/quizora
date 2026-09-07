@@ -723,12 +723,10 @@ function renderModeTabs(container) {
     ['exam', 'grad', L('Educational Mode', 'الوضع التعليمي', 'Eğitim Modu')],
   ];
   modes.forEach(([m, icon, label]) => {
-    const locked = m === 'exam' && !hasFeature('examPacks');
     const active = state.mode === m;
-    const b = h('button', `mode-btn ${active ? 'active' : ''}`, [hIcon(icon, 'ic'), ' ' + label, locked ? ' 🔒' : ''], {
+    const b = h('button', `mode-btn ${active ? 'active' : ''}`, [hIcon(icon, 'ic'), ' ' + label], {
       onclick: () => {
         sound.click();
-        if (locked) { openUpgrade('examPacks'); return; }
         state.mode = m;
         const bank = currentBank();
         if (!state.selectedCategories.some(k => bank[k])) {
@@ -740,13 +738,15 @@ function renderModeTabs(container) {
     tabs.appendChild(b);
   });
   container.appendChild(tabs);
+  if (state.mode === 'exam' && !hasFeature('examPacks')) {
+    container.appendChild(h('div', 'free-exam-note', [L('Free: up to 5 educational questions per game — Premium unlocks the full packs.', 'مجاناً: حتى 5 أسئلة تعليمية لكل لعبة — تتيح خطة Premium الحزم الكاملة.', 'Ücretsiz: oyun başına 5 eğitim sorusu — Premium tüm paketleri açar.')]));
+  }
 }
 
 function renderSelectionGrid(container, sync) {
   const bank = currentBank();
   const grid = h('div', 'category-grid', [], { style: 'margin-bottom:12px' });
   Object.entries(bank).forEach(([key, cat]) => {
-    if (state.mode === 'exam' && !hasFeature('examPacks')) return;
     const sel = state.selectedCategories.includes(key);
     const btn = h('button', `cat-btn ${sel ? 'selected' : 'unselected'}`, [`${cat.emoji} ${L(cat.name, cat.nameAr, cat.nameTr)}`], {
       style: sel ? cat.css : '',
@@ -2098,6 +2098,7 @@ function handleHostMessage(msg) {
   switch (msg.type) {
     case 'room_created':
       state.roomCode = msg.code;
+      if (msg.numQuestions) state.numQuestions = msg.numQuestions;
       state.screen = 'lobby';
       render();
       setTimeout(loadQR, 100);
@@ -2914,7 +2915,7 @@ function buildPracticeSetup(c) {
   const bankRow = h('div', '', [], { style: 'width:100%;display:flex;gap:8px;margin:12px 0 2px;flex-wrap:wrap' });
   const bankOpts = [
     ['fun', '🎉 ' + L('Fun Mode', 'الوضع الترفيهي', 'Eğlence Modu'), false],
-    ['exam', '🎓 ' + L('Educational Mode', 'الوضع التعليمي', 'Eğitim Modu'), !hasFeature('examPacks')],
+    ['exam', '🎓 ' + L('Educational Mode', 'الوضع التعليمي', 'Eğitim Modu'), false],
     ['custom', '🧩 ' + L('Custom', 'مخصص', 'Özel'), !hasFeature('customQuestions')],
   ];
   bankOpts.forEach(([b, lab, locked]) => {
@@ -2924,7 +2925,9 @@ function buildPracticeSetup(c) {
     }));
   });
   c.appendChild(bankRow);
-  if (pick.bank === 'exam' && !hasFeature('examPacks')) pick.bank = 'fun';
+  if (pick.bank === 'exam' && !hasFeature('examPacks')) {
+    c.appendChild(h('div', 'practice-sub', [L('Free: up to 5 questions per test / 5 cards per deck — Premium unlocks the full packs.', 'مجاناً: حتى 5 أسئلة لكل اختبار / 5 بطاقات لكل مجموعة — تتيح خطة Premium الحزم الكاملة.', 'Ücretsiz: test başına 5 soru / destede 5 kart — Premium tüm paketleri açar.')], { style: 'color:#94a3b8;font-size:13px;text-align:center;margin:6px 0 0' }));
+  }
   if (pick.bank === 'custom' && !hasFeature('customQuestions')) pick.bank = 'fun';
   if (pick.bank === 'custom') {
     const n = state.billing && state.billing.customQuestions ? state.billing.customQuestions.length : 0;
@@ -2936,7 +2939,7 @@ function buildPracticeSetup(c) {
   if (pick.bank === 'custom') {
     bankEntries = Object.entries({ custom: { name: 'My Custom Questions', nameAr: 'أسئلتي المخصصة', nameTr: 'Özel Sorularım', emoji: '🧩', css: 'background:#8b5cf6' } });
   } else {
-    bankEntries = Object.entries(bank).filter(([key]) => pick.bank === 'exam' || hasFeature('examPacks'));
+    bankEntries = Object.entries(bank);
   }
   const grid = h('div', 'category-grid', [], { style: 'width:100%;margin:8px 0' });
   bankEntries.forEach(([key, cat]) => {
@@ -3081,7 +3084,6 @@ function buildFlashcardView(c) {
 async function beginPractice() {
   const pick = state.practice.pick;
   if (pick.bank === 'custom') { alert(L('Use Flashcards for custom questions', 'استخدم البطاقات التعليمية للأسئلة المخصصة', 'Özel sorular için Flashcard kullanın')); return; }
-  if (pick.bank === 'exam' && !hasFeature('examPacks')) { openUpgrade('examPacks'); return; }
   if (!pick.categories.length) { alert(L('Pick at least one exam', 'اختر امتحاناً واحداً على الأقل', 'En az bir sınav seç')); return; }
   const res = await api('/api/practice/start', 'POST', { categories: pick.categories, numQuestions: pick.num, mode: pick.mode, timerSeconds: pick.timer });
   if (res && res.code === 'plan') { openUpgrade('examPacks'); }

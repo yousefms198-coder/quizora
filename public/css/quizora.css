@@ -4512,7 +4512,7 @@ html[dir="rtl"] .question-lang-hint { text-align: right; }
   .lobby-start .start-btn { padding: 16px; font-size: 17px; }
 
   /* Safe area for notched phones */
-  .game-container { padding-top: max(env(safe-area-inset-top), 8px); padding-bottom: max(env(safe-area-inset-bottom), 32px); }
-  .lobby-container { padding-top: max(env(safe-area-inset-top), 18px); padding-bottom: max(env(safe-area-inset-bottom), 30px); }
+  .game-container { padding-top: calc(max(env(safe-area-inset-top), 10px) + 46px); padding-bottom: max(env(safe-area-inset-bottom), 32px); }
+  .lobby-container { padding-top: calc(max(env(safe-area-inset-top), 10px) + 46px); padding-bottom: max(env(safe-area-inset-bottom), 30px); }
   .corner-widget { top: max(env(safe-area-inset-top), 10px); }
 }

@@ -4747,10 +4747,28 @@ wss.on('connection', (ws) => {
       if (!room || !ws.isHost) return;
       room.selectedCategories = msg.categories || room.selectedCategories;
       room.numQuestions = msg.numQuestions || room.numQuestions;
+      if (room.mode === 'exam' && room.plan === 'free') room.numQuestions = Math.min(room.numQuestions, FREE_EXAM_LIMIT);
       room.timerSeconds = msg.timerSeconds !== undefined ? msg.timerSeconds : room.timerSeconds;
       if (msg.questionLang !== undefined) room.questionLang = msg.questionLang === 'perplayer' ? 'perplayer' : 'shared';
       if (msg.roomLang !== undefined && (msg.roomLang === 'ar' || msg.roomLang === 'tr' || msg.roomLang === 'en')) room.roomLang = msg.roomLang;
-      if (msg.powerupsEnabled !== undefined) room.powerupsEnabled = !!msg.powerupsEnabled;
+      if (msg.powerupsEnabled !== undefined) {
+        const wasOn = room.powerupsEnabled;
+        room.powerupsEnabled = !!msg.powerupsEnabled;
+        if (wasOn && !room.powerupsEnabled) {
+          room.powerups = {};
+          broadcastAll(room, { type: 'powerups_cleared' });
+        }
+        if (!wasOn && room.powerupsEnabled) {
+          const powerupTypes = ['freeze', 'double', 'steal'];
+          room.players.forEach((p, i) => {
+            room.powerups[p.name] = powerupTypes[i % powerupTypes.length];
+          });
+          room.clients.forEach(client => {
+            if (client.readyState !== 1 || client.isHost) return;
+            client.send(JSON.stringify({ type: 'powerup_assign', powerup: room.powerups[client.playerName] || null }));
+          });
+        }
+      }
     }
 
     if (msg.type === 'use_powerup') {
@@ -5522,23 +5540,33 @@ app.post('/api/custom/save', (req, res) => {
   if (!(limit === Infinity) && customUsage(user) >= limit) {
     return res.status(403).json({ code: 'limit', error: `Monthly custom-question limit reached (${limit})`, errorTr: `Aylık özel soru limitine ulaşıldı (${limit})`, errorAr: `تم بلوغ حد الأسئلة المخصصة الشهري (${limit})`, used: customUsage(user), limit });
   }
-  const b = req.body || {};
+const b = req.body || {};
   const q = String(b.q || '').trim().substring(0, 300);
-  const options = Array.isArray(b.options) ? b.options.map(o => String(o || '').trim().substring(0, 60)) : [];
+  const rawOpts = Array.isArray(b.options) ? b.options.map(o => String(o || '').trim().substring(0, 60)) : [];
+  const rawOptsAr = Array.isArray(b.optionsAr) ? b.optionsAr : [];
+  const rawOptsTr = Array.isArray(b.optionsTr) ? b.optionsTr : [];
   if (!q) return res.status(400).json({ error: 'Question is required', errorTr: 'Soru gerekli', errorAr: 'السؤال مطلوب' });
-  const valid = options.filter(o => o).length;
-  if (valid < 2 || options.length < 2) return res.status(400).json({ error: 'Add at least 2 options', errorTr: 'En az 2 seçenek ekle', errorAr: 'أضف خيارين على الأقل' });
-  const correct = Number(b.correct);
-  if (!(correct >= 0 && correct < options.length) || !options[correct]) return res.status(400).json({ error: 'Pick a correct option', errorTr: 'Doğru seçeneği seç', errorAr: 'اختر الخيار الصحيح' });
-  const qq = (i, v) => (Array.isArray(b[v]) && b[v][i] !== undefined ? String(b[v][i]).trim().substring(0, 60) : '');
+  if (rawOpts.filter(o => o).length < 2 || rawOpts.length < 2) return res.status(400).json({ error: 'Add at least 2 options', errorTr: 'En az 2 seçenek ekle', errorAr: 'أضف خيارين على الأقل' });
+  const rawCorrect = Number(b.correct);
+  if (!(rawCorrect >= 0 && rawCorrect < rawOpts.length) || !rawOpts[rawCorrect]) return res.status(400).json({ error: 'Pick a correct option', errorTr: 'Doğru seçeneği seç', errorAr: 'اختر الإجابة الصحيحة' });
+  const options = [];
+  const optionsAr = [];
+  const optionsTr = [];
+  rawOpts.forEach((o, i) => {
+    if (!o) return;
+    options.push(o);
+    optionsAr.push(String(rawOptsAr[i] || '').trim().substring(0, 60) || o);
+    optionsTr.push(String(rawOptsTr[i] || '').trim().substring(0, 60) || o);
+  });
+  const correct = rawOpts.slice(0, rawCorrect).filter(o => o).length;
   const question = {
     id: crypto.randomBytes(8).toString('hex'),
     q,
     qAr: String(b.qAr || '').trim().substring(0, 300) || q,
     qTr: String(b.qTr || '').trim().substring(0, 300) || q,
     options,
-    optionsAr: options.map((o, i) => qq(i, 'optionsAr') || o),
-    optionsTr: options.map((o, i) => qq(i, 'optionsTr') || o),
+    optionsAr,
+    optionsTr,
     correct,
     createdAt: new Date().toISOString(),
   };

@@ -268,10 +268,11 @@ function renderUpgradeModal() {
     const plan = PLANS[state.upgrade.plan];
     const planNm = L(plan.name.en, plan.name.ar, plan.name.tr);
     const total = payTL(state.upgrade.plan, interval);
-    card.appendChild(h('div', 'pay-summary', [
+    const summaryLeft = h('div', '', [
       h('div', 'pay-plan', [planNm + ' · ' + (interval === 'yearly' ? L('Yearly', 'سنوي', 'Yıllık') : L('Monthly', 'شهري', 'Aylık'))]),
-      h('div', 'pay-total', [total + '/mo'])
-    ]));
+      interval === 'yearly' ? h('div', 'pay-plan-sub', ['₺' + (plan.priceTRY.yearly * 12) + ' ' + L('billed yearly', 'تُحاسب سنوياً', 'yıllık faturalanır')]) : null
+    ]);
+    card.appendChild(h('div', 'pay-summary', [summaryLeft, h('div', 'pay-total', [total + '/mo'])]));
 
     const stripNum = h('div', 'card-strip-num', ['•••• •••• •••• ••••']);
     const stripName = h('span', '', ['CARDHOLDER']);
@@ -379,7 +380,7 @@ function renderUpgradeModal() {
     const feats = h('ul', 'plan-card-feats', []);
     const pF = PLANS[key].features;
     const rows = [
-      ['examPacks', L('Educational exam packs', 'حزم امتحانات تعليمية', 'Eğitim sınav paketleri')],
+      ['examPacks', L('Full exam packs (free: 5 per game)', 'الحزم الكاملة للامتحانات (مجاناً: 5 لكل لعبة)', 'Tam sınav paketleri (ücretsiz: oyun başına 5)')],
       ['customQuestions', L('Custom questions', 'أسئلة مخصصة', 'Özel sorular')],
       ['weakTopics', L('Weak-topic insights', 'تحليل المواضيع الضعيفة', 'Zayıf konu analizleri')],
       ['reports', L('Export reports (CSV)', 'تصدير التقارير (CSV)', 'Raporları dışa aktar (CSV)')],
@@ -679,7 +680,7 @@ function advanceTour() {
 
 function goPractice() {
   quitPractice();
-  state.practice = { pick: { categories: ['yks'], num: 5, mode: 'instant', timer: 0 } };
+  state.practice = { pick: { bank: 'exam', format: 'test', categories: ['yks'], num: 5, mode: 'instant', timer: 0 } };
   state.practiceView = 'setup';
   state.screen = 'practice';
   tutorialDone();
@@ -2494,6 +2495,16 @@ function handlePlayerMessage(msg) {
       if (msg.scores) state.scores = msg.scores;
       break;
 
+    case 'powerup_assign':
+      state.myPowerup = msg.powerup || null;
+      if (state.screen === 'player_waiting' || state.screen === 'player_answer') render();
+      break;
+
+    case 'powerups_cleared':
+      state.myPowerup = null;
+      if (state.screen === 'player_waiting' || state.screen === 'player_answer') render();
+      break;
+
     case 'powerup_consumed':
       state.myPowerup = null;
       if (state.screen === 'player_answer') render();
@@ -2671,8 +2682,12 @@ function logout() {
   api('/api/auth/logout', 'POST', {});
   try { localStorage.removeItem('quizora_token'); } catch {}
   state.user = null;
+  state.billing = null;
   state.settingsOpen = false;
   state.authOpen = false;
+  state.langMenuOpen = false;
+  state.customEditor = null;
+  state.upgrade = null;
   render();
 }
 
@@ -2696,7 +2711,7 @@ function accountChip() {
     title: L('Practice Tests', 'اختبارات التمرين', 'Pratik Testleri'),
     onclick: () => {
       sound.click();
-      state.practice = { pick: { categories: ['yks'], num: 5, mode: 'instant', timer: 0 } };
+      state.practice = { pick: { bank: 'exam', format: 'test', categories: ['yks'], num: 5, mode: 'instant', timer: 0 } };
       state.practiceView = 'setup';
       state.screen = 'practice';
       render();
@@ -2753,7 +2768,7 @@ function renderDashboard() {
   const cards = [
     ['play', L('Host a Quiz', 'إنشاء لعبة', 'Yarışma Oluştur'), '#38bdf8', () => { sound.click(); state.screen = 'landing'; render(); }],
     ['users', L('Join a Quiz', 'الانضمام', 'Oyuna Katıl'), '#22c55e', () => { sound.click(); state.screen = 'join'; state.isHost = false; state.inputCode = ''; render(); }],
-    ['grad', L('Practice', 'التدريب', 'Pratik'), '#f59e0b', () => { sound.click(); state.practice = { pick: { categories: ['yks'], num: 5, mode: 'instant', timer: 0 } }; state.practiceView = 'setup'; state.screen = 'practice'; render(); }],
+    ['grad', L('Practice', 'التدريب', 'Pratik'), '#f59e0b', () => { sound.click(); state.practice = { pick: { bank: 'exam', format: 'test', categories: ['yks'], num: 5, mode: 'instant', timer: 0 } }; state.practiceView = 'setup'; state.screen = 'practice'; render(); }],
   ];
   cards.forEach(([icon, label, color, onclick]) => {
     const card = h('div', 'dash-card glass', [], { onclick });
@@ -3100,7 +3115,10 @@ function quitPractice() {
 
 function buildPracticeSetup(c) {
   const pick = state.practice.pick;
-  if (!pick.categories.length) pick.categories = ['yks'];
+  if (!pick.bank) pick.bank = 'exam';
+  if (!pick.format) pick.format = 'test';
+  if (pick.bank !== 'exam' && pick.format === 'test') pick.format = 'flash';
+  if (!pick.categories.length) pick.categories = pick.bank === 'fun' ? ['general'] : ['yks'];
 
   c.appendChild(h('div', '', [L('Practice with study tests or flashcards, from fun or educational categories.', 'تدرب عبر اختبارات أو بطاقات تعليمية من الفئات الترفيهية أو التعليمية.', 'Eğlence veya eğitim kategorilerinden testler veya flashcard’larla pratik yapın.')], { style: 'color:#94a3b8;font-size:13px;text-align:center' }));
 
@@ -3144,7 +3162,10 @@ function buildPracticeSetup(c) {
   c.appendChild(grid);
 
   const formatRow = h('div', '', [], { style: 'width:100%;display:flex;gap:8px;margin:6px 0' });
-  [['test', '📝 ' + L('Practice Test', 'اختبار تدريبي', 'Pratik Testi')], ['flash', '🃏 ' + L('Flashcards', 'بطاقات تعليمية', 'Flashcard')]].forEach(([f, lab]) => {
+  const formatOpts = [];
+  if (pick.bank === 'exam') formatOpts.push(['test', '📝 ' + L('Practice Test', 'اختبار تدريبي', 'Pratik Testi')]);
+  formatOpts.push(['flash', '🃏 ' + L('Flashcards', 'بطاقات تعليمية', 'Flashcard')]);
+  formatOpts.forEach(([f, lab]) => {
     formatRow.appendChild(h('button', `mode-btn ${pick.format === f ? 'active' : ''}`, [lab], {
       style: 'flex:1',
       onclick: () => { sound.click(); pick.format = f; render(); }
@@ -3218,6 +3239,8 @@ async function beginFlashcards() {
     };
     state.practiceView = 'flash';
     render();
+  } else if (res.cards && !res.cards.length) {
+    alert(L('No questions found for this selection', 'لا توجد أسئلة لهذا الاختيار', 'Bu seçim için soru bulunamadı'));
   } else {
     alert(res.errorTr || res.error || 'Error');
   }

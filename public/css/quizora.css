@@ -2197,8 +2197,10 @@ input[type='text'], input[type='email'], input[type='password'], select {
   backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
+  align-items: safe center;
   justify-content: center;
   padding: 20px;
+  overflow-y: auto;
   animation: fadeIn 0.15s ease;
 }
 @keyframes fadeIn {
@@ -4968,6 +4970,7 @@ html[dir="rtl"] .question-lang-hint { text-align: right; }
   border: 1px solid #334155;
 }
 .pay-plan { font-weight: 700; font-size: 14px; color: #e2e8f0; }
+.pay-plan-sub { font-size: 12px; color: #94a3b8; margin-top: 2px; }
 .pay-total { font-weight: 800; color: #7dd3fc; font-size: 18px; white-space: nowrap; }
 .card-strip {
   background: linear-gradient(135deg, #1e293b, #0f172a);

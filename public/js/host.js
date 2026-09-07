@@ -394,10 +394,11 @@ function renderTourOverlay() {
     const el = step.sel ? document.querySelector(step.sel) : null;
     if (spot && el) {
       const r = el.getBoundingClientRect();
-      spot.style.left = `${r.left}px`;
-      spot.style.top = `${r.top}px`;
-      spot.style.width = `${r.width}px`;
-      spot.style.height = `${r.height}px`;
+      const inset = 3;
+      spot.style.left = `${r.left + inset}px`;
+      spot.style.top = `${r.top + inset}px`;
+      spot.style.width = `${Math.max(0, r.width - inset * 2)}px`;
+      spot.style.height = `${Math.max(0, r.height - inset * 2)}px`;
       const rad = getComputedStyle(el).borderRadius;
       spot.style.borderRadius = rad && rad !== '0px' ? rad : '18px';
     } else if (spot) {

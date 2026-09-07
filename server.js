@@ -4565,11 +4565,19 @@ wss.on('connection', (ws) => {
 
     if (msg.type === 'create_room') {
       let code;
+      const hostPlan = msg.plan && PLANS[msg.plan] ? msg.plan : 'free';
+      if (msg.mode === 'exam' && hostPlan === 'free') {
+        ws.send(JSON.stringify({ type: 'error', code: 'plan', message: 'Exam packs require a Premium or Ultimate plan', messageAr: 'حزم الامتحانات تتطلب خطة Premium أو Ultimate', messageTr: 'Sınav paketleri Premium veya Ultimate plan gerektirir' }));
+        return;
+      }
       do { code = generateCode(); } while (rooms.has(code));
       const room = {
         code,
         hostId: ws.id,
         hostWs: ws,
+        plan: hostPlan,
+        playerLimit: PLANS[hostPlan].players,
+        powerupsEnabled: msg.powerupsEnabled !== undefined ? !!msg.powerupsEnabled : true,
         clients: new Set([ws]),
         players: [],
         questions: [],
@@ -4611,6 +4619,10 @@ wss.on('connection', (ws) => {
         ws.send(JSON.stringify({ type: 'error', message: 'Game already in progress', messageAr: 'اللعبة قيد التقدم بالفعل', messageTr: 'Oyun zaten devam ediyor' }));
         return;
       }
+      if (room.playerLimit && room.players.length >= room.playerLimit) {
+        ws.send(JSON.stringify({ type: 'error', code: 'room_full', message: `Room is full (${room.playerLimit} players)`, messageAr: `الغرفة ممتلئة (${room.playerLimit} لاعباً)`, messageTr: `Oda dolu (${room.playerLimit} oyuncu)` }));
+        return;
+      }
       const name = (msg.name || '').trim().substring(0, 12);
       if (!name) {
         ws.send(JSON.stringify({ type: 'error', message: 'Name required', messageAr: 'الاسم مطلوب', messageTr: 'İsim gerekli' }));
@@ -4636,7 +4648,7 @@ wss.on('connection', (ws) => {
       room.totalBonuses[name] = 0;
 
       const powerupTypes = ['freeze', 'double', 'steal'];
-      room.powerups[name] = powerupTypes[room.players.length % powerupTypes.length];
+      room.powerups[name] = room.powerupsEnabled ? powerupTypes[room.players.length % powerupTypes.length] : null;
 
       ws.send(JSON.stringify({ type: 'joined', code, player, categories: room.selectedCategories, numQuestions: room.numQuestions, mode: room.mode, powerup: room.powerups[name], questionLang: room.questionLang, roomLang: room.roomLang }));
       broadcast(room, { type: 'player_joined', player, players: room.players }, ws.id);
@@ -4647,6 +4659,10 @@ wss.on('connection', (ws) => {
       const room = rooms.get(ws.roomCode);
       if (!room || !ws.isHost) return;
       if (room.players.length < 1) return;
+      if (room.mode === 'exam' && room.plan === 'free') {
+        ws.send(JSON.stringify({ type: 'error', code: 'plan', message: 'Exam packs require a Premium or Ultimate plan', messageAr: 'حزم الامتحانات تتطلب خطة Premium أو Ultimate', messageTr: 'Sınav paketleri Premium veya Ultimate plan gerektirir' }));
+        return;
+      }
 
       room.questions = buildQuestions(room.selectedCategories, room.numQuestions, room.mode);
       room.currentQ = 0;
@@ -4736,11 +4752,12 @@ wss.on('connection', (ws) => {
       room.timerSeconds = msg.timerSeconds !== undefined ? msg.timerSeconds : room.timerSeconds;
       if (msg.questionLang !== undefined) room.questionLang = msg.questionLang === 'perplayer' ? 'perplayer' : 'shared';
       if (msg.roomLang !== undefined && (msg.roomLang === 'ar' || msg.roomLang === 'tr' || msg.roomLang === 'en')) room.roomLang = msg.roomLang;
+      if (msg.powerupsEnabled !== undefined) room.powerupsEnabled = !!msg.powerupsEnabled;
     }
 
     if (msg.type === 'use_powerup') {
       const room = rooms.get(ws.roomCode);
-      if (!room || ws.isHost || room.phase !== 'playing') return;
+      if (!room || ws.isHost || room.phase !== 'playing' || !room.powerupsEnabled) return;
       const pname = ws.playerName;
       const pu = room.powerups[pname];
       if (!pu) return;
@@ -5034,6 +5051,32 @@ function saveUsers(db) {
 const usersDB = loadUsers();
 const sessions = new Map();
 
+/* ---- Plans (single source of truth in public/js/plans.js) ---- */
+const PLANS = require('./public/js/plans.js').PLANS;
+
+function resolvePlan(user) {
+  return (user && user.plan && PLANS[user.plan]) ? user.plan : 'free';
+}
+function planLimits(user) {
+  return PLANS[resolvePlan(user)];
+}
+function planFeature(user, key) {
+  return !!(PLANS[resolvePlan(user)] && PLANS[resolvePlan(user)].features && PLANS[resolvePlan(user)].features[key]);
+}
+function customMonthKey() {
+  return new Date().toISOString().slice(0, 7);
+}
+function customUsage(user) {
+  if (!user.customMonth || user.customMonth.key !== customMonthKey()) return 0;
+  return user.customMonth.count || 0;
+}
+const PLAN_EXAM_ERROR = {
+  code: 'plan',
+  error: 'Exam packs require a Premium or Ultimate plan',
+  errorTr: 'Sınav paketleri Premium veya Ultimate plan gerektirir',
+  errorAr: 'حزم الامتحانات تتطلب خطة Premium أو Ultimate',
+};
+
 function hashPassword(password, salt) {
   return crypto.scryptSync(String(password), salt, 64).toString('hex');
 }
@@ -5045,6 +5088,8 @@ function cleanUser(u) {
     avatar: u.avatar || '😎',
     lang: u.lang || 'en',
     createdAt: u.createdAt,
+    plan: resolvePlan(u),
+    planInterval: u.planInterval && u.planInterval === 'yearly' ? 'yearly' : 'monthly',
     stats: u.stats || { tests: 0, scoreSum: 0, correctTot: 0, answerTot: 0 },
     examStats: u.examStats || {},
   };
@@ -5078,6 +5123,10 @@ app.post('/api/auth/register', (req, res) => {
     createdAt: new Date().toISOString(),
     stats: { tests: 0, scoreSum: 0, correctTot: 0, answerTot: 0 },
     examStats: {},
+    plan: 'free',
+    planInterval: 'monthly',
+    customMonth: null,
+    customQuestions: [],
   };
   usersDB[em] = user;
   saveUsers(usersDB);
@@ -5255,6 +5304,7 @@ const practiceTests = new Map();
 app.post('/api/practice/start', (req, res) => {
   const user = authUser(req);
   if (!user) return res.status(401).json({ error: 'Not logged in' });
+  if (!planFeature(user, 'examPacks')) return res.status(403).json(PLAN_EXAM_ERROR);
   const { categories, numQuestions, mode, timerSeconds } = req.body || {};
   const cats = Array.isArray(categories) ? categories.filter(c => EXAMS[c]) : [];
   if (cats.length === 0) return res.status(400).json({ error: 'Pick at least one exam' });
@@ -5292,11 +5342,20 @@ app.post('/api/practice/deck', (req, res) => {
   const user = authUser(req);
   if (!user) return res.status(401).json({ error: 'Not logged in' });
   const { categories, numCards, bank } = req.body || {};
-  const source = bank === 'exam' ? EXAMS : CATEGORIES;
-  const cats = Array.isArray(categories) ? categories.filter(c => source[c]) : [];
-  if (cats.length === 0) return res.status(400).json({ error: 'Pick at least one category' });
+  let cats;
+  let pool;
+  if (bank === 'custom') {
+    if (!planFeature(user, 'customQuestions')) return res.status(403).json({ code: 'plan', error: 'Custom questions require a Premium or Ultimate plan', errorTr: 'Özel sorular Premium veya Ultimate plan gerektirir', errorAr: 'الأسئلة المخصصة تتطلب خطة Premium أو Ultimate' });
+    cats = ['custom'];
+    pool = (user.customQuestions || []).map(q => ({ ...q, category: 'custom' }));
+  } else {
+    if (bank === 'exam' && !planFeature(user, 'examPacks')) return res.status(403).json(PLAN_EXAM_ERROR);
+    const source = bank === 'exam' ? EXAMS : CATEGORIES;
+    cats = Array.isArray(categories) ? categories.filter(c => source[c]) : [];
+    if (cats.length === 0) return res.status(400).json({ error: 'Pick at least one category' });
+    pool = cats.flatMap(c => source[c].questions.map(q => ({ ...q, category: c })));
+  }
   const n = Math.min(Math.max(parseInt(numCards, 10) || 10, 1), 20);
-  const pool = cats.flatMap(c => source[c].questions.map(q => ({ ...q, category: c })));
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -5381,6 +5440,94 @@ app.post('/api/practice/finish', (req, res) => {
     practiceTests.delete(t.testId);
   }
   res.json({ total, correct, wrong, percentage, catStats, details });
+});
+
+/* ======================== BILLING & CUSTOM QUESTIONS ======================== */
+app.post('/api/billing/status', (req, res) => {
+  const user = authUser(req);
+  if (!user) return res.status(401).json({ error: 'Not logged in' });
+  const planId = resolvePlan(user);
+  const p = PLANS[planId];
+  const key = customMonthKey();
+  const used = customUsage(user);
+  res.json({
+    plan: planId,
+    interval: user.planInterval && user.planInterval === 'yearly' ? 'yearly' : 'monthly',
+    features: p.features,
+    players: p.players,
+    customLimit: p.customMonthly,
+    customUsed: used,
+    customReset: key,
+    customQuestions: (user.customQuestions || []).map(q => ({ id: q.id, q: q.q, qAr: q.qAr || '', qTr: q.qTr || '', options: q.options, optionsAr: q.optionsAr || [], optionsTr: q.optionsTr || [], correct: q.correct, createdAt: q.createdAt })),
+  });
+});
+
+app.post('/api/billing/checkout', (req, res) => {
+  const user = authUser(req);
+  if (!user) return res.status(401).json({ error: 'Not logged in' });
+  const { plan, interval } = req.body || {};
+  if (plan === 'free') {
+    user.plan = 'free';
+    user.planInterval = 'monthly';
+    user.planUpdatedAt = new Date().toISOString();
+    saveUsers(usersDB);
+    return res.json({ ok: true, user: cleanUser(user) });
+  }
+  if (plan !== 'premium' && plan !== 'ultimate') return res.status(400).json({ error: 'Unknown plan' });
+  /* Mock checkout — no real payment is processed. */
+  user.plan = plan;
+  user.planInterval = interval === 'yearly' ? 'yearly' : 'monthly';
+  user.planUpdatedAt = new Date().toISOString();
+  saveUsers(usersDB);
+  res.json({ ok: true, user: cleanUser(user) });
+});
+
+app.post('/api/custom/save', (req, res) => {
+  const user = authUser(req);
+  if (!user) return res.status(401).json({ error: 'Not logged in' });
+  if (!planFeature(user, 'customQuestions')) return res.status(403).json({ code: 'plan', error: 'Custom questions require a Premium or Ultimate plan', errorTr: 'Özel sorular Premium veya Ultimate plan gerektirir', errorAr: 'الأسئلة المخصصة تتطلب خطة Premium أو Ultimate' });
+  const limit = PLANS[resolvePlan(user)].customMonthly;
+  if (!(limit === Infinity) && customUsage(user) >= limit) {
+    return res.status(403).json({ code: 'limit', error: `Monthly custom-question limit reached (${limit})`, errorTr: `Aylık özel soru limitine ulaşıldı (${limit})`, errorAr: `تم بلوغ حد الأسئلة المخصصة الشهري (${limit})`, used: customUsage(user), limit });
+  }
+  const b = req.body || {};
+  const q = String(b.q || '').trim().substring(0, 300);
+  const options = Array.isArray(b.options) ? b.options.map(o => String(o || '').trim().substring(0, 60)) : [];
+  if (!q) return res.status(400).json({ error: 'Question is required', errorTr: 'Soru gerekli', errorAr: 'السؤال مطلوب' });
+  const valid = options.filter(o => o).length;
+  if (valid < 2 || options.length < 2) return res.status(400).json({ error: 'Add at least 2 options', errorTr: 'En az 2 seçenek ekle', errorAr: 'أضف خيارين على الأقل' });
+  const correct = Number(b.correct);
+  if (!(correct >= 0 && correct < options.length) || !options[correct]) return res.status(400).json({ error: 'Pick a correct option', errorTr: 'Doğru seçeneği seç', errorAr: 'اختر الخيار الصحيح' });
+  const qq = (i, v) => (Array.isArray(b[v]) && b[v][i] !== undefined ? String(b[v][i]).trim().substring(0, 60) : '');
+  const question = {
+    id: crypto.randomBytes(8).toString('hex'),
+    q,
+    qAr: String(b.qAr || '').trim().substring(0, 300) || q,
+    qTr: String(b.qTr || '').trim().substring(0, 300) || q,
+    options,
+    optionsAr: options.map((o, i) => qq(i, 'optionsAr') || o),
+    optionsTr: options.map((o, i) => qq(i, 'optionsTr') || o),
+    correct,
+    createdAt: new Date().toISOString(),
+  };
+  if (!user.customQuestions) user.customQuestions = [];
+  user.customQuestions.push(question);
+  const key = customMonthKey();
+  if (!user.customMonth || user.customMonth.key !== key) user.customMonth = { key, count: 0 };
+  user.customMonth.count = (user.customMonth.count || 0) + 1;
+  saveUsers(usersDB);
+  res.json({ ok: true, question, used: user.customMonth.count, limit });
+});
+
+app.post('/api/custom/delete', (req, res) => {
+  const user = authUser(req);
+  if (!user) return res.status(401).json({ error: 'Not logged in' });
+  const id = req.body && req.body.id;
+  if (!user.customQuestions) user.customQuestions = [];
+  const before = user.customQuestions.length;
+  user.customQuestions = user.customQuestions.filter(q => q.id !== id);
+  if (user.customQuestions.length !== before) saveUsers(usersDB);
+  res.json({ ok: true, count: user.customQuestions.length });
 });
 
 server.listen(PORT, () => {

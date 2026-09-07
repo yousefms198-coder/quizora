@@ -51,6 +51,11 @@ let state = {
   tutSlide: 0,
   tourStep: null,
   pendingPractice: false,
+  billing: null,
+  upgrade: null,
+  customEditor: null,
+  powerupsEnabled: true,
+  quizColor: null,
 };
 
 const app = document.getElementById('app');
@@ -84,6 +89,9 @@ const ICONS = {
   users: [['circle', { cx: 9, cy: 8, r: 3.5 }], ['path', { d: 'M2.5 20c0-3.8 3-6 6.5-6s6.5 2.2 6.5 6' }], ['circle', { cx: 17, cy: 9, r: 2.5 }], ['path', { d: 'M17.5 14.7c2.4.6 4 2.3 4 5.3' }]],
   sparkle: [['path', { d: 'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9Z' }]],
   'arrow-left': [['path', { d: 'M19 12H5' }], ['path', { d: 'M12 19l-7-7 7-7' }]],
+  check: [['path', { d: 'M20 6L9 17l-5-5' }]],
+  x: [['path', { d: 'M18 6L6 18' }], ['path', { d: 'M6 6l12 12' }]],
+  download: [['path', { d: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4' }], ['path', { d: 'M7 10l5 5 5-5' }], ['path', { d: 'M12 15V3' }]],
   settings: [['circle', { cx: 12, cy: 12, r: 3 }], ['path', { d: 'M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z' }]],
   logout: [['path', { d: 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4' }], ['path', { d: 'M16 17l5-5-5-5' }], ['path', { d: 'M21 12H9' }]],
 };
@@ -105,6 +113,272 @@ function hIcon(name, cls) {
   return svg;
 }
 
+/* ==================== PLANS — client helpers ==================== */
+function currentPlanId() {
+  return (state.user && state.user.plan && window.PLANS && PLANS[state.user.plan]) ? state.user.plan : 'free';
+}
+function currentPlanDef() {
+  return window.PLANS ? (PLANS[currentPlanId()] || PLANS.free) : null;
+}
+function hasFeature(key) {
+  if (!window.PLANS) { return true; }
+  const d = currentPlanDef();
+  if (!d) return true;
+  return key === 'multiLang' || key === 'stats' || key === 'powerups' || !!d.features[key];
+}
+function planName() {
+  const d = currentPlanDef();
+  const n = d && d.name ? d.name : { en: 'Free', ar: 'مجاني', tr: 'Ücretsiz' };
+  return L(n.en, n.ar, n.tr);
+}
+function planBadgeEl() {
+  const d = currentPlanDef();
+  const id = currentPlanId();
+  return h('button', `plan-badge plan-${id}`, [d && d.icon ? d.icon : '', ' ', planName()], {
+    onclick: () => { sound.click(); openUpgrade('current'); }
+  });
+}
+function billingInterval() {
+  if (!state.billing || !state.billing.interval) return 'monthly';
+  return state.billing.interval === 'yearly' ? 'yearly' : 'monthly';
+}
+function applyQuizColor() {
+  const root = document.documentElement;
+  if (state.quizColor) {
+    root.style.setProperty('--accent', state.quizColor);
+    root.style.setProperty('--accent-glow', state.quizColor + '59');
+    root.style.setProperty('--accent-deep', state.quizColor);
+  } else {
+    root.style.removeProperty('--accent');
+    root.style.removeProperty('--accent-glow');
+    root.style.removeProperty('--accent-deep');
+  }
+}
+async function refreshBilling(renderAfter) {
+  if (!state.user) return;
+  try {
+    const r = await api('/api/billing/status', 'POST');
+    if (r && r.plan) state.billing = r;
+    else state.billing = null;
+  } catch { state.billing = null; }
+  if (renderAfter) render();
+}
+function payTL(planId, interval) {
+  const amt = planPrice(planId, interval);
+  return amt === 0 ? L('Free', 'مجاني', 'Ücretsiz') : '₺' + amt;
+}
+function payLabel(planId, interval) {
+  return interval === 'yearly'
+    ? L('per month, billed yearly', '/شهر، يحاسب سنوياً', '/ay, yıllık faturalandırılır')
+    : L('per month, billed monthly', '/شهر، يحاسب شهرياً', '/ay, aylık faturalandırılır');
+}
+async function openUpgrade(feature) {
+  state.upgrade = { feature: feature || 'current', step: 'plans', interval: billingInterval() };
+  render();
+}
+
+async function submitCheckout(plan, interval) {
+  try {
+    const r = await api('/api/billing/checkout', 'POST', { plan, interval });
+    if (r && r.user) {
+      state.user = r.user;
+      try { localStorage.setItem('quizora_plan', JSON.stringify({ plan: r.user.plan, interval: r.user.planInterval })); } catch {}
+      state.upgrade = null;
+      sound.win();
+      showToast(plan === 'free' ? L('Plan updated', 'تم تحديث الخطة', 'Plan güncellendi') : L('Welcome to ' + (plan === 'premium' ? 'Premium' : 'Ultimate') + '! 🎉', 'مرحباً بكم في ' + (plan === 'premium' ? 'بريميوم' : 'الترايمت') + '! 🎉', (plan === 'premium' ? 'Premium\'' : 'Ultimate\'') + 'a hoş geldiniz! 🎉'), 'upgrade');
+      refreshBilling();
+      render();
+    } else if (r && r.error) {
+      alert(r.errorTr || r.error || 'Error');
+    }
+  } catch (e) { alert('Error'); }
+}
+
+function renderUpgradeModal() {
+  const overlay = h('div', 'modal-overlay', [], {
+    onclick: (e) => { if (e.target === overlay) { state.upgrade = null; render(); } }
+  });
+  const card = h('div', 'glass-strong upgrade-card', [], { style: 'width:100%;max-width:1000px;padding:22px;border-radius:18px' });
+  const feature = state.upgrade ? state.upgrade.feature : 'current';
+  if (feature !== 'current') card.appendChild(h('div', 'upgrade-why', [hIcon('sparkle', 'ic ic-s'), ' ', L('This is a paid feature.', 'هذه ميزة مدفوعة.', 'Bu ücretli bir özelliktir.')]));
+
+  const head = h('div', 'upgrade-head');
+  head.appendChild(h('div', 'font-display upgrade-title', [L('Choose your plan', 'اختر خطتك', 'Planını Seç')]));
+  const closeBtn = h('button', 'btn-ghost', ['✕'], { onclick: () => { sound.click(); state.upgrade = null; render(); } });
+  head.appendChild(closeBtn);
+  card.appendChild(head);
+
+  const toggle = h('div', 'billing-toggle');
+  const ints = [['monthly', L('Monthly', 'شهري', 'Aylık')], ['yearly', 'Yearly -20%']];
+  ints.forEach(([v, lab]) => {
+    const b = h('button', `bill-btn${billingInterval() === v ? ' active' : ''}`, [lab], {
+      onclick: () => { sound.click(); state.upgrade.interval = v; render(); }
+    });
+    toggle.appendChild(b);
+  });
+  card.appendChild(toggle);
+
+  const grid = h('div', 'plan-grid');
+  const interval = billingInterval();
+  ORDER.forEach(key => {
+    const p = PLANS[key];
+    const action = () => { sound.click(); submitCheckout(key, interval); };
+    let btnLabel;
+    if (key === currentPlanId()) btnLabel = L('Current', 'الحالية', 'Mevcut');
+    else if (p.priceTRY.monthly === 0 && currentPlanId() !== 'free') btnLabel = L('Downgrade', 'تخفيض', 'Düşür');
+    else if (p.priceTRY.monthly === 0) btnLabel = L('Current', 'الحالية', 'Mevcut');
+    else btnLabel = interval === 'yearly' ? L('Select Yearly', 'اختر سنوي', 'Yıllık Seç') : L('Select', 'اختر', 'Seç');
+    const isCur = key === currentPlanId();
+    const cardEl = h('div', `plan-card plan-card-${key}${key === 'premium' ? ' featured' : ''}`, []);
+    cardEl.appendChild(h('div', 'plan-card-name font-display', [L(p.name.en, p.name.ar, p.name.tr)]));
+    if (key === 'premium') cardEl.appendChild(h('div', 'plan-card-badge', [L('Most Popular', 'الأكثر شعبية', 'En Popüler')]));
+    const pTag = h('div', 'plan-card-price');
+    pTag.appendChild(h('span', 'plan-card-amt', [payTL(key, interval)]));
+    pTag.appendChild(h('span', 'plan-card-unit', [' ' + payLabel(key, interval)]));
+    cardEl.appendChild(pTag);
+    const feats = h('ul', 'plan-card-feats', []);
+    const pF = PLANS[key].features;
+    const rows = [
+      ['examPacks', L('Educational exam packs', 'حزم امتحانات تعليمية', 'Eğitim sınav paketleri')],
+      ['customQuestions', L('Custom questions', 'أسئلة مخصصة', 'Özel sorular')],
+      ['weakTopics', L('Weak-topic insights', 'تحليل المواضيع الضعيفة', 'Zayıf konu analizleri')],
+      ['reports', L('Export reports (CSV)', 'تصدير التقارير (CSV)', 'Raporları dışa aktar (CSV)')],
+      ['noBranding', L('Remove QUIZORA watermark', 'إزالة شعار QUIZORA', 'QUIZORA logosunu kaldır')],
+      ['customTheme', L('Custom quiz colors', 'ألوان اختبار مخصصة', 'Özel test renkleri')],
+      ['unlimitedPlayers', L('Unlimited players', 'لاعبون بلا حدود', 'Sınırsız oyuncu')],
+      ['stats', L('Personal stats', 'إحصائيات شخصية', 'Kişisel istatistikler')],
+    ];
+    rows.forEach(([k, label]) => {
+      const on = pF[k];
+      const li = h('li', `plan-feat${on ? ' on' : ' off'}`, [hIcon(on ? 'check' : 'x', 'ic ic-s'), ' ', label]);
+      feats.appendChild(li);
+    });
+    if (key === 'premium') {
+      const cap = L('50 custom questions / month', '50 سؤال مخصص شهرياً', 'Ayda 50 özel soru');
+      feats.appendChild(h('li', 'plan-feat on plan-cap', [hIcon('check', 'ic ic-s'), ' ', cap]));
+    }
+    if (key === 'ultimate') {
+      feats.appendChild(h('li', 'plan-feat on plan-cap', [hIcon('check', 'ic ic-s'), ' ', L('Unlimited custom questions', 'أسئلة مخصصة بلا حدود', 'Sınırsız özel soru')]));
+    }
+    if (key === 'free') {
+      feats.appendChild(h('li', 'plan-feat on plan-cap', [hIcon('users', 'ic ic-s'), ' ', L('Up to 20 players', 'حتى 20 لاعباً', '20 oyuncuya kadar')]));
+    }
+    cardEl.appendChild(feats);
+    const btn = h('button', key === 'premium' ? 'btn-primary' : 'btn-ghost', [btnLabel], {
+      style: 'width:100%;padding:12px;border-radius:10px;font-weight:700',
+      onclick: action
+    });
+    if (isCur) btn.setAttribute('disabled', '');
+    cardEl.appendChild(btn);
+    grid.appendChild(cardEl);
+  });
+  card.appendChild(grid);
+
+  card.appendChild(h('div', 'upgrade-note', [L('Mock checkout — no real payment is charged. You can switch plans anytime.', 'دفع تجريبي — لن يتم خصم أي مبلغ حقيقي. يمكنك تغيير خطتك في أي وقت.', 'Deneme ödeme — gerçek ücret alınmaz. Planını istediğin zaman değiştirebilirsin.')]));
+
+  overlay.appendChild(card);
+  return overlay;
+}
+
+function renderCustomEditor() {
+  const overlay = h('div', 'modal-overlay', [], {
+    onclick: (e) => { if (e.target === overlay) { state.customEditor = null; render(); } }
+  });
+  const card = h('div', 'glass-strong custom-editor-card', [], { style: 'width:100%;max-width:520px;padding:20px;border-radius:16px;max-height:86vh;overflow:auto' });
+
+  card.appendChild(h('div', 'upgrade-head', [h('div', 'font-display upgrade-title', [L('Create a Custom Question', 'إنشاء سؤال مخصص', 'Özel Soru Oluştur')]), h('button', 'btn-ghost', ['✕'], { onclick: () => { sound.click(); state.customEditor = null; render(); } })]));
+
+  const errEl = h('div', 'join-error', [], { style: 'margin-top:6px;font-size:12px' });
+  const mkField = (label, ph) => h('input', 'text-input custom-field', [], { placeholder: ph, style: 'width:100%;margin:4px 0;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:14px' });
+
+  const qInput = mkField(L('Question (EN)', 'السؤال (إنجليزي)', 'Soru (İng)'), L('Type the question…', 'اكتب السؤال…', 'Soruyu yazın…'));
+  const qAr = mkField(L('Arabic (optional)', 'العربية (اختياري)', 'Arapça (isteğe bağlı)'), '');
+  const qTr = mkField(L('Turkish (optional)', 'التركية (اختياري)', 'Türkçe (isteğe bağlı)'), '');
+
+  card.appendChild(h('div', 'section-label', [L('Question', 'السؤال', 'Soru')], { style: 'font-size:11px;color:#64748b;margin-top:8px' }));
+  card.appendChild(qInput);
+  card.appendChild(qAr);
+  card.appendChild(qTr);
+
+  card.appendChild(h('div', 'section-label', [L('Options (choose one correct)', 'الخيارات (اختر واحداً صحيحاً)', 'Seçenekler (birini doğru seçin)')], { style: 'font-size:11px;color:#64748b;margin-top:12px' }));
+  const optInputs = [];
+  const optRow = (idx) => {
+    const row = h('div', '', [], { style: 'display:flex;gap:6px;align-items:center' });
+    const radio = h('input', '', [], { type: 'radio', name: 'custom-correct', value: idx, style: 'accent-color:#8b5cf6;width:18px;height:18px' });
+    if (idx === 0) radio.checked = true;
+    row.appendChild(radio);
+    const en = mkInput('', idx);
+    const ar = mkInput('', idx);
+    const tr = mkInput('', idx);
+    row.appendChild(en);
+    optInputs.push({ en, ar, tr, radio });
+    return row;
+  };
+  function mkInput(v, idx) {
+    const isMain = idx === 0;
+    return h('input', 'text-input custom-field', [], { placeholder: isMain ? L('Option', 'خيار', 'Seçenek') + ' ' + String(idx + 1) : '', style: 'flex:1;margin:3px 0;padding:8px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:13px' });
+  }
+  for (let i = 0; i < 4; i++) card.appendChild(optRow(i));
+
+  optInputs.forEach(o => {
+    o.en.addEventListener('input', () => { if (o.ar.placeholder === '') o.ar.placeholder = L('Arabic…', 'عربية…', 'Arapça…'); });
+  });
+
+  const btn = h('button', 'btn-primary', [L('Save Question', 'حفظ السؤال', 'Soruyu Kaydet')], {
+    style: 'width:100%;margin-top:14px;padding:12px;font-size:15px;border-radius:10px;font-weight:700',
+    onclick: async () => {
+      errEl.textContent = '';
+      const options = optInputs.map(o => o.en.value.trim());
+      const optionsAr = optInputs.map(o => o.ar.value.trim());
+      const optionsTr = optInputs.map(o => o.tr.value.trim());
+      const correct = options.findIndex((v, i) => optInputs[i].radio.checked);
+      const body = { q: qInput.value, qAr: qAr.value, qTr: qTr.value, options, optionsAr, optionsTr, correct };
+      const res = await api('/api/custom/save', 'POST', body);
+      if (res && res.ok) {
+        sound.win();
+        state.customEditor = null;
+        state.upgrade = null;
+        showToast(L('Question added!', 'تمت إضافة السؤال!', 'Soru eklendi!'), 'custom');
+        refreshBilling(true);
+      } else if (!hasFeature('customQuestions')) {
+        openUpgrade('custom');
+      } else if (res && res.error) {
+        errEl.textContent = res.errorTr || res.error || 'Error';
+      }
+    }
+  });
+  card.appendChild(btn);
+  card.appendChild(errEl);
+  overlay.appendChild(card);
+  return overlay;
+}
+
+async function deleteCustomQuestion(id) {
+  try {
+    const r = await api('/api/custom/delete', 'POST', { id });
+    if (r && r.ok) { refreshBilling(true); }
+  } catch {}
+}
+
+function exportReportCSV(questions, report) {
+  const rows = [['Question', 'Your answer', 'Correct?', 'Correct answer'].join(',')];
+  const details = report.details || [];
+  const answers = state.practice ? state.practice.answers : null;
+  details.forEach((d, i) => {
+    const answered = answers ? answers[i] : null;
+    const your = typeof answered === 'number' && d.options[answered] ? '"' + String(d.options[answered]).replace(/"/g, '""') + '"' : '""';
+    const correct = d.correct ? 'Yes' : 'No';
+    const ans = typeof d.correctIndex === 'number' ? '"' + String(d.options[d.correctIndex]).replace(/"/g, '""') + '"' : '""';
+    rows.push(['"' + String(d.question).replace(/"/g, '""') + '"', your, correct, ans].join(','));
+  });
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'quizora-report.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 function startCreate() {
   state.isHost = true;
   if (!state.roomLangTouched) state.roomLang = appLang;
@@ -117,6 +391,8 @@ function startCreate() {
       timerSeconds: state.timerSeconds,
       questionLang: state.questionLang,
       lang: state.roomLang,
+      plan: currentPlanId(),
+      powerupsEnabled: !!state.powerupsEnabled,
     }));
   };
   if (ws && ws.readyState === WebSocket.OPEN) {
@@ -134,6 +410,7 @@ function render() {
   const screenChanged = state._lastScreen !== state.screen;
   state._lastScreen = state.screen;
   app.innerHTML = '';
+  applyQuizColor();
   const screens = {
     landing: renderLanding,
     lobby: renderLobby,
@@ -151,8 +428,13 @@ function render() {
   const cornerScreens = ['landing', 'join', 'lobby', 'game', 'gameover', 'practice'];
   if (cornerScreens.includes(state.screen)) app.appendChild(renderCornerWidget());
   if (fn) app.appendChild(fn());
+  if (state.isHost && !hasFeature('noBranding') && ['game'].includes(state.screen)) {
+    app.appendChild(h('div', 'brand-watermark', ['QUIZORA']));
+  }
   if (state.authOpen) app.appendChild(renderAuthModal());
   if (state.settingsOpen) app.appendChild(renderSettings());
+  if (state.upgrade) app.appendChild(renderUpgradeModal());
+  if (state.customEditor) app.appendChild(renderCustomEditor());
   if (state.tutorialOpen) app.appendChild(renderTutorialModal());
   if (state.tourStep !== null) app.appendChild(renderTourOverlay());
   if (screenChanged && !document.hidden) {
@@ -434,9 +716,12 @@ function renderModeTabs(container) {
     ['exam', 'grad', L('Educational Mode', 'الوضع التعليمي', 'Eğitim Modu')],
   ];
   modes.forEach(([m, icon, label]) => {
-    const b = h('button', `mode-btn ${state.mode === m ? 'active' : ''}`, [hIcon(icon, 'ic'), ' ' + label], {
+    const locked = m === 'exam' && !hasFeature('examPacks');
+    const active = state.mode === m;
+    const b = h('button', `mode-btn ${active ? 'active' : ''}`, [hIcon(icon, 'ic'), ' ' + label, locked ? ' 🔒' : ''], {
       onclick: () => {
         sound.click();
+        if (locked) { openUpgrade('examPacks'); return; }
         state.mode = m;
         const bank = currentBank();
         if (!state.selectedCategories.some(k => bank[k])) {
@@ -454,6 +739,7 @@ function renderSelectionGrid(container, sync) {
   const bank = currentBank();
   const grid = h('div', 'category-grid', [], { style: 'margin-bottom:12px' });
   Object.entries(bank).forEach(([key, cat]) => {
+    if (state.mode === 'exam' && !hasFeature('examPacks')) return;
     const sel = state.selectedCategories.includes(key);
     const btn = h('button', `cat-btn ${sel ? 'selected' : 'unselected'}`, [`${cat.emoji} ${L(cat.name, cat.nameAr, cat.nameTr)}`], {
       style: sel ? cat.css : '',
@@ -462,7 +748,7 @@ function renderSelectionGrid(container, sync) {
         if (sel) { if (state.selectedCategories.length > 1) state.selectedCategories = state.selectedCategories.filter(c => c !== key); }
         else state.selectedCategories.push(key);
         if (sync && ws && ws.readyState === WebSocket.OPEN && state.roomCode) {
-          ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang, lang: state.roomLang }));
+          ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang, lang: state.roomLang, powerupsEnabled: !!state.powerupsEnabled }));
         }
         render();
       }
@@ -485,7 +771,7 @@ function appendSettingsRow(panel) {
   qSel.onchange = e => {
     state.numQuestions = +e.target.value;
     if (ws && ws.readyState === WebSocket.OPEN && state.roomCode) {
-      ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang, lang: state.roomLang }));
+      ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang, lang: state.roomLang, powerupsEnabled: !!state.powerupsEnabled }));
     }
   };
   qBox.appendChild(qSel);
@@ -502,7 +788,7 @@ function appendSettingsRow(panel) {
   tSel.onchange = e => {
     state.timerSeconds = +e.target.value;
     if (ws && ws.readyState === WebSocket.OPEN && state.roomCode) {
-      ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang, lang: state.roomLang }));
+      ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang, lang: state.roomLang, powerupsEnabled: !!state.powerupsEnabled }));
     }
   };
   tBox.appendChild(tSel);
@@ -522,7 +808,7 @@ function appendSettingsRow(panel) {
         sound.click();
         state.questionLang = v;
         if (ws && ws.readyState === WebSocket.OPEN && state.roomCode) {
-          ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang, lang: state.roomLang }));
+          ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang, lang: state.roomLang, powerupsEnabled: !!state.powerupsEnabled }));
         }
         render();
       }
@@ -545,7 +831,7 @@ function appendSettingsRow(panel) {
         state.roomLang = v;
         state.roomLangTouched = true;
         if (ws && ws.readyState === WebSocket.OPEN && state.roomCode) {
-          ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang, lang: state.roomLang }));
+          ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang, lang: state.roomLang, powerupsEnabled: !!state.powerupsEnabled }));
         }
         render();
       }
@@ -559,6 +845,23 @@ function appendSettingsRow(panel) {
     ? L('Everyone sees questions in the selected language.', 'سيرى الجميع الأسئلة باللغة المحددة.', 'Herkes soruları seçilen dilde görür.')
     : L('Each player sees questions in their own language.', 'سيرى كل لاعب الأسئلة بلغته الخاصة.', 'Her oyuncu soruları kendi dilinde görür.')]));
   panel.appendChild(langBox);
+
+  /* --- Powerups toggle (Premium hosts) --- */
+  const puBox = h('div', 'setting-box glass');
+  puBox.appendChild(h('div', 'setting-label', [L('Power-ups', 'الـ Power-ups', 'Güçlendirmeler')]));
+  const puToggle = h('button', `lang-btn${state.powerupsEnabled ? ' active' : ''}`, [hIcon('sparkle', 'ic ic-s'), ' ', L('Enabled', 'مفعّلة', 'Etkin')], {
+    style: 'flex:1',
+    onclick: () => {
+      sound.click();
+      state.powerupsEnabled = !state.powerupsEnabled;
+      if (ws && ws.readyState === WebSocket.OPEN && state.roomCode) {
+        ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang, lang: state.roomLang, powerupsEnabled: !!state.powerupsEnabled }));
+      }
+      render();
+    }
+  });
+  puBox.appendChild(h('div', '', [], { style: 'display:flex' })).appendChild(puToggle);
+  panel.appendChild(puBox);
 }
 
 /* ======================== LANDING / DASHBOARD ======================== */
@@ -1919,6 +2222,7 @@ function handleHostMessage(msg) {
       break;
 
     case 'error':
+      if (msg.code === 'plan') { openUpgrade('examPacks'); break; }
       const errEl = document.getElementById('join-error');
       if (errEl && state.screen === 'join') errEl.textContent = L(msg.message, msg.messageAr, msg.messageTr);
       else alert(L(msg.message, msg.messageAr, msg.messageTr));
@@ -2080,6 +2384,7 @@ function handlePlayerMessage(msg) {
       break;
 
     case 'error':
+      if (msg.code === 'plan') { openUpgrade('examPacks'); break; }
       const joinErr = document.getElementById('join-error');
       if (joinErr && state.screen === 'join') joinErr.textContent = L(msg.message, msg.messageAr, msg.messageTr);
       else alert(L(msg.message, msg.messageAr, msg.messageTr));
@@ -2192,6 +2497,7 @@ function restoreSession() {
     if (res.user) {
       state.user = res.user;
       if (res.user.lang && res.user.lang !== appLang) setLang(res.user.lang);
+      refreshBilling();
       render();
     } else {
       try { localStorage.removeItem('quizora_token'); } catch {}
@@ -2217,6 +2523,7 @@ function accountChip() {
     });
   }
   const wrap = h('div', '', [], { style: 'display:flex;gap:6px' });
+  wrap.appendChild(planBadgeEl());
   wrap.appendChild(h('button', 'btn-ghost icon-chip', [hIcon('edit', 'ic')], {
     'data-tour': 'practice',
     title: L('Practice Tests', 'اختبارات التمرين', 'Pratik Testleri'),
@@ -2251,6 +2558,21 @@ function renderDashboard() {
   c.appendChild(h('div', 'dash-avatar', [u.avatar || '😎']));
   c.appendChild(h('div', 'font-display dash-name', [u.username || 'Player']));
   c.appendChild(h('div', 'dash-sub', [u.email || '']));
+
+  /* --- plan + billing panel --- */
+  const planId = currentPlanId();
+  const planDef = currentPlanDef();
+  c.appendChild(h('div', 'plan-panel glass', [
+    h('div', 'plan-panel-left', [
+      h('div', '', [h('span', `plan-dot plan-dot-${planId}`, []), ' ', h('span', 'dash-plan-name', [planName()])], { style: 'display:flex;align-items:center;gap:8px' }),
+      h('div', 'plan-panel-sub', [state.billing && (state.billing.customLimit > 0 || state.billing.customLimit === Infinity)
+        ? (state.billing.customLimit === Infinity
+          ? L('Unlimited custom questions', 'أسئلة مخصصة بلا حدود', 'Sınırsız özel soru')
+          : L('Custom questions: ' + state.billing.customUsed + ' / ' + state.billing.customLimit, 'أسئلة مخصصة: ' + state.billing.customUsed + ' / ' + state.billing.customLimit, 'Özel sorular: ' + state.billing.customUsed + ' / ' + state.billing.customLimit))
+        : L(billingInterval() === 'yearly' ? 'Yearly billing' : 'Monthly billing', billingInterval() === 'yearly' ? 'فوترة سنوية' : 'فوترة شهرية', billingInterval() === 'yearly' ? 'Yıllık fatura' : 'Aylık fatura')]),
+    ]),
+    h('button', 'btn-primary plan-upgrade-btn', [L('Manage', 'إدارة', 'Yönet')], { onclick: () => { sound.click(); openUpgrade('current'); } })
+  ]));
 
   /* --- quick actions --- */
   const actions = h('div', 'dash-actions');
@@ -2295,7 +2617,13 @@ function renderDashboard() {
   const examStats = u.examStats || {};
   const examKeys = Object.keys(examStats);
   if (examKeys.length > 0) {
-    c.appendChild(h('div', 'section-label', [L('Exam Performance', 'نتائج الامتحانات', 'Sınav Sonuçları')], { style: 'margin:20px 0 10px;text-align:center' }));
+    if (!hasFeature('examPacks')) {
+      c.appendChild(h('div', 'section-label', [L('Exam Performance', 'نتائج الامتحانات', 'Sınav Sonuçları')], { style: 'margin:20px 0 10px;text-align:center' }));
+      c.appendChild(h('div', 'gate-locked glass', [hIcon('lock', 'ic ic-s'), ' ', L('Unlock exam insights with Premium', 'افتح رؤى الامتحانات مع بريميوم', 'Premium ile sınav analizlerini aç')], {
+        onclick: () => { sound.click(); openUpgrade('examPacks'); }
+      }));
+    } else {
+      c.appendChild(h('div', 'section-label', [L('Exam Performance', 'نتائج الامتحانات', 'Sınav Sonuçları')], { style: 'margin:20px 0 10px;text-align:center' }));
     const examList = h('div', 'dash-exams');
     examKeys.forEach(key => {
       const cat = EXAM_CATEGORIES[key];
@@ -2317,7 +2645,28 @@ function renderDashboard() {
       examList.appendChild(row);
     });
     c.appendChild(examList);
+    }
   }
+
+  /* --- custom questions --- */
+  const customSection = h('div', 'custom-mgmt glass');
+  customSection.appendChild(h('div', 'custom-mgmt-head', [h('span', '', [L('My Custom Questions', 'أسئلتي المخصصة', 'Özel Sorularım')]), h('button', 'btn-primary', ['+ ' + L('New', 'جديد', 'Yeni')], { onclick: () => { sound.click(); state.customEditor = true; render(); } })]));
+  customSection.appendChild(h('div', 'custom-mgmt-sub', [hasFeature('customQuestions')
+    ? (state.billing && state.billing.customLimit > 0 ? L('Used ' + (state.billing.customUsed || 0) + ' of ' + (state.billing.customLimit === Infinity ? '∞' : state.billing.customLimit) + ' this month', 'المستخدم ' + (state.billing.customUsed || 0) + ' من ' + (state.billing.customLimit === Infinity ? '∞' : state.billing.customLimit) + ' هذا الشهر', 'Bu ay ' + (state.billing.customUsed || 0) + ' / ' + (state.billing.customLimit === Infinity ? '∞' : state.billing.customLimit) + ' kullanıldı') : L('Create questions for private flashcard practice', 'أنشئ أسئلة لتدريب البطاقات الخاص', 'Özel flashcard pratiği için soru oluştur'))
+    : L('Create your own questions. Premium includes 50/month.', 'أنشئ أسئلتك الخاصة. بريميوم يتضمن 50/شهر.', 'Kendi sorularını oluştur. Premium ayda 50 içerir.')]));
+  if (state.billing && state.billing.customQuestions && state.billing.customQuestions.length) {
+    state.billing.customQuestions.forEach(q => {
+      const row = h('div', 'custom-row', [h('span', 'custom-row-q', ['🧩 ' + q.q]), h('button', 'btn-ghost', ['✕'], { onclick: () => { sound.click(); deleteCustomQuestion(q.id); } })]);
+      customSection.appendChild(row);
+    });
+  } else if (hasFeature('customQuestions')) {
+    customSection.appendChild(h('div', 'custom-empty', [L('No custom questions yet.', 'لا توجد أسئلة مخصصة بعد.', 'Henüz özel soru yok.')]));
+  } else {
+    customSection.appendChild(h('button', 'btn-ghost', [hIcon('lock', 'ic ic-s'), ' ' + L('Unlock Custom Questions', 'افتح الأسئلة المخصصة', 'Özel Soruları Aç')], {
+      onclick: () => { sound.click(); openUpgrade('customQuestions'); }
+    }));
+  }
+  c.appendChild(customSection);
 
   /* --- settings + logout --- */
   const footer = h('div', 'dash-footer');
@@ -2401,6 +2750,7 @@ function renderAuthModal() {
         state.user = res.user;
         if (res.user.lang && res.user.lang !== appLang) setLang(res.user.lang);
         state.authOpen = false;
+        refreshBilling();
         sound.win();
         if (state.pendingPractice) {
           state.pendingPractice = false;
@@ -2457,6 +2807,26 @@ function renderSettings() {
   card.appendChild(langSel);
   card.appendChild(h('div', 'section-label', [L('Password', 'كلمة المرور', 'Parola')], { style: 'font-size:11px;color:#64748b;margin-top:8px' }));
   card.appendChild(passInput);
+
+  /* --- Custom quiz color (Ultimate) --- */
+  card.appendChild(h('div', 'section-label', [L('Custom Quiz Color', 'لون الاختبار المخصص', 'Özel Test Rengi')], { style: 'font-size:11px;color:#64748b;margin-top:10px' }));
+  if (hasFeature('customTheme')) {
+    const themeRow = h('div', '', [], { style: 'display:flex;gap:8px;flex-wrap:wrap;margin:6px 0' });
+    ['#38bdf8', '#8b5cf6', '#22c55e', '#f59e0b', '#ef4444', '#f472b6'].forEach(col => {
+      const swatch = h('button', `theme-swatch${state.quizColor === col ? ' active' : ''}`, [], {
+        style: `background:${col}`,
+        onclick: () => { sound.click(); state.quizColor = col; render(); }
+      });
+      swatch.style.width = '30px'; swatch.style.height = '30px'; swatch.style.borderRadius = '8px';
+      themeRow.appendChild(swatch);
+    });
+    card.appendChild(themeRow);
+  } else {
+    card.appendChild(h('button', 'btn-ghost gate-locked-inline', [hIcon('lock', 'ic ic-s'), ' ' + L('Custom theme — Ultimate', 'السمة المخصصة — الترايمت', 'Özel tema — Ultimate')], {
+      style: 'width:100%;padding:10px;font-size:12px',
+      onclick: () => { sound.click(); openUpgrade('customTheme'); }
+    }));
+  }
 
   const btnRow = h('div', '', [], { style: 'display:flex;gap:8px;margin-top:14px;flex-wrap:wrap' });
   btnRow.appendChild(h('button', 'btn-success', [L('Save', 'حفظ', 'Kaydet')], {
@@ -2520,18 +2890,35 @@ function buildPracticeSetup(c) {
 
   c.appendChild(h('div', '', [L('Practice with study tests or flashcards, from fun or educational categories.', 'تدرب عبر اختبارات أو بطاقات تعليمية من الفئات الترفيهية أو التعليمية.', 'Eğlence veya eğitim kategorilerinden testler veya flashcard’larla pratik yapın.')], { style: 'color:#94a3b8;font-size:13px;text-align:center' }));
 
-  const bankRow = h('div', '', [], { style: 'width:100%;display:flex;gap:8px;margin:12px 0 2px' });
-  [['fun', '🎉 ' + L('Fun Mode', 'الوضع الترفيهي', 'Eğlence Modu')], ['exam', '🎓 ' + L('Educational Mode', 'الوضع التعليمي', 'Eğitim Modu')]].forEach(([b, lab]) => {
-    bankRow.appendChild(h('button', `mode-btn ${pick.bank === b ? 'active' : ''}`, [lab], {
+  const bankRow = h('div', '', [], { style: 'width:100%;display:flex;gap:8px;margin:12px 0 2px;flex-wrap:wrap' });
+  const bankOpts = [
+    ['fun', '🎉 ' + L('Fun Mode', 'الوضع الترفيهي', 'Eğlence Modu'), false],
+    ['exam', '🎓 ' + L('Educational Mode', 'الوضع التعليمي', 'Eğitim Modu'), !hasFeature('examPacks')],
+    ['custom', '🧩 ' + L('Custom', 'مخصص', 'Özel'), !hasFeature('customQuestions')],
+  ];
+  bankOpts.forEach(([b, lab, locked]) => {
+    bankRow.appendChild(h('button', `mode-btn ${pick.bank === b ? 'active' : ''}`, [lab, locked ? ' 🔒' : ''], {
       style: 'flex:1',
-      onclick: () => { sound.click(); pick.bank = b; pick.categories = b === 'fun' ? ['general'] : ['yks']; render(); }
+      onclick: () => { sound.click(); if (locked) { openUpgrade(b === 'exam' ? 'examPacks' : 'custom'); return; } pick.bank = b; pick.categories = b === 'fun' ? ['general'] : b === 'exam' ? ['yks'] : ['custom']; render(); }
     }));
   });
   c.appendChild(bankRow);
+  if (pick.bank === 'exam' && !hasFeature('examPacks')) pick.bank = 'fun';
+  if (pick.bank === 'custom' && !hasFeature('customQuestions')) pick.bank = 'fun';
+  if (pick.bank === 'custom') {
+    const n = state.billing && state.billing.customQuestions ? state.billing.customQuestions.length : 0;
+    c.appendChild(h('div', 'practice-sub', [n > 0 ? L('You have ' + n + ' custom question' + (n === 1 ? '' : 's'), 'لديك ' + n + ' سؤالاً مخصصاً', n + (n === 1 ? ' özel sorun var' : ' özel sorun var')) : L('No custom questions yet — create some from the dashboard.', 'لا توجد أسئلة مخصصة بعد — أنشئ بعضها من لوحة التحكم.', 'Henüz özel soru yok — panodan bazılarını oluşturun.')], { style: 'color:#94a3b8;font-size:13px;text-align:center;margin:8px 0 0' }));
+  }
 
-  const bank = pick.bank === 'exam' ? EXAM_CATEGORIES : CATEGORIES;
+  let bank = pick.bank === 'exam' ? EXAM_CATEGORIES : CATEGORIES;
+  let bankEntries;
+  if (pick.bank === 'custom') {
+    bankEntries = Object.entries({ custom: { name: 'My Custom Questions', nameAr: 'أسئلتي المخصصة', nameTr: 'Özel Sorularım', emoji: '🧩', css: 'background:#8b5cf6' } });
+  } else {
+    bankEntries = Object.entries(bank).filter(([key]) => pick.bank === 'exam' || hasFeature('examPacks'));
+  }
   const grid = h('div', 'category-grid', [], { style: 'width:100%;margin:8px 0' });
-  Object.entries(bank).forEach(([key, cat]) => {
+  bankEntries.forEach(([key, cat]) => {
     const on = pick.categories.includes(key);
     grid.appendChild(h('button', `cat-btn ${on ? 'selected' : 'unselected'}`, [`${cat.emoji} ${L(cat.name, cat.nameAr, cat.nameTr)}`], {
       style: on ? cat.css : '',
@@ -2603,9 +2990,10 @@ function buildPracticeSetup(c) {
 async function beginFlashcards() {
   const pick = state.practice.pick;
   if (!pick.categories.length) { alert(L('Pick at least one category', 'اختر فئة واحدة على الأقل', 'En az bir kategori seç')); return; }
-  const bank = pick.bank === 'exam' ? 'exam' : 'fun';
+  const bank = pick.bank === 'custom' ? 'custom' : pick.bank === 'exam' ? 'exam' : 'fun';
   const res = await api('/api/practice/deck', 'POST', { categories: pick.categories, numCards: pick.num || 10, bank });
-  if (res.cards && res.cards.length) {
+  if (res && res.code === 'plan') { openUpgrade(bank === 'exam' ? 'examPacks' : 'custom'); }
+  else if (res.cards && res.cards.length) {
     state.practice = {
       pick,
       cards: res.cards,
@@ -2623,7 +3011,9 @@ function buildFlashcardView(c) {
   const t = state.practice;
   if (!t || !t.cards || !t.cards[t.current]) return c;
   const card = t.cards[t.current];
-  const meta = (t.pick.bank === 'exam' ? EXAM_CATEGORIES : CATEGORIES)[card.category] || { name: card.category, emoji: '📘', css: 'background:#475569' };
+  const meta = card.category === 'custom'
+    ? { name: L('My Custom Questions', 'أسئلتي المخصصة', 'Özel Sorularım'), emoji: '🧩', css: 'background:#8b5cf6' }
+    : ((t.pick && t.pick.bank === 'exam' ? EXAM_CATEGORIES : CATEGORIES)[card.category] || { name: card.category, emoji: '📘', css: 'background:#475569' });
   const lq = Lq(card);
 
   c.appendChild(h('div', '', [L('Card', 'بطاقة', 'Kart') + ' ' + (t.current + 1) + ' / ' + t.cards.length], { style: 'color:#94a3b8;font-size:13px;width:100%' }));
@@ -2669,9 +3059,12 @@ function buildFlashcardView(c) {
 
 async function beginPractice() {
   const pick = state.practice.pick;
+  if (pick.bank === 'custom') { alert(L('Use Flashcards for custom questions', 'استخدم البطاقات التعليمية للأسئلة المخصصة', 'Özel sorular için Flashcard kullanın')); return; }
+  if (pick.bank === 'exam' && !hasFeature('examPacks')) { openUpgrade('examPacks'); return; }
   if (!pick.categories.length) { alert(L('Pick at least one exam', 'اختر امتحاناً واحداً على الأقل', 'En az bir sınav seç')); return; }
   const res = await api('/api/practice/start', 'POST', { categories: pick.categories, numQuestions: pick.num, mode: pick.mode, timerSeconds: pick.timer });
-  if (res.testId) {
+  if (res && res.code === 'plan') { openUpgrade('examPacks'); }
+  else if (res.testId) {
     state.practice = {
       pick,
       testId: res.testId,
@@ -2851,7 +3244,7 @@ function buildPracticeReport(c) {
     c.appendChild(wBox);
   }
 
-  const btns = h('div', '', [], { style: 'width:100%;display:flex;gap:8px;margin-top:8px' });
+  const btns = h('div', '', [], { style: 'width:100%;display:flex;gap:8px;margin-top:8px;flex-wrap:wrap' });
   btns.appendChild(h('button', 'btn-success', [L('Retry', 'إعادة', 'Tekrar Dene')], {
     style: 'flex:1;padding:12px;font-size:14px;border-radius:10px',
     onclick: () => { sound.click(); state.practiceView = 'setup'; render(); }
@@ -2861,6 +3254,18 @@ function buildPracticeReport(c) {
     onclick: () => { quitPractice(); state.screen = 'landing'; render(); }
   }));
   c.appendChild(btns);
+
+  if (hasFeature('reports')) {
+    c.appendChild(h('button', 'btn-ghost', [hIcon('download', 'ic ic-s'), ' ' + L('Export Report (CSV)', 'تصدير التقرير (CSV)', 'Raporu Dışa Aktar (CSV)')], {
+      style: 'width:100%;margin-top:8px;padding:11px;font-size:13px;border-radius:10px',
+      onclick: () => { sound.click(); exportReportCSV(t.questions, r); }
+    }));
+  } else {
+    c.appendChild(h('button', 'btn-ghost gate-locked-inline', [hIcon('lock', 'ic ic-s'), ' ' + L('Export Report — Ultimate', 'تصدير التقرير — الترايمت', 'Raporu Dışa Aktar — Ultimate')], {
+      style: 'width:100%;margin-top:8px;padding:11px;font-size:13px;border-radius:10px',
+      onclick: () => { sound.click(); openUpgrade('reports'); }
+    }));
+  }
   return c;
 }
 

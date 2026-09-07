@@ -116,7 +116,9 @@ function hIcon(name, cls) {
 
 /* ==================== PLANS — client helpers ==================== */
 function profilePic(u) {
-  const src = u && u.avatar === 'photo' ? (u.picture || u.avatarUrl || '') : '';
+  let src = '';
+  if (u && u.avatar === 'custom' && u.customPic) src = u.customPic;
+  else if (u && u.avatar === 'photo') src = u.picture || u.avatarUrl || '';
   if (src) {
     const img = h('img', 'profile-img', [], { src, alt: '' });
     img.addEventListener('error', () => {
@@ -125,7 +127,27 @@ function profilePic(u) {
     });
     return img;
   }
-  return h('span', '', [u && u.avatar && u.avatar !== 'photo' ? u.avatar : '🙂']);
+  return h('span', '', [u && u.avatar && u.avatar !== 'photo' && u.avatar !== 'custom' ? u.avatar : '🙂']);
+}
+function resizeImage(file, size) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const min = Math.min(img.width, img.height);
+        ctx.drawImage(img, (img.width - min) / 2, (img.height - min) / 2, min, min, 0, 0, size, size);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      } catch (e) { URL.revokeObjectURL(url); reject(e); }
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('bad image')); };
+    img.src = url;
+  });
 }
 function currentPlanId() {
   return (state.user && state.user.plan && window.PLANS && PLANS[state.user.plan]) ? state.user.plan : 'free';
@@ -214,20 +236,112 @@ async function submitCheckout(plan, interval) {
   } catch (e) { alert('Error'); }
 }
 
+function luhnOk(numStr) {
+  const d = String(numStr || '').replace(/\D/g, '');
+  if (d.length !== 16) return false;
+  let sum = 0;
+  for (let i = 0; i < 16; i++) {
+    let n = +d[15 - i];
+    if (i % 2 === 1) { n *= 2; if (n > 9) n -= 9; }
+    sum += n;
+  }
+  return sum % 10 === 0;
+}
+
 function renderUpgradeModal() {
   const overlay = h('div', 'modal-overlay', [], {
     onclick: (e) => { if (e.target === overlay) { state.upgrade = null; render(); } }
   });
-  const card = h('div', 'glass-strong upgrade-card', [], { style: 'width:100%;max-width:1000px;padding:22px;border-radius:18px' });
+  const isCheckout = state.upgrade && state.upgrade.step === 'checkout' && state.upgrade.plan;
+  const card = h('div', 'glass-strong upgrade-card', [], { style: 'width:100%;max-width:' + (isCheckout ? '460px' : '1000px') + ';padding:22px;border-radius:18px' });
   const feature = state.upgrade ? state.upgrade.feature : 'current';
   const interval = state.upgrade && state.upgrade.interval ? state.upgrade.interval : billingInterval();
   if (feature !== 'current') card.appendChild(h('div', 'upgrade-why', [hIcon('sparkle', 'ic ic-s'), ' ', L('This is a paid feature.', 'هذه ميزة مدفوعة.', 'Bu ücretli bir özelliktir.')]));
 
   const head = h('div', 'upgrade-head');
-  head.appendChild(h('div', 'font-display upgrade-title', [L('Choose your plan', 'اختر خطتك', 'Planını Seç')]));
+  head.appendChild(h('div', 'font-display upgrade-title', [isCheckout ? L('Card payment', 'الدفع بالبطاقة', 'Kart ile Ödeme') : L('Choose your plan', 'اختر خطتك', 'Planını Seç')]));
   const closeBtn = h('button', 'btn-ghost', ['✕'], { onclick: () => { sound.click(); state.upgrade = null; render(); } });
   head.appendChild(closeBtn);
   card.appendChild(head);
+
+  if (isCheckout) {
+    const plan = PLANS[state.upgrade.plan];
+    const planNm = L(plan.name.en, plan.name.ar, plan.name.tr);
+    const total = payTL(state.upgrade.plan, interval);
+    card.appendChild(h('div', 'pay-summary', [
+      h('div', 'pay-plan', [planNm + ' · ' + (interval === 'yearly' ? L('Yearly', 'سنوي', 'Yıllık') : L('Monthly', 'شهري', 'Aylık'))]),
+      h('div', 'pay-total', [total + '/mo'])
+    ]));
+
+    const stripNum = h('div', 'card-strip-num', ['•••• •••• •••• ••••']);
+    const stripName = h('span', '', ['CARDHOLDER']);
+    const stripExp = h('span', '', ['MM/YY']);
+    const strip = h('div', 'card-strip', [
+      h('div', '', ['💳']),
+      stripNum,
+      h('div', 'card-strip-meta', [stripName, stripExp])
+    ]);
+    card.appendChild(strip);
+
+    const payInput = (ph, attrs) => h('input', 'text-input pay-input', [], Object.assign({
+      placeholder: ph,
+      style: 'width:100%;margin:5px 0;padding:11px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:15px;box-sizing:border-box'
+    }, attrs || {}));
+
+    const nameIn = payInput(L('Cardholder name', 'اسم حامل البطاقة', 'Kart sahibinin adı'), { autocomplete: 'off' });
+    const numIn = payInput('Card number', { inputmode: 'numeric', autocomplete: 'cc-number' });
+    const expIn = payInput('MM/YY', { inputmode: 'numeric', autocomplete: 'cc-exp', style: 'width:100%;margin:5px 0;padding:11px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:15px;box-sizing:border-box' });
+    const cvcIn = payInput('CVC', { inputmode: 'numeric', autocomplete: 'cc-csc', style: 'width:100%;margin:5px 0;padding:11px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:15px;box-sizing:border-box' });
+
+    nameIn.addEventListener('input', () => { stripName.textContent = (nameIn.value || 'CARDHOLDER').toUpperCase().slice(0, 22); });
+    numIn.addEventListener('input', () => {
+      const d = numIn.value.replace(/\D/g, '').slice(0, 16);
+      numIn.value = d.replace(/(.{4})/g, '$1 ').trim();
+      stripNum.textContent = (numIn.value + ' •••• •••• ••••').slice(0, 19);
+    });
+    expIn.addEventListener('input', () => {
+      const d = expIn.value.replace(/\D/g, '').slice(0, 4);
+      expIn.value = d.length > 2 ? d.slice(0, 2) + '/' + d.slice(2) : d;
+      stripExp.textContent = expIn.value || 'MM/YY';
+    });
+    cvcIn.addEventListener('input', () => { cvcIn.value = cvcIn.value.replace(/\D/g, '').slice(0, 4); });
+
+    const row1 = h('div', 'pay-row', [numIn]);
+    const row2 = h('div', 'pay-row', [expIn, cvcIn]);
+    card.appendChild(row1);
+    card.appendChild(row2);
+    const holderErr = h('div', 'join-error', [], { style: 'margin-top:4px;font-size:12px' });
+    card.appendChild(nameIn);
+    card.appendChild(holderErr);
+
+    const payBtn = h('button', 'btn-success', [L('Pay ' + total, 'ادفع ' + total, total + ' Öde')], {
+      style: 'width:100%;margin-top:10px;padding:14px;font-size:16px;border-radius:12px;font-weight:800',
+      onclick: () => {
+        holderErr.textContent = '';
+        const digits = numIn.value.replace(/\D/g, '');
+        if (!nameIn.value.trim() || nameIn.value.trim().length < 3) { holderErr.textContent = L('Enter the cardholder name', 'أدخل اسم حامل البطاقة', 'Kart sahibinin adını girin'); return; }
+        if (!luhnOk(digits)) { holderErr.textContent = L('Card number is not valid (try 4242 4242 4242 4242)', 'رقم البطاقة غير صالح (جرّب 4242 4242 4242 4242)', 'Kart numarası geçersiz (4242 4242 4242 4242 deneyin)'); return; }
+        const em = expIn.value.match(/^(\d{2})\/(\d{2})$/);
+        const now = new Date();
+        const curYY = now.getFullYear() % 100;
+        const curMM = now.getMonth() + 1;
+        if (!em || +em[1] < 1 || +em[1] > 12 || +em[2] < curYY || (+em[2] === curYY && +em[1] < curMM) || +em[2] > curYY + 20) { holderErr.textContent = L('Enter a valid expiry (MM/YY)', 'أدخل تاريخ صلاحية صحيحاً (MM/YY)', 'Geçerli bir son kullanma tarihi girin'); return; }
+        if (cvcIn.value.length < 3) { holderErr.textContent = L('Enter the CVC', 'أدخل رمز CVC', 'CVC kodunu girin'); return; }
+        payBtn.setAttribute('disabled', '');
+        payBtn.textContent = L('Processing…', 'جارٍ المعالجة…', 'İşleniyor…');
+        const planId = state.upgrade.plan;
+        setTimeout(() => submitCheckout(planId, interval), 1200);
+      }
+    });
+    card.appendChild(payBtn);
+    card.appendChild(h('button', 'btn-ghost', ['← ' + L('Back to plans', 'العودة إلى الخطط', 'Planlara dön')], {
+      style: 'width:100%;margin-top:8px',
+      onclick: () => { sound.click(); state.upgrade.step = 'plans'; render(); }
+    }));
+    card.appendChild(h('div', 'upgrade-note', [L('Demo checkout — no real charge and the card is not stored.', 'دفع تجريبي — لن يتم خصم أي مبلغ ولن يتم تخزين البطاقة.', 'Deneme ödeme — ücret alınmaz ve kart saklanmaz.')]));
+    overlay.appendChild(card);
+    return overlay;
+  }
 
   const toggle = h('div', 'billing-toggle');
   const ints = [['monthly', L('Monthly', 'شهري', 'Aylık')], ['yearly', L('Yearly -20%', 'سنوي -20%', 'Yıllık -20%')]];
@@ -242,7 +356,13 @@ function renderUpgradeModal() {
   const grid = h('div', 'plan-grid');
   ORDER.forEach(key => {
     const p = PLANS[key];
-    const action = () => { sound.click(); submitCheckout(key, interval); };
+    const action = () => {
+      sound.click();
+      if (key === 'free') { submitCheckout('free', interval); return; }
+      state.upgrade.plan = key;
+      state.upgrade.step = 'checkout';
+      render();
+    };
     let btnLabel;
     if (key === currentPlanId()) btnLabel = L('Current', 'الحالية', 'Mevcut');
     else if (p.priceTRY.monthly === 0 && currentPlanId() !== 'free') btnLabel = L('Downgrade', 'تخفيض', 'Düşür');
@@ -294,7 +414,7 @@ function renderUpgradeModal() {
   });
   card.appendChild(grid);
 
-  card.appendChild(h('div', 'upgrade-note', [L('Mock checkout — no real payment is charged. You can switch plans anytime.', 'دفع تجريبي — لن يتم خصم أي مبلغ حقيقي. يمكنك تغيير خطتك في أي وقت.', 'Deneme ödeme — gerçek ücret alınmaz. Planını istediğin zaman değiştirebilirsin.')]));
+  card.appendChild(h('div', 'upgrade-note', [L('Secure card checkout (demo) — you can switch plans anytime.', 'دفع آمن بالبطاقة (تجريبي) — يمكنك تغيير خطتك في أي وقت.', 'Güvenli kart ödemesi (deneme) — planını istediğin zaman değiştirebilirsin.')]));
 
   overlay.appendChild(card);
   return overlay;
@@ -2833,8 +2953,30 @@ function renderSettings() {
 
   card.appendChild(h('div', 'section-label', [L('⚙️ Account Settings', '⚙️ إعدادات الحساب', '⚙️ Hesap Ayarları')], { style: 'font-weight:800;color:#38bdf8;font-size:14px;margin-bottom:12px' }));
 
-  const errEl = h('div', 'join-error', [], { style: 'margin-top:6px;font-size:12px' });
+const errEl = h('div', 'join-error', [], { style: 'margin-top:6px;font-size:12px' });
+  const fileInput = h('input', '', [], { type: 'file', accept: 'image/*', style: 'display:none' });
+  fileInput.addEventListener('change', async () => {
+    const f = fileInput.files && fileInput.files[0];
+    if (!f) return;
+    errEl.textContent = '';
+    try {
+      const dataUrl = await resizeImage(f, 256);
+      const res = await api('/api/auth/avatar-upload', 'POST', { image: dataUrl });
+      if (res.user) {
+        state.user = res.user;
+        state.pendingAvatar = 'custom';
+        sound.win();
+        showToast(L('Profile photo updated!', 'تم تحديث صورة الملف!', 'Profil fotoğrafı güncellendi!'), 'custom');
+        render();
+      } else {
+        errEl.textContent = res.errorTr || res.error || 'Error';
+      }
+    } catch (e) {
+      errEl.textContent = L('Could not read that image', 'تعذر قراءة الصورة', 'Görsel okunamadı');
+    }
+  });
   const avatars = [
+    ['custom', '🖼️'],
     ['photo', '📧'],
     ['😎', ''], ['🦊', ''], ['🐱', ''], ['🚀', ''], ['🔥', ''], ['⭐', ''], ['💎', ''], ['🎯', ''],
     ['👨', ''], ['👩', ''], ['🧔', ''], ['👱', ''], ['👨‍🎓', ''], ['👩‍🎓', ''], ['👨‍💼', ''], ['👩‍💼', ''],
@@ -2843,13 +2985,21 @@ function renderSettings() {
   const avPreview = h('div', 'av-preview', [profilePic({ ...state.user, avatar })]);
   const avRow = h('div', '', [], { style: 'display:flex;gap:6px;flex-wrap:wrap;margin:6px 0' });
   avatars.forEach(([a]) => {
-    avRow.appendChild(h('button', `mode-btn${avatar === a ? ' active' : ''}`, [a === 'photo' ? '📧' : a], {
+    avRow.appendChild(h('button', `mode-btn${avatar === a ? ' active' : ''}`, [a], {
       style: 'flex:0 0 auto;padding:6px 10px;font-size:16px',
-      title: a === 'photo' ? L('Use my email photo', 'استخدم صورة بريدي', 'E-posta fotoğrafımı kullan') : a,
-      onclick: () => { sound.click(); state.pendingAvatar = a; render(); }
+      title: a === 'custom'
+        ? L('Upload your own photo', 'ارفع صورتك الخاصة', 'Kendi fotoğrafını yükle')
+        : a === 'photo' ? L('Use my email photo', 'استخدم صورة بريدي', 'E-posta fotoğrafımı kullan') : a,
+      onclick: () => {
+        sound.click();
+        if (a === 'custom') { fileInput.click(); return; }
+        state.pendingAvatar = a;
+        render();
+      }
     }));
   });
-  card.appendChild(h('div', 'section-label', [L('Avatar', 'الصورة الرمزية', 'Avatar') + '  📧 = ' + L('email photo', 'صورة البريد', 'e-posta fotoğrafı')], { style: 'font-size:11px;color:#64748b;margin-top:8px' }));
+  card.appendChild(fileInput);
+  card.appendChild(h('div', 'section-label', [L('Avatar', 'الصورة الرمزية', 'Avatar') + '  —  🖼️ ' + L('upload', 'رفع صورة', 'yükle') + ' · 📧 ' + L('email photo', 'صورة البريد', 'e-posta fotoğrafı')], { style: 'font-size:11px;color:#64748b;margin-top:8px' }));
   card.appendChild(avRow);
   card.appendChild(h('div', 'section-label', [L('Preview', 'معاينة', 'Önizleme')], { style: 'font-size:11px;color:#64748b;margin-top:8px' }));
   card.appendChild(avPreview);

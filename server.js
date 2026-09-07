@@ -44,7 +44,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json());
+app.use(express.json({ limit: '4mb' }));
 
 const rooms = new Map();
 
@@ -5088,6 +5088,7 @@ function cleanUser(u) {
     avatar: u.avatar || 'photo',
     avatarUrl: 'https://www.gravatar.com/avatar/' + emailHash + '?s=200&d=404',
     picture: u.picture || '',
+    customPic: u.customPic || '',
     lang: u.lang || 'en',
     createdAt: u.createdAt,
     plan: resolvePlan(u),
@@ -5184,6 +5185,30 @@ app.post('/api/auth/update', (req, res) => {
   }
   saveUsers(usersDB);
   res.json({ user: cleanUser(user) });
+});
+
+app.post('/api/auth/avatar-upload', (req, res) => {
+  const user = authUser(req);
+  if (!user) return res.status(401).json({ error: 'Not logged in', errorTr: 'Giriş yapılmadı' });
+  const m = /^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/=]+)$/.exec(String((req.body || {}).image || ''));
+  if (!m) return res.status(400).json({ error: 'Invalid image file', errorTr: 'Geçersiz resim dosyası', errorAr: 'ملف صورة غير صالح' });
+  const buf = Buffer.from(m[2], 'base64');
+  if (buf.length < 64) return res.status(400).json({ error: 'Image is too small', errorTr: 'Resim çok küçük' });
+  if (buf.length > 3 * 1024 * 1024) return res.status(413).json({ error: 'Image too large (max 3MB)', errorTr: 'Resim çok büyük (en fazla 3MB)', errorAr: 'الصورة كبيرة جداً (3MB كحد أقصى)' });
+  const uploadsDir = path.join(__dirname, 'public', 'uploads');
+  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+  const ext = m[1] === 'jpeg' ? 'jpg' : m[1];
+  const name = 'av_' + crypto.randomBytes(8).toString('hex') + '.' + ext;
+  fs.writeFileSync(path.join(uploadsDir, name), buf);
+  // remove previous custom picture to avoid clutter
+  if (user.customPic) {
+    const old = user.customPic.replace(/[^a-zA-Z0-9_./-]/g, '');
+    if (old.startsWith('/uploads/av_')) { try { fs.unlinkSync(path.join(__dirname, 'public', old)); } catch {} }
+  }
+  user.customPic = '/uploads/' + name;
+  user.avatar = 'custom';
+  saveUsers(usersDB);
+  res.json({ ok: true, user: cleanUser(user) });
 });
 
 /* ======================== GOOGLE SIGN-IN ======================== */

@@ -4525,14 +4525,31 @@ const EXAM_CATEGORIES_2 = require('./exams-data-2.js');
 const EXAM_CATEGORIES_3 = require('./exams-data-3.js');
 const EXAMS = Object.assign({}, EXAM_CATEGORIES_1, EXAM_CATEGORIES_2, EXAM_CATEGORIES_3);
 
-function buildQuestions(categories, numQuestions, mode) {
-  const bank = mode === 'exam' ? EXAMS : CATEGORIES;
-  let pool = [];
-  categories.forEach(cat => {
-    if (bank[cat]) {
-      pool = pool.concat(bank[cat].questions.map(q => ({ ...q, category: cat })));
-    }
+/* Merge extra question bank batches (fun + exam). Future batches:
+   add question-bank-2.js, question-bank-3.js ... and register them here. */
+const QUESTION_BANK_BATCHES = ['./question-bank-1.js'];
+QUESTION_BANK_BATCHES.forEach(batchFile => {
+  const batch = require(batchFile);
+  Object.entries(batch.fun || {}).forEach(([key, qs]) => {
+    if (CATEGORIES[key] && Array.isArray(qs)) CATEGORIES[key].questions.push(...qs);
   });
+  Object.entries(batch.exam || {}).forEach(([key, qs]) => {
+    if (EXAMS[key] && Array.isArray(qs)) EXAMS[key].questions.push(...qs);
+  });
+});
+
+function buildQuestions(categories, numQuestions, mode, customBank) {
+  let pool = [];
+  if (mode === 'custom' && Array.isArray(customBank)) {
+    pool = customBank.map(q => ({ ...q, category: 'custom' }));
+  } else {
+    const bank = mode === 'exam' ? EXAMS : CATEGORIES;
+    categories.forEach(cat => {
+      if (bank[cat]) {
+        pool = pool.concat(bank[cat].questions.map(q => ({ ...q, category: cat })));
+      }
+    });
+  }
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -4566,7 +4583,20 @@ wss.on('connection', (ws) => {
     if (msg.type === 'create_room') {
       let code;
       const hostPlan = msg.plan && PLANS[msg.plan] ? msg.plan : 'free';
+      const hostUser = msg.token && sessions.get(msg.token) ? usersDB[sessions.get(msg.token)] : null;
       let roomNum = msg.numQuestions || 10;
+      if (msg.mode === 'custom') {
+        if (!hostUser || !planFeature(hostUser, 'customQuestions')) {
+          ws.send(JSON.stringify({ type: 'error', code: 'plan', message: 'Custom questions require a Premium or Ultimate plan', messageAr: 'الأسئلة المخصصة تتطلب خطة Premium أو Ultimate', messageTr: 'Özel sorular Premium veya Ultimate plan gerektirir' }));
+          return;
+        }
+        const bank = hostUser.customQuestions || [];
+        if (!bank.length) {
+          ws.send(JSON.stringify({ type: 'error', code: 'no_custom', message: 'You have no custom questions yet — create some first', messageAr: 'لا توجد أسئلة مخصصة بعد — أنشئ بعضها أولاً', messageTr: 'Henüz özel soru yok — önce bazılarını oluşturun' }));
+          return;
+        }
+        roomNum = Math.min(roomNum, bank.length);
+      }
       if (msg.mode === 'exam' && hostPlan === 'free') {
         roomNum = Math.min(roomNum, FREE_EXAM_LIMIT);
       }
@@ -4594,7 +4624,8 @@ wss.on('connection', (ws) => {
         timeLeft: msg.timerSeconds !== undefined ? msg.timerSeconds : 20,
         paused: false,
         phase: 'lobby',
-        mode: msg.mode === 'exam' ? 'exam' : 'fun',
+        mode: ['exam', 'custom'].includes(msg.mode) ? msg.mode : 'fun',
+        customBank: msg.mode === 'custom' && hostUser ? (hostUser.customQuestions || []) : null,
         selectedCategories: msg.categories || ['general', 'movies', 'family'],
         numQuestions: roomNum,
         questionLang: msg.questionLang === 'perplayer' ? 'perplayer' : 'shared',
@@ -4662,7 +4693,7 @@ wss.on('connection', (ws) => {
       if (room.mode === 'exam' && room.plan === 'free') {
         room.numQuestions = Math.min(room.numQuestions || 5, FREE_EXAM_LIMIT);
       }
-      room.questions = buildQuestions(room.selectedCategories, room.numQuestions, room.mode);
+      room.questions = buildQuestions(room.selectedCategories, room.numQuestions, room.mode, room.customBank);
       room.currentQ = 0;
       room.phase = 'playing';
       room.answeredThisRound = {};

@@ -523,6 +523,17 @@ function exportReportCSV(questions, report) {
 function startCreate() {
   state.isHost = true;
   if (!state.roomLangTouched) state.roomLang = appLang;
+  if (state.mode === 'custom') {
+    const n = state.billing && state.billing.customQuestions ? state.billing.customQuestions.length : 0;
+    if (!n) {
+      showToast(L('Add a question first — opening the creator.', 'أضف سؤالاً أولاً — سيُفتح المنشئ.', 'Önce bir soru ekleyin — oluşturucu açılıyor.'), 'custom');
+      state.customEditor = true;
+      render();
+      return;
+    }
+  }
+  let hostToken = null;
+  try { hostToken = localStorage.getItem('quizora_token'); } catch (e) {}
   const sendCreate = () => {
     ws.send(JSON.stringify({
       type: 'create_room',
@@ -533,6 +544,7 @@ function startCreate() {
       questionLang: state.questionLang,
       lang: state.roomLang,
       plan: currentPlanId(),
+      token: hostToken,
       powerupsEnabled: !!state.powerupsEnabled,
     }));
   };
@@ -891,15 +903,23 @@ function renderModeTabs(container) {
     ['fun', 'play', L('Fun Mode', 'الوضع الترفيهي', 'Eğlence Modu')],
     ['exam', 'grad', L('Educational Mode', 'الوضع التعليمي', 'Eğitim Modu')],
   ];
+  const showCustom = hasFeature('customQuestions');
+  if (showCustom) modes.push(['custom', null, L('My Questions', 'أسئلتي', 'Sorularım')]);
+  tabs.className = 'mode-tabs' + (showCustom ? ' three-tabs' : '');
   modes.forEach(([m, icon, label]) => {
     const active = state.mode === m;
-    const b = h('button', `mode-btn ${active ? 'active' : ''}`, [hIcon(icon, 'ic'), ' ' + label], {
+    const kids = icon ? [hIcon(icon, 'ic'), ' ' + label] : ['🧩 ' + label];
+    const b = h('button', `mode-btn ${active ? 'active' : ''}`, kids, {
       onclick: () => {
         sound.click();
         state.mode = m;
-        const bank = currentBank();
-        if (!state.selectedCategories.some(k => bank[k])) {
-          state.selectedCategories = m === 'exam' ? ['yks'] : ['general', 'movies', 'family'];
+        if (m === 'custom') {
+          state.selectedCategories = ['custom'];
+        } else {
+          const bank = currentBank();
+          if (!state.selectedCategories.some(k => bank[k])) {
+            state.selectedCategories = m === 'exam' ? ['yks'] : ['general', 'movies', 'family'];
+          }
         }
         render();
       }
@@ -910,9 +930,30 @@ function renderModeTabs(container) {
   if (state.mode === 'exam' && !hasFeature('examPacks')) {
     container.appendChild(h('div', 'free-exam-note', [L('Free: up to 5 educational questions per game — Premium unlocks the full packs.', 'مجاناً: حتى 5 أسئلة تعليمية لكل لعبة — تتيح خطة Premium الحزم الكاملة.', 'Ücretsiz: oyun başına 5 eğitim sorusu — Premium tüm paketleri açar.')]));
   }
+  if (state.mode === 'custom') {
+    const n = state.billing && state.billing.customQuestions ? state.billing.customQuestions.length : 0;
+    container.appendChild(h('div', 'free-exam-note', [n > 0
+      ? L('Playing with your ' + n + ' custom question' + (n === 1 ? '' : 's') + ' — edit them in Practice.', 'تلعب بـ ' + n + ' من أسئلتك المخصصة — عدّلها من قسم التدريب.', n + ' özel sorunuzla oynuyorsunuz — Pratik bölümünden düzenleyin.')
+      : L('No custom questions yet — add some from the dashboard first.', 'لا توجد أسئلة مخصصة بعد — أضف بعضها من لوحة التحكم أولاً.', 'Henüz özel soru yok — önce panodan bazılarını ekleyin.')]));
+  }
 }
 
 function renderSelectionGrid(container, sync) {
+  if (state.mode === 'custom') {
+    const n = state.billing && state.billing.customQuestions ? state.billing.customQuestions.length : 0;
+    const grid = h('div', 'category-grid', [], { style: 'margin-bottom:12px' });
+    const tile = h('button', `cat-btn ${n > 0 ? 'selected' : 'unselected'}`, ['🧩 ' + L('My Questions', 'أسئلتي', 'Sorularım') + ' (' + n + ')'], {
+      style: n > 0 ? 'background:#8b5cf6' : '',
+      onclick: () => { sound.click(); if (!n) { state.customEditor = true; render(); } }
+    });
+    grid.appendChild(tile);
+    const addBtn = h('button', 'cat-btn unselected', ['➕ ' + L('Add question', 'إضافة سؤال', 'Soru ekle')], {
+      onclick: () => { sound.click(); state.customEditor = true; render(); }
+    });
+    grid.appendChild(addBtn);
+    container.appendChild(grid);
+    return;
+  }
   const bank = currentBank();
   const grid = h('div', 'category-grid', [], { style: 'margin-bottom:12px' });
   Object.entries(bank).forEach(([key, cat]) => {
@@ -1292,7 +1333,8 @@ function renderGame() {
   const c = h('div', 'game-container');
 
   /* --- Masthead: round + category + answered count + timer --- */
-  const cat = CATEGORIES[q.category] || EXAM_CATEGORIES[q.category] || { name: 'General', emoji: '🧠', css: 'background:#475569' };
+  const CUSTOM_CAT_META = { name: L('My Questions', 'أسئلتي', 'Sorularım'), emoji: '🧩', css: 'background:#8b5cf6' };
+const cat = CATEGORIES[q.category] || EXAM_CATEGORIES[q.category] || (q.category === 'custom' ? CUSTOM_CAT_META : { name: 'General', emoji: '🧠', css: 'background:#475569' });
   state.currentCategory = cat;
 
   const masthead = h('div', 'host-masthead');
@@ -2408,6 +2450,7 @@ function handleHostMessage(msg) {
 
     case 'error':
       if (msg.code === 'plan') { openUpgrade('examPacks'); break; }
+      if (msg.code === 'no_custom') { state.customEditor = true; showToast(L(msg.message, msg.messageAr, msg.messageTr), 'custom'); render(); break; }
       const errEl = document.getElementById('join-error');
       if (errEl && state.screen === 'join') errEl.textContent = L(msg.message, msg.messageAr, msg.messageTr);
       else alert(L(msg.message, msg.messageAr, msg.messageTr));

@@ -5104,3 +5104,9 @@ html[dir="rtl"] .question-lang-hint { text-align: right; }
   .controller-container .controller-option-text { font-size: 13.5px; }
   .controller-container .controller-options { gap: 8px; }
 }
+
+/* ---- three mode tabs (Fun / Educational / My Questions) ---- */
+.mode-tabs.three-tabs .mode-btn { padding-left: 10px; padding-right: 10px; font-size: 12.5px; gap: 4px; }
+@media (max-width: 420px) {
+  .mode-tabs.three-tabs .mode-btn { font-size: 11.5px; padding-left: 6px; padding-right: 6px; }
+}

@@ -5081,10 +5081,13 @@ function hashPassword(password, salt) {
 }
 
 function cleanUser(u) {
+  const emailHash = crypto.createHash('md5').update(String(u.email || '').trim().toLowerCase()).digest('hex');
   return {
     username: u.username,
     email: u.email,
-    avatar: u.avatar || '😎',
+    avatar: u.avatar || 'photo',
+    avatarUrl: 'https://www.gravatar.com/avatar/' + emailHash + '?s=200&d=404',
+    picture: u.picture || '',
     lang: u.lang || 'en',
     createdAt: u.createdAt,
     plan: resolvePlan(u),
@@ -5117,7 +5120,7 @@ app.post('/api/auth/register', (req, res) => {
     email: em,
     passSalt: salt,
     passHash: hashPassword(password, salt),
-    avatar: '😎',
+    avatar: 'photo',
     lang: 'en',
     createdAt: new Date().toISOString(),
     stats: { tests: 0, scoreSum: 0, correctTot: 0, answerTot: 0 },
@@ -5171,7 +5174,8 @@ app.post('/api/auth/update', (req, res) => {
     if (Object.values(usersDB).some(u => u.username.toLowerCase() === uname.toLowerCase() && u.email !== user.email)) return res.status(409).json({ error: 'That username is taken' });
     user.username = uname;
   }
-  if (typeof b.avatar === 'string' && /^[\p{Extended_Pictographic}\u200d]?$/u.test(b.avatar) && b.avatar.length <= 6) user.avatar = b.avatar || user.avatar;
+  if (b.avatar === 'photo') user.avatar = 'photo';
+  else if (typeof b.avatar === 'string' && /^[\p{Extended_Pictographic}][\p{Extended_Pictographic}\u200d]*$/u.test(b.avatar) && b.avatar.length <= 8) user.avatar = b.avatar;
   if (b.lang === 'en' || b.lang === 'ar' || b.lang === 'tr') user.lang = b.lang;
   if (b.newPassword) {
     if (String(b.newPassword).length < 4) return res.status(400).json({ error: 'Password must be at least 4 characters' });

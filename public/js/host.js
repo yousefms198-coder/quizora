@@ -44,6 +44,7 @@ let state = {
   practiceTimer: null,
   inputAnswer: null,
   settingsOpen: false,
+  langMenuOpen: false,
   authOpen: false,
   pendingAvatar: undefined,
   lastAnswer: null,
@@ -114,6 +115,18 @@ function hIcon(name, cls) {
 }
 
 /* ==================== PLANS — client helpers ==================== */
+function profilePic(u) {
+  const src = u && u.avatar === 'photo' ? (u.picture || u.avatarUrl || '') : '';
+  if (src) {
+    const img = h('img', 'profile-img', [], { src, alt: '' });
+    img.addEventListener('error', () => {
+      const initial = u && u.username ? u.username.trim().charAt(0).toUpperCase() : '🙂';
+      img.replaceWith(h('span', 'profile-initial', [initial]));
+    });
+    return img;
+  }
+  return h('span', '', [u && u.avatar && u.avatar !== 'photo' ? u.avatar : '🙂']);
+}
 function currentPlanId() {
   return (state.user && state.user.plan && window.PLANS && PLANS[state.user.plan]) ? state.user.plan : 'free';
 }
@@ -471,13 +484,25 @@ function stateLoading() {
 }
 
 function langCyclePill() {
-  const order = ['en', 'ar', 'tr'];
   const labels = { en: 'EN', ar: 'عربية', tr: 'TR' };
-  const next = order[(order.indexOf(appLang) + 1) % order.length];
-  return h('button', 'lang-pill', [hIcon('globe', 'ic ic-s'), labels[appLang]], {
+  const wrap = h('div', 'lang-wrap');
+  wrap.appendChild(h('button', `lang-pill${state.langMenuOpen ? ' open' : ''}`, [hIcon('globe', 'ic ic-s'), labels[appLang]], {
     title: L('Language', 'اللغة', 'Dil'),
-    onclick: () => { setLang(next); sound.click(); render(); }
-  });
+    onclick: () => { sound.click(); state.langMenuOpen = !state.langMenuOpen; render(); }
+  }));
+  if (state.langMenuOpen) {
+    app.appendChild(h('div', 'lang-backdrop', [], {
+      onclick: () => { state.langMenuOpen = false; render(); }
+    }));
+    const menu = h('div', 'lang-menu');
+    [['en', 'English', '🇬🇧'], ['ar', 'العربية', '🇸🇦'], ['tr', 'Türkçe', '🇹🇷']].forEach(([v, name, flag]) => {
+      menu.appendChild(h('button', `lang-item${appLang === v ? ' active' : ''}`, [flag + '  ' + name], {
+        onclick: () => { sound.click(); setLang(v); state.langMenuOpen = false; render(); }
+      }));
+    });
+    wrap.appendChild(menu);
+  }
+  return wrap;
 }
 
 function renderCornerWidget() {
@@ -2557,8 +2582,9 @@ function accountChip() {
       render();
     }
   }));
-  wrap.appendChild(h('button', 'btn-ghost icon-chip', [state.user.avatar || '😎'], {
+  wrap.appendChild(h('button', 'btn-ghost icon-chip', [profilePic(state.user)], {
     title: state.user.username + ' — ' + L('Dashboard', 'لوحة التحكم', 'Panel'),
+    'data-tour': 'profile',
     onclick: () => { sound.click(); state.screen = 'dashboard'; render(); }
   }));
   return wrap;
@@ -2577,8 +2603,14 @@ function renderDashboard() {
   }));
   c.appendChild(top);
 
-  c.appendChild(h('div', 'dash-avatar', [u.avatar || '😎']));
-  c.appendChild(h('div', 'font-display dash-name', [u.username || 'Player']));
+  c.appendChild(h('button', 'dash-avatar profile-edit', [profilePic(u)], {
+    title: L('Edit profile', 'تعديل الملف', 'Profili düzenle'),
+    onclick: () => { sound.click(); state.settingsOpen = true; render(); }
+  }));
+  c.appendChild(h('button', 'font-display dash-name profile-edit', [u.username || 'Player'], {
+    title: L('Edit profile', 'تعديل الملف', 'Profili düzenle'),
+    onclick: () => { sound.click(); state.settingsOpen = true; render(); }
+  }));
   c.appendChild(h('div', 'dash-sub', [u.email || '']));
 
   /* --- plan + billing panel --- */
@@ -2802,15 +2834,25 @@ function renderSettings() {
   card.appendChild(h('div', 'section-label', [L('⚙️ Account Settings', '⚙️ إعدادات الحساب', '⚙️ Hesap Ayarları')], { style: 'font-weight:800;color:#38bdf8;font-size:14px;margin-bottom:12px' }));
 
   const errEl = h('div', 'join-error', [], { style: 'margin-top:6px;font-size:12px' });
-  const avatars = ['😎', '🦊', '🐱', '🚀', '🔥', '⭐', '💎', '🎯'];
-  const avatar = state.pendingAvatar || state.user.avatar || '😎';
+  const avatars = [
+    ['photo', '📧'],
+    ['😎', ''], ['🦊', ''], ['🐱', ''], ['🚀', ''], ['🔥', ''], ['⭐', ''], ['💎', ''], ['🎯', ''],
+    ['👨', ''], ['👩', ''], ['🧔', ''], ['👱', ''], ['👨‍🎓', ''], ['👩‍🎓', ''], ['👨‍💼', ''], ['👩‍💼', ''],
+  ];
+  const avatar = state.pendingAvatar !== undefined ? state.pendingAvatar : (state.user.avatar || 'photo');
+  const avPreview = h('div', 'av-preview', [profilePic({ ...state.user, avatar })]);
   const avRow = h('div', '', [], { style: 'display:flex;gap:6px;flex-wrap:wrap;margin:6px 0' });
-  avatars.forEach(a => {
-    avRow.appendChild(h('button', `mode-btn ${avatar === a ? 'active' : ''}`, [a], {
+  avatars.forEach(([a]) => {
+    avRow.appendChild(h('button', `mode-btn${avatar === a ? ' active' : ''}`, [a === 'photo' ? '📧' : a], {
       style: 'flex:0 0 auto;padding:6px 10px;font-size:16px',
+      title: a === 'photo' ? L('Use my email photo', 'استخدم صورة بريدي', 'E-posta fotoğrafımı kullan') : a,
       onclick: () => { sound.click(); state.pendingAvatar = a; render(); }
     }));
   });
+  card.appendChild(h('div', 'section-label', [L('Avatar', 'الصورة الرمزية', 'Avatar') + '  📧 = ' + L('email photo', 'صورة البريد', 'e-posta fotoğrafı')], { style: 'font-size:11px;color:#64748b;margin-top:8px' }));
+  card.appendChild(avRow);
+  card.appendChild(h('div', 'section-label', [L('Preview', 'معاينة', 'Önizleme')], { style: 'font-size:11px;color:#64748b;margin-top:8px' }));
+  card.appendChild(avPreview);
 
   const nameInput = h('input', 'text-input', [], { placeholder:'', value: state.user.username, style: 'width:100%;margin:6px 0;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:14px' });
   const langSel = h('select', 'setting-select', [], { style: 'width:100%;margin:6px 0;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:14px' });

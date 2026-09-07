@@ -4693,17 +4693,27 @@ wss.on('connection', (ws) => {
         room.clients.add(ws);
         ws.send(JSON.stringify({ type: 'joined', code, player: existing, categories: room.selectedCategories, numQuestions: room.numQuestions, mode: room.mode, powerup: room.powerups[name] || null, questionLang: room.questionLang, roomLang: room.roomLang }));
         ws.send(JSON.stringify({ type: 'player_list', players: room.players }));
-        if (room.phase === 'playing' && room.questions[room.currentQ]) {
-          const q = room.questions[room.currentQ];
+        if (room.phase === 'playing' || room.phase === 'reveal') {
+          const curQ = room.questions[room.currentQ];
+          /* send the full question list, then jump the player to the current round */
           ws.send(JSON.stringify({
-            type: 'new_question',
-            round: room.currentQ + 1,
-            question: { q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q, options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options, category: q.category },
-            timerSeconds: room.timerSeconds,
-            timeLeft: room.timeLeft,
+            type: 'game_started',
+            questions: room.questions.map(q => ({ q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q, options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options, category: q.category })),
+            totalQuestions: room.questions.length,
+            mode: room.mode,
+            currentQuestion: curQ ? { q: curQ.q, qAr: curQ.qAr || curQ.q, qTr: curQ.qTr || curQ.q, options: curQ.options, optionsAr: curQ.optionsAr || curQ.options, optionsTr: curQ.optionsTr || curQ.options, category: curQ.category, round: room.currentQ + 1 } : null,
+            players: room.players,
             scores: room.scores,
+            timerSeconds: room.timerSeconds,
+            questionLang: room.questionLang,
+            roomLang: room.roomLang,
             powerups: Object.fromEntries(room.players.map(p => [p.name, room.powerups[p.name]])),
           }));
+          if (curQ) {
+            ws.send(JSON.stringify({ type: 'new_question', round: room.currentQ + 1, timerSeconds: room.timerSeconds, timeLeft: room.timeLeft, scores: room.scores }));
+          }
+        } else if (room.phase === 'finished' && room.lastGameOver) {
+          ws.send(JSON.stringify(room.lastGameOver));
         } else if (room.phase !== 'playing') {
           room.phase = 'lobby';
           broadcastAll(room, { type: 'back_to_lobby', players: room.players, scores: room.scores });
@@ -5102,14 +5112,16 @@ function advanceQuestion(room) {
       };
     });
 
-    broadcastAll(room, {
+    const gameEndPayload = {
       type: 'game_over',
       scores: room.scores,
       ranked,
       players: room.players,
       playerStats,
       totalQuestions: totalQ,
-    });
+    };
+    room.lastGameOver = gameEndPayload;
+    broadcastAll(room, gameEndPayload);
     return;
   }
 

@@ -1999,6 +1999,7 @@ function renderPlayerAnswer() {
       sound.click();
       removeRevealOverlay();
       if (ws) { try { ws.close(); } catch {} }
+      try { sessionStorage.removeItem('quizora_player'); } catch (e) {}
       state.screen = 'landing';
       state.isHost = true;
       state.roomCode = null;
@@ -2291,6 +2292,7 @@ function connect() {
     console.log('Connected to Quizora server');
     if (state.screen === 'landing') render();
     tryRejoinHost();
+    tryRejoinPlayer();
   };
 
   ws.onclose = () => {
@@ -2329,6 +2331,23 @@ function tryRejoinHost() {
       }
     } catch (e) {}
   }, 3000);
+}
+
+/* Player reconnection: after a refresh, jump straight back into the game */
+function tryRejoinPlayer() {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  if (state.isHost) return;
+  let saved = null;
+  try { saved = JSON.parse(sessionStorage.getItem('quizora_player') || 'null'); } catch (e) {}
+  if (!saved || !saved.code || !saved.name) return;
+  state._autoRejoin = true;
+  ws.send(JSON.stringify({ type: 'join_room', code: saved.code, name: saved.name }));
+  setTimeout(() => {
+    state._autoRejoin = false;
+    if (!state.roomCode) {
+      try { sessionStorage.removeItem('quizora_player'); } catch (e) {}
+    }
+  }, 3500);
 }
 
 function handleMessage(msg) {
@@ -2505,6 +2524,8 @@ function handlePlayerMessage(msg) {
       state.questionLang = msg.questionLang === 'perplayer' ? 'perplayer' : 'shared';
       state.roomLang = ['ar', 'tr', 'en'].includes(msg.roomLang) ? msg.roomLang : 'en';
       state.screen = 'player_waiting';
+      try { sessionStorage.setItem('quizora_player', JSON.stringify({ code: msg.code, name: msg.player.name })); } catch (e) {}
+      state._autoRejoin = false;
       render();
       break;
 
@@ -2588,7 +2609,7 @@ function handlePlayerMessage(msg) {
       state.revealData = null;
       removeRevealOverlay();
       state.paused = false;
-      state.timeLeft = msg.timerSeconds || state.timerSeconds;
+      state.timeLeft = msg.timeLeft != null ? msg.timeLeft : (msg.timerSeconds || state.timerSeconds);
       state.screen = 'player_answer';
       render();
       break;
@@ -2658,12 +2679,18 @@ function handlePlayerMessage(msg) {
       state.screen = 'landing';
       state.roomCode = null;
       state.players = [];
+      try { sessionStorage.removeItem('quizora_player'); } catch (e) {}
       showToast(L('The host left — room closed.', 'غادر المضيف — أُغلقت الغرفة.', 'Ev sahibi ayrıldı — oda kapatıldı.'), 'error');
       render();
       break;
 
     case 'error':
       if (msg.code === 'plan') { openUpgrade('examPacks'); break; }
+      if (state._autoRejoin) {
+        state._autoRejoin = false;
+        try { sessionStorage.removeItem('quizora_player'); } catch (e) {}
+        break;
+      }
       const joinErr = document.getElementById('join-error');
       if (joinErr && state.screen === 'join') joinErr.textContent = L(msg.message, msg.messageAr, msg.messageTr);
       else alert(L(msg.message, msg.messageAr, msg.messageTr));

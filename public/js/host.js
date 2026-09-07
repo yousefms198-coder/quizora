@@ -1,4 +1,14 @@
 let ws = null;
+/* topic display metadata (weak-topic analytics + report chips) */
+const TOPIC_META = {
+  matematik: ['📐', ['Math', 'رياضيات', 'Matematik']],
+  fizik: ['🧲', ['Physics', 'فيزياء', 'Fizik']],
+  kimya: ['⚗️', ['Chemistry', 'كيمياء', 'Kimya']],
+  biyoloji: ['🧬', ['Biology', 'أحياء', 'Biyoloji']],
+  tarih: ['🏛️', ['History', 'تاريخ', 'Tarih']],
+  'coğrafya': ['🗺️', ['Geography', 'جغرافيا', 'Coğrafya']],
+  'türkçe': ['📖', ['Turkish', 'تركية', 'Türkçe']],
+};
 let state = {
   screen: 'landing',
   roomCode: null,
@@ -2979,22 +2989,13 @@ function renderDashboard() {
     }
 
     /* --- Weak-topic insights (Premium+) --- */
-    const TOPIC_META = {
-      matematik: ['📐', L('Math', 'رياضيات', 'Matematik')],
-      fizik: ['🧲', L('Physics', 'فيزياء', 'Fizik')],
-      kimya: ['⚗️', L('Chemistry', 'كيمياء', 'Kimya')],
-      biyoloji: ['🧬', L('Biology', 'أحياء', 'Biyoloji')],
-      tarih: ['🏛️', L('History', 'تاريخ', 'Tarih')],
-      'coğrafya': ['🗺️', L('Geography', 'جغرافيا', 'Coğrafya')],
-      'türkçe': ['📖', L('Turkish', 'تركية', 'Türkçe')],
-    };
     const topicStats = u.topicStats || {};
     const topicRows = Object.entries(topicStats)
       .filter(([tp, ts]) => (ts.tot || 0) >= 3)
       .map(([tp, ts]) => ({
         tp,
         emoji: (TOPIC_META[tp] || ['📘', tp])[0],
-        name: (TOPIC_META[tp] || [null, (EXAM_CATEGORIES[tp] && EXAM_CATEGORIES[tp].name) || tp])[1],
+        name: TOPIC_META[tp] ? L(...TOPIC_META[tp][1]) : ((EXAM_CATEGORIES[tp] && EXAM_CATEGORIES[tp].name) || tp),
         pct: Math.round(((ts.correct || 0) / (ts.tot || 1)) * 100),
         correct: ts.correct || 0,
         tot: ts.tot || 0,
@@ -3673,9 +3674,11 @@ function buildPracticeReport(c) {
     wBox.appendChild(h('div', 'section-label', [L('Review Mistakes', 'مراجعة الأخطاء', 'Hatalarını Gözden Geçir')], { style: 'font-weight:800;color:#f87171;font-size:12px;margin-bottom:8px' }));
     wrongs.forEach(d => {
       const meta = EXAM_CATEGORIES[d.category] || { name: d.category, emoji: '📘' };
+      const tm = d.topic && TOPIC_META[d.topic];
       const wrow = h('div', '', [], { style: 'padding:8px 0;border-bottom:1px solid #1e293b' });
       wrow.appendChild(h('div', '', [`${meta.emoji} ${d.question}`], { style: 'font-size:13px;font-weight:700' }));
       wrow.appendChild(h('div', '', [d.options[d.correctIndex] || d.correctAnswer], { style: 'font-size:12px;color:#22c55e;margin-top:2px' }));
+      if (tm) wrow.appendChild(h('div', '', ['🎯 ' + L(...tm[1])], { style: 'font-size:11px;color:#94a3b8;margin-top:3px' }));
       wBox.appendChild(wrow);
     });
     c.appendChild(wBox);

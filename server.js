@@ -5595,7 +5595,7 @@ app.post('/api/practice/finish', (req, res) => {
     const ans = answers[i];
     const ok = typeof ans === 'number' && ans === q.correct;
     if (ok) correct++;
-    details.push({ index: i, category: q.category, correct: ok, correctAnswer: q.options[q.correct], correctIndex: q.correct, question: q.q, options: q.options });
+    details.push({ index: i, category: q.category, topic: q.topic || null, correct: ok, correctAnswer: q.options[q.correct], correctIndex: q.correct, question: q.q, options: q.options });
     catStats[q.category] = catStats[q.category] || { correct: 0, total: 0 };
     catStats[q.category].total++;
     if (ok) catStats[q.category].correct++;

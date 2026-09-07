@@ -1162,7 +1162,8 @@ input[type='text'], input[type='email'], input[type='password'], select {
   justify-content: flex-start;
   height: 100vh;
   height: 100dvh;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 16px;
   padding-top: max(16px, env(safe-area-inset-top));
   padding-bottom: max(16px, env(safe-area-inset-bottom));
@@ -3258,6 +3259,37 @@ input:-webkit-autofill:focus {
   margin-bottom: 8px;
   color: #fff;
 }
+
+/* Short phones / large system font: shrink the controller so nothing overlaps */
+@media (max-height: 720px) {
+  .controller-option { min-height: 86px; padding: 15px 12px; }
+  .controller-option-text { font-size: 16px; }
+  .controller-option-letter { width: 36px; height: 36px; font-size: 14px; margin-bottom: 6px; }
+  .controller-question-card { padding: 12px 14px 10px; }
+  .controller-question-card .controller-question { -webkit-line-clamp: 4; }
+  .controller-top { padding: 4px 0; }
+  .controller-room-badge, .pw-count { padding: 3px 10px; }
+  .controller-round { padding: 4px 0; margin: 4px 0 6px; }
+  .controller-timer-bar { height: 6px; margin: 2px 0; }
+  .controller-presence-head { margin: 4px 0 2px; }
+  .controller-bottom { padding: 4px 0 4px; gap: 4px; }
+  .controller-score-pill, .controller-rank-pill { padding: 6px 14px; }
+  .controller-score { font-size: 18px; }
+  .controller-rank-pill b { font-size: 16px; }
+  .controller-leave { margin-top: 2px; padding: 7px 14px; min-width: 0; font-size: 12px; }
+  .powerup-btn { flex-direction: row; gap: 10px; padding: 8px 14px; }
+  .powerup-desc { display: none; }
+  .powerup-container { margin-top: 6px; }
+}
+@media (max-height: 620px) {
+  .controller-option { min-height: 70px; padding: 11px 10px; }
+  .controller-option-text { font-size: 15px; }
+  .controller-question-card .controller-question { -webkit-line-clamp: 3; }
+  .controller-round { padding: 3px 0; margin: 2px 0 4px; }
+  .controller-presence-head { margin: 3px 0 1px; }
+  .controller-question-card { padding: 10px 12px 8px; }
+  .controller-avatars { margin-bottom: 4px; }
+}
 .ol-a { background: linear-gradient(135deg, #60a5fa, #3b82f6); box-shadow: 0 0 14px rgba(59,130,246,0.45); }
 .ol-b { background: linear-gradient(135deg, #2dd4bf, #14b8a6); box-shadow: 0 0 14px rgba(20,184,166,0.45); }
 .ol-c { background: linear-gradient(135deg, #a78bfa, #8b5cf6); box-shadow: 0 0 14px rgba(139,92,246,0.45); }
@@ -5027,4 +5059,48 @@ html[dir="rtl"] .question-lang-hint { text-align: right; }
   .plan-card {
     padding: 16px 14px;
   }
+}
+
+/* ================================================================
+   CONTROLLER FINAL ANTI-OVERLAP PASS
+   Phones: answers as a 2x2 grid of compact row tiles so the whole
+   controller always fits the screen (the earlier 1-column stacking
+   pushed ~800px of content into a ~640px viewport and everything
+   overlapped). Higher specificity wins over the scattered tile
+   rules above regardless of file position.
+   ================================================================ */
+@media (max-width: 700px) {
+  .controller-container .controller-options {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: none;
+    grid-auto-rows: minmax(64px, 1fr);
+    gap: 10px;
+    padding: 0 2px;
+  }
+  .controller-container .controller-option {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    min-height: 64px;
+    padding: 10px 12px;
+    text-align: left;
+  }
+  html[dir="rtl"] .controller-container .controller-option { text-align: right; }
+  .controller-container .controller-option-letter {
+    width: 34px; height: 34px;
+    font-size: 14px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+  .controller-container .controller-option-text {
+    font-size: 15px;
+    line-height: 1.25;
+    min-width: 0;
+    overflow-wrap: break-word;
+  }
+}
+@media (max-width: 340px) {
+  .controller-container .controller-option-text { font-size: 13.5px; }
+  .controller-container .controller-options { gap: 8px; }
 }

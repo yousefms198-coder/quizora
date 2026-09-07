@@ -1458,6 +1458,10 @@ const cat = CATEGORIES[q.category] || EXAM_CATEGORIES[q.category] || (q.category
   qHead.appendChild(h('div', 'question-points', [L('100 PTS', '100 نقطة', '100 PUAN')]));
   qCard.appendChild(qHead);
   qCard.appendChild(h('div', 'question-text', [lq.text]));
+  qCard.appendChild(h('button', 'report-btn', ['⚠️ ' + L('Report question', 'إبلاغ عن السؤال', 'Sorunu bildir')], {
+    title: L('Something wrong with this question? Tell us.', 'هل هناك خطأ في هذا السؤال؟ أخبرنا.', 'Bu soruda bir hata mı var? Bize bildirin.'),
+    onclick: () => { sound.click(); reportQuestion(lq.text, q && q.category); }
+  }));
   c.appendChild(qCard);
 
   /* --- Late-join QR (compact, left column — stays out of the question area) --- */
@@ -1901,6 +1905,10 @@ function renderPlayerAnswer() {
   const qCard = h('div', 'controller-question-card glass');
   qCard.appendChild(h('div', 'controller-q-kicker', [L(`QUESTION ${state.currentQ + 1}`, `السؤال ${state.currentQ + 1}`, `SORU ${state.currentQ + 1}`)]));
   qCard.appendChild(h('div', 'controller-question', [lq.text]));
+  qCard.appendChild(h('button', 'report-btn', ['⚠️ ' + L('Report', 'إبلاغ', 'Bildir')], {
+    title: L('Something wrong with this question? Tell us.', 'هل هناك خطأ في هذا السؤال؟ أخبرنا.', 'Bu soruda bir hata mı var? Bize bildirin.'),
+    onclick: () => { sound.click(); reportQuestion(lq.text, q && q.category); }
+  }));
   c.appendChild(qCard);
 
   /* --- Live presence: who has answered --- */
@@ -2282,6 +2290,7 @@ function connect() {
   ws.onopen = () => {
     console.log('Connected to Quizora server');
     if (state.screen === 'landing') render();
+    tryRejoinHost();
   };
 
   ws.onclose = () => {
@@ -2297,6 +2306,31 @@ function connect() {
   };
 }
 
+/* Host reconnection: after a refresh/disconnect, re-attach to the live room */
+function tryRejoinHost() {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  if (state.roomCode) return;
+  let saved = null;
+  try {
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const k = sessionStorage.key(i);
+      if (k && k.startsWith('quizora_host_')) saved = { code: k.slice('quizora_host_'.length), token: sessionStorage.getItem(k) };
+    }
+  } catch (e) { return; }
+  if (!saved || !saved.code || !saved.token) return;
+  ws.send(JSON.stringify({ type: 'rejoin_host', code: saved.code, hostToken: saved.token }));
+  setTimeout(() => {
+    try {
+      if (!state.roomCode) {
+        for (let i = sessionStorage.length - 1; i >= 0; i--) {
+          const k = sessionStorage.key(i);
+          if (k && k.startsWith('quizora_host_')) sessionStorage.removeItem(k);
+        }
+      }
+    } catch (e) {}
+  }, 3000);
+}
+
 function handleMessage(msg) {
   if (state.isHost) {
     handleHostMessage(msg);
@@ -2310,6 +2344,9 @@ function handleHostMessage(msg) {
     case 'room_created':
       state.roomCode = msg.code;
       if (msg.numQuestions) state.numQuestions = msg.numQuestions;
+      try {
+        if (msg.hostToken) sessionStorage.setItem('quizora_host_' + msg.code, msg.hostToken);
+      } catch (e) {}
       state.screen = 'lobby';
       render();
       setTimeout(loadQR, 100);
@@ -2614,10 +2651,14 @@ function handlePlayerMessage(msg) {
       break;
 
     case 'host_disconnected':
+      showToast(L('Host connection lost — waiting for them to come back…', 'انقطع اتصال المضيف — بانتظار عودته…', 'Ev sahibi bağlantısı koptu — dönüşü bekleniyor…'), 'error');
+      break;
+
+    case 'room_closed':
       state.screen = 'landing';
       state.roomCode = null;
       state.players = [];
-      alert(L('Host disconnected. Game ended.', 'انقطع المضيف. انتهت اللعبة.', 'Ev sahibi bağlantıyı kesti. Oyun bitti.'));
+      showToast(L('The host left — room closed.', 'غادر المضيف — أُغلقت الغرفة.', 'Ev sahibi ayrıldı — oda kapatıldı.'), 'error');
       render();
       break;
 
@@ -2706,6 +2747,14 @@ function showToast(message, kind) {
     t.textContent = message;
     clearTimeout(t._timer);
     t._timer = setTimeout(() => { t.className = 'app-toast'; }, 1800);
+  } catch (e) {}
+}
+
+/* ======================== QUESTION REPORTS ======================== */
+async function reportQuestion(qText, category) {
+  try {
+    await api('/api/report-question', 'POST', { q: qText, category: category || '', roomCode: state.roomCode || '' });
+    showToast(L('Reported — thank you! Every report gets reviewed.', 'تم الإبلاغ — شكراً! كل بلاغ يُراجع.', 'Bildirildi — teşekkürler! Her bildirim incelenir.'), 'custom');
   } catch (e) {}
 }
 
@@ -2974,6 +3023,9 @@ function renderAuthModal() {
   mkFields();
   card.appendChild(tabs);
   card.appendChild(fields);
+  card.appendChild(h('button', 'forgot-link', [L('Forgot password?', 'نسيت كلمة المرور؟', 'Şifremi unuttum')], {
+    onclick: () => { sound.click(); window.location.href = '/reset'; }
+  }));
 
   const orRow = h('div', '', [], { style: 'display:flex;align-items:center;gap:10px;margin:12px 0 2px' });
   orRow.appendChild(h('div', '', [], { style: 'flex:1;height:1px;background:#334155' }));

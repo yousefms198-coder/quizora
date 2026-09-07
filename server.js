@@ -4626,6 +4626,9 @@ wss.on('connection', (ws) => {
         phase: 'lobby',
         mode: ['exam', 'custom'].includes(msg.mode) ? msg.mode : 'fun',
         customBank: msg.mode === 'custom' && hostUser ? (hostUser.customQuestions || []) : null,
+        hostToken: crypto.randomBytes(16).toString('hex'),
+        hostWs: null,
+        closeTimer: null,
         selectedCategories: msg.categories || ['general', 'movies', 'family'],
         numQuestions: roomNum,
         questionLang: msg.questionLang === 'perplayer' ? 'perplayer' : 'shared',
@@ -4635,8 +4638,30 @@ wss.on('connection', (ws) => {
       };
       ws.isHost = true;
       ws.roomCode = code;
+      room.hostWs = ws;
+      if (room.closeTimer) { clearTimeout(room.closeTimer); room.closeTimer = null; }
       rooms.set(code, room);
-      ws.send(JSON.stringify({ type: 'room_created', code, numQuestions: roomNum }));
+      ws.send(JSON.stringify({ type: 'room_created', code, numQuestions: roomNum, hostToken: room.hostToken }));
+    }
+
+    /* Host reconnection: re-attach a refreshed host to their live room. */
+    if (msg.type === 'rejoin_host') {
+      const room = rooms.get((msg.code || '').toUpperCase());
+      if (!room || room.hostToken !== msg.hostToken || room.hostWs) return;
+      ws.isHost = true;
+      ws.roomCode = room.code;
+      room.hostWs = ws;
+      if (room.closeTimer) { clearTimeout(room.closeTimer); room.closeTimer = null; }
+      room.clients.add(ws);
+      ws.send(JSON.stringify({ type: 'room_created', code: room.code, numQuestions: room.numQuestions, hostToken: room.hostToken }));
+      ws.send(JSON.stringify({ type: 'player_list', players: room.players }));
+      if (room.phase !== 'lobby') {
+        room.phase = 'lobby';
+        room.currentQ = 0;
+        clearInterval(room.timerInterval);
+        broadcastAll(room, { type: 'back_to_lobby', players: room.players, scores: room.scores });
+      }
+      return;
     }
 
     if (msg.type === 'join_room') {
@@ -4646,21 +4671,50 @@ wss.on('connection', (ws) => {
         ws.send(JSON.stringify({ type: 'error', message: 'Room not found', messageAr: 'الغرفة غير موجودة', messageTr: 'Oda bulunamadı' }));
         return;
       }
+      const name = (msg.name || '').trim().substring(0, 12);
+      if (!name) {
+        ws.send(JSON.stringify({ type: 'error', message: 'Name required', messageAr: 'الاسم مطلوب', messageTr: 'İsim gerekli' }));
+        return;
+      }
+      const existing = room.players.find(p => p.name === name);
+      if (existing && room.playerDiscAt && room.playerDiscAt[name]) {
+        /* rejoin mid-game: same player reconnects, keeps seat/score, gets current question */
+        ws.isHost = false;
+        ws.roomCode = code;
+        ws.playerName = name;
+        if (room.playerTimers[name]) { clearTimeout(room.playerTimers[name]); delete room.playerTimers[name]; }
+        delete room.playerDiscAt[name];
+        existing.id = ws.id;
+        room.clients.add(ws);
+        ws.send(JSON.stringify({ type: 'joined', code, player: existing, categories: room.selectedCategories, numQuestions: room.numQuestions, mode: room.mode, powerup: room.powerups[name] || null, questionLang: room.questionLang, roomLang: room.roomLang }));
+        ws.send(JSON.stringify({ type: 'player_list', players: room.players }));
+        if (room.phase === 'playing' && room.questions[room.currentQ]) {
+          const q = room.questions[room.currentQ];
+          ws.send(JSON.stringify({
+            type: 'new_question',
+            round: room.currentQ + 1,
+            question: { q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q, options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options, category: q.category },
+            timerSeconds: room.timerSeconds,
+            timeLeft: room.timeLeft,
+            scores: room.scores,
+            powerups: Object.fromEntries(room.players.map(p => [p.name, room.powerups[p.name]])),
+          }));
+        } else if (room.phase !== 'playing') {
+          room.phase = 'lobby';
+          broadcastAll(room, { type: 'back_to_lobby', players: room.players, scores: room.scores });
+        }
+        return;
+      }
+      if (existing) {
+        ws.send(JSON.stringify({ type: 'error', message: 'Name already taken', messageAr: 'الاسم مستخدم بالفعل', messageTr: 'Bu isim zaten alınmış' }));
+        return;
+      }
       if (room.phase !== 'lobby') {
         ws.send(JSON.stringify({ type: 'error', message: 'Game already in progress', messageAr: 'اللعبة قيد التقدم بالفعل', messageTr: 'Oyun zaten devam ediyor' }));
         return;
       }
       if (room.playerLimit && room.players.length >= room.playerLimit) {
         ws.send(JSON.stringify({ type: 'error', code: 'room_full', message: `Room is full (${room.playerLimit} players)`, messageAr: `الغرفة ممتلئة (${room.playerLimit} لاعباً)`, messageTr: `Oda dolu (${room.playerLimit} oyuncu)` }));
-        return;
-      }
-      const name = (msg.name || '').trim().substring(0, 12);
-      if (!name) {
-        ws.send(JSON.stringify({ type: 'error', message: 'Name required', messageAr: 'الاسم مطلوب', messageTr: 'İsim gerekli' }));
-        return;
-      }
-      if (room.players.find(p => p.name === name)) {
-        ws.send(JSON.stringify({ type: 'error', message: 'Name already taken', messageAr: 'الاسم مستخدم بالفعل', messageTr: 'Bu isim zaten alınmış' }));
         return;
       }
 
@@ -4918,14 +4972,46 @@ wss.on('connection', (ws) => {
       room.clients.delete(ws);
 
       if (ws.isHost) {
-        broadcast(room, { type: 'host_disconnected' });
-        clearInterval(room.timerInterval);
-        rooms.delete(ws.roomCode);
+        // keep the room alive for 45s so a refreshed host can rejoin
+        if (room.hostWs === ws) {
+          room.hostWs = null;
+          broadcast(room, { type: 'host_disconnected' });
+          if (!room.closeTimer) {
+            room.closeTimer = setTimeout(() => {
+              if (!room.hostWs) {
+                room.clients.forEach(client => { try { client.send(JSON.stringify({ type: 'room_closed' })); client.close(); } catch {} });
+                rooms.delete(room.code);
+              }
+            }, 45000);
+          }
+        }
       } else {
-        room.players = room.players.filter(p => p.name !== ws.playerName);
-        delete room.scores[ws.playerName];
-        delete room.streaks[ws.playerName];
-        broadcast(room, { type: 'player_left', playerName: ws.playerName, players: room.players, scores: room.scores });
+        const p = room.players.find(x => x.name === ws.playerName);
+        if (p && p.id === ws.id) {
+          // mark the player as disconnected but keep their seat for 60s (rejoin)
+          if (!room.playerDiscAt) room.playerDiscAt = {};
+          if (!room.playerTimers) room.playerTimers = {};
+          room.playerDiscAt[p.name] = Date.now();
+          if (!room.playerTimers[p.name]) {
+            room.playerTimers[p.name] = setTimeout(() => {
+              if (room.playerDiscAt && room.playerDiscAt[p.name]) {
+                room.players = room.players.filter(x => x.name !== p.name);
+                delete room.scores[p.name];
+                delete room.streaks[p.name];
+                delete room.powerups[p.name];
+                delete room.playerDiscAt[p.name];
+                delete room.playerTimers[p.name];
+                broadcast(room, { type: 'player_left', playerName: p.name, players: room.players, scores: room.scores });
+              }
+            }, 60000);
+          }
+          broadcast(room, { type: 'player_disconnected', playerName: p.name, players: room.players, scores: room.scores });
+        } else {
+          room.players = room.players.filter(x => x.name !== ws.playerName);
+          delete room.scores[ws.playerName];
+          delete room.streaks[ws.playerName];
+          broadcast(room, { type: 'player_left', playerName: ws.playerName, players: room.players, scores: room.scores });
+        }
       }
     }
   });
@@ -5079,24 +5165,17 @@ app.get('/qr/:code', async (req, res) => {
   }
 });
 
-/* ======================== ACCOUNTS & PRACTICE ======================== */
-const fs = require('fs');
-const DATA_DIR = path.join(__dirname, 'data');
-const USERS_FILE = path.join(DATA_DIR, 'users.json');
+/* ======================== ACCOUNTS & PERSISTENT STORAGE ======================== */
+const storage = require('./storage.js');
+const ADMIN_KEY = process.env.ADMIN_KEY || 'quizora-admin';
 
-function loadUsers() {
-  try { return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8')); }
-  catch { return {}; }
-}
-function saveUsers(db) {
-  try {
-    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-    fs.writeFileSync(USERS_FILE, JSON.stringify(db, null, 2));
-  } catch (e) { console.error('saveUsers failed:', e.message); }
-}
-
-const usersDB = loadUsers();
+let usersDB = {};
+let reportsDB = [];
 const sessions = new Map();
+
+function saveUsers() {
+  storage.saveState({ users: usersDB, reports: reportsDB });
+}
 
 /* ---- Plans (single source of truth in public/js/plans.js) ---- */
 const PLANS = require('./public/js/plans.js').PLANS;
@@ -5244,19 +5323,10 @@ app.post('/api/auth/avatar-upload', (req, res) => {
   const buf = Buffer.from(m[2], 'base64');
   if (buf.length < 64) return res.status(400).json({ error: 'Image is too small', errorTr: 'Resim çok küçük' });
   if (buf.length > 3 * 1024 * 1024) return res.status(413).json({ error: 'Image too large (max 3MB)', errorTr: 'Resim çok büyük (en fazla 3MB)', errorAr: 'الصورة كبيرة جداً (3MB كحد أقصى)' });
-  const uploadsDir = path.join(__dirname, 'public', 'uploads');
-  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-  const ext = m[1] === 'jpeg' ? 'jpg' : m[1];
-  const name = 'av_' + crypto.randomBytes(8).toString('hex') + '.' + ext;
-  fs.writeFileSync(path.join(uploadsDir, name), buf);
-  // remove previous custom picture to avoid clutter
-  if (user.customPic) {
-    const old = user.customPic.replace(/[^a-zA-Z0-9_./-]/g, '');
-    if (old.startsWith('/uploads/av_')) { try { fs.unlinkSync(path.join(__dirname, 'public', old)); } catch {} }
-  }
-  user.customPic = '/uploads/' + name;
+  // stored as a data URL inside the user record → survives redeploys (no disk files)
+  user.customPic = 'data:image/' + m[1] + ';base64,' + m[2];
   user.avatar = 'custom';
-  saveUsers(usersDB);
+  saveUsers();
   res.json({ ok: true, user: cleanUser(user) });
 });
 
@@ -5621,11 +5691,116 @@ app.post('/api/custom/delete', (req, res) => {
   res.json({ ok: true, count: user.customQuestions.length });
 });
 
-server.listen(PORT, () => {
-  console.log(`\n  ╔══════════════════════════════════════╗`);
-  console.log(`  ║          QUIZORA is LIVE             ║`);
-  console.log(`  ║  Host:    http://localhost:${PORT}      ║`);
-  console.log(`  ║  Network: http://${LOCAL_IP}:${PORT}  ║`);
-  if (PUBLIC_BASE_URL) console.log(`  ║  Public:  ${PUBLIC_BASE_URL}  ║`);
-  console.log(`  ╚══════════════════════════════════════╝\n`);
+/* ---- question reports (quality loop) ---- */
+app.post('/api/report-question', (req, res) => {
+  const b = req.body || {};
+  const q = String(b.q || '').trim().substring(0, 300);
+  if (!q) return res.status(400).json({ error: 'Missing question' });
+  if (reportsDB.length > 500) reportsDB = reportsDB.slice(-400);
+  reportsDB.push({
+    at: new Date().toISOString(),
+    q,
+    category: String(b.category || '').substring(0, 40),
+    reason: String(b.reason || '').substring(0, 200),
+    roomCode: String(b.roomCode || '').substring(0, 8).toUpperCase(),
+  });
+  saveUsers();
+  res.json({ ok: true });
 });
+
+app.get('/api/admin/reports', (req, res) => {
+  if (!ADMIN_KEY || req.query.key !== ADMIN_KEY) return res.status(403).json({ error: 'Forbidden' });
+  res.json({ reports: reportsDB.slice(-200).reverse() });
+});
+
+/* ---- password reset ---- */
+const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
+const RESET_FROM = process.env.RESET_FROM || 'Quizora <onboarding@resend.dev>';
+
+app.post('/api/auth/forgot', async (req, res) => {
+  const em = String((req.body || {}).email || '').trim().toLowerCase();
+  const user = usersDB[em];
+  if (!user || !user.passHash) return res.json({ ok: true }); // never leak account existence
+  const token = crypto.randomBytes(24).toString('hex');
+  user.resetToken = token;
+  user.resetExpires = Date.now() + 30 * 60 * 1000;
+  saveUsers();
+  const resetUrl = (PUBLIC_BASE_URL || `http://localhost:${PORT}`) + '/reset?token=' + token;
+  if (RESEND_API_KEY) {
+    try {
+      const r = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + RESEND_API_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: RESET_FROM,
+          to: [em],
+          subject: 'Quizora — password reset',
+          html: `<p>Hi,</p><p>Tap the link below to reset your Quizora password (valid for 30 minutes):</p><p><a href="${resetUrl}">Reset my password</a></p><p>If you did not request this, you can ignore this email.</p>`,
+        }),
+      });
+      if (r.ok) return res.json({ ok: true, sent: true });
+      console.error('Resend send failed:', r.status);
+    } catch (e) { console.error('Resend error:', e.message); }
+    return res.status(500).json({ error: 'Could not send the reset email. Try again later.' });
+  }
+  // no email provider configured → demo mode: show the link directly
+  res.json({ ok: true, demo: true, resetUrl });
+});
+
+app.get('/reset', (req, res) => {
+  res.send(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Quizora — Reset password</title>
+<style>*{box-sizing:border-box;margin:0}body{background:#0a0f1e;color:#e2e8f0;font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:28px;max-width:380px;width:100%}h1{font-size:19px;margin-bottom:8px}p{font-size:13px;color:#94a3b8;margin-bottom:14px;line-height:1.5}input{width:100%;padding:12px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:15px;margin:5px 0}button{width:100%;padding:13px;border:none;border-radius:10px;background:linear-gradient(135deg,#14b8a6,#0d9488);color:#fff;font-weight:800;font-size:15px;cursor:pointer;margin-top:10px}.msg{margin-top:12px;font-size:13px}.ok{color:#34d399}.err{color:#f87171}</style></head>
+<body><div class="card"><h1>🔒 Reset your password</h1><p>Enter a new password for your Quizora account.</p>
+<form id="f"><input id="p1" type="password" placeholder="New password (min 4)" required><input id="p2" type="password" placeholder="Repeat new password" required><button>Save new password</button></form><div class="msg" id="m"></div></div>
+<script>
+var token = new URLSearchParams(location.search).get('token') || '';
+document.getElementById('f').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  var m = document.getElementById('m');
+  var p1 = document.getElementById('p1').value, p2 = document.getElementById('p2').value;
+  if (p1.length < 4) { m.className = 'msg err'; m.textContent = 'Password must be at least 4 characters.'; return; }
+  if (p1 !== p2) { m.className = 'msg err'; m.textContent = 'Passwords do not match.'; return; }
+  try {
+    var r = await fetch('/api/auth/reset-confirm', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: token, password: p1 }) });
+    var j = await r.json();
+    if (j.ok) { m.className = 'msg ok'; m.textContent = '✅ Password updated! You can close this tab and log in.'; document.getElementById('f').style.display = 'none'; }
+    else { m.className = 'msg err'; m.textContent = j.error || 'Reset failed — the link may have expired.'; }
+  } catch (err) { m.className = 'msg err'; m.textContent = 'Something went wrong. Try again.'; }
+});
+</script></body></html>`);
+});
+
+app.post('/api/auth/reset-confirm', (req, res) => {
+  const b = req.body || {};
+  const token = String(b.token || '');
+  const password = String(b.password || '');
+  if (password.length < 4) return res.status(400).json({ error: 'Password must be at least 4 characters' });
+  const user = Object.values(usersDB).find(u => u.resetToken === token);
+  if (!user || !user.resetExpires || user.resetExpires < Date.now()) {
+    return res.status(400).json({ error: 'Invalid or expired reset link', errorTr: 'Bağlantı geçersiz veya süresi dolmuş' });
+  }
+  user.passSalt = crypto.randomBytes(16).toString('hex');
+  user.passHash = hashPassword(password, user.passSalt);
+  delete user.resetToken;
+  delete user.resetExpires;
+  sessions.clear(); // force re-login everywhere after a reset
+  saveUsers();
+  res.json({ ok: true });
+});
+
+/* ---- boot: load persistent state, then start serving ---- */
+(async () => {
+  const st = await storage.loadState();
+  usersDB = st.users || {};
+  reportsDB = st.reports || [];
+  console.log(`[storage] ${Object.keys(usersDB).length} users, ${reportsDB.length} reports loaded (${storage.usingSupabase ? 'Supabase' : 'local file'})`);
+
+  server.listen(PORT, () => {
+    console.log(`\n  ╔══════════════════════════════════════╗`);
+    console.log(`  ║          QUIZORA is LIVE             ║`);
+    console.log(`  ║  Host:    http://localhost:${PORT}      ║`);
+    console.log(`  ║  Network: http://${LOCAL_IP}:${PORT}  ║`);
+    if (PUBLIC_BASE_URL) console.log(`  ║  Public:  ${PUBLIC_BASE_URL}  ║`);
+    console.log(`  ╚══════════════════════════════════════╝\n`);
+  });
+})();

@@ -43,7 +43,12 @@ app.use((req, res, next) => {
   }
   next();
 });
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res) => {
+    // always revalidate static assets so phones never play with stale CSS/JS
+    res.setHeader('Cache-Control', 'no-cache');
+  }
+}));
 app.use(express.json({ limit: '4mb' }));
 
 const rooms = new Map();

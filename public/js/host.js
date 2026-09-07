@@ -2977,6 +2977,60 @@ function renderDashboard() {
     });
     c.appendChild(examList);
     }
+
+    /* --- Weak-topic insights (Premium+) --- */
+    const TOPIC_META = {
+      matematik: ['📐', L('Math', 'رياضيات', 'Matematik')],
+      fizik: ['🧲', L('Physics', 'فيزياء', 'Fizik')],
+      kimya: ['⚗️', L('Chemistry', 'كيمياء', 'Kimya')],
+      biyoloji: ['🧬', L('Biology', 'أحياء', 'Biyoloji')],
+      tarih: ['🏛️', L('History', 'تاريخ', 'Tarih')],
+      'coğrafya': ['🗺️', L('Geography', 'جغرافيا', 'Coğrafya')],
+      'türkçe': ['📖', L('Turkish', 'تركية', 'Türkçe')],
+    };
+    const topicStats = u.topicStats || {};
+    const topicRows = Object.entries(topicStats)
+      .filter(([tp, ts]) => (ts.tot || 0) >= 3)
+      .map(([tp, ts]) => ({
+        tp,
+        emoji: (TOPIC_META[tp] || ['📘', tp])[0],
+        name: (TOPIC_META[tp] || [null, (EXAM_CATEGORIES[tp] && EXAM_CATEGORIES[tp].name) || tp])[1],
+        pct: Math.round(((ts.correct || 0) / (ts.tot || 1)) * 100),
+        correct: ts.correct || 0,
+        tot: ts.tot || 0,
+        last: ts.last,
+      }))
+      .sort((a, b) => a.pct - b.pct)
+      .slice(0, 4);
+    c.appendChild(h('div', 'section-label', [L('Weak Topics', 'المواضيع الضعيفة', 'Zayıf Konular')], { style: 'margin:20px 0 10px;text-align:center' }));
+    if (!hasFeature('weakTopics')) {
+      c.appendChild(h('div', 'gate-locked glass', [hIcon('lock', 'ic ic-s'), ' ', L('See your weak topics with Premium', 'اعرف مواضيعك الضعيفة مع بريميوم', 'Zayıf konularını Premium ile gör')], {
+        onclick: () => { sound.click(); openUpgrade('weakTopics'); }
+      }));
+    } else if (topicRows.length) {
+      const weakList = h('div', 'dash-exams');
+      topicRows.forEach(rw => {
+        const row = h('div', 'dash-exam glass weak');
+        const left = h('div', 'dash-exam-left');
+        left.appendChild(h('span', '', [rw.emoji]));
+        left.appendChild(h('span', 'dash-exam-name', [rw.name]));
+        row.appendChild(left);
+        const right = h('div', 'dash-exam-right');
+        right.appendChild(h('div', 'dash-exam-best' + (rw.pct < 50 ? ' weak-bad' : ''), [rw.pct + '% · ' + rw.correct + '/' + rw.tot + (rw.last != null ? ' · ' + L('last', 'الأخير', 'son') + ' ' + rw.last + '%' : '')]));
+        const barWrap = h('div', 'dash-bar-wrap');
+        barWrap.appendChild(h('div', 'dash-bar-fill' + (rw.pct < 50 ? ' weak-fill' : ''), [], { style: `width:${rw.pct}%` }));
+        right.appendChild(barWrap);
+        row.appendChild(right);
+        weakList.appendChild(row);
+      });
+      c.appendChild(weakList);
+      c.appendChild(h('button', 'btn-ghost', ['🎯 ' + L('Practice educational tests to improve', 'تدرب على الاختبارات التعليمية للتحسين', 'Gelişmek için eğitim testleri çöz')], {
+        style: 'width:100%;margin-top:8px;padding:10px;font-size:13px',
+        onclick: () => { sound.click(); state.practice = { pick: { bank: 'exam', format: 'test', categories: ['yks'], num: 10, mode: 'instant', timer: 0 } }; state.practiceView = 'setup'; state.screen = 'practice'; render(); }
+      }));
+    } else {
+      c.appendChild(h('div', 'gate-locked glass', [L('Take educational practice tests to build your weak-topic report.', 'اجتاز اختبارات تدريبية لبناء تقرير مواضيعك الضعيفة.', 'Zayıf konu raporun için eğitim testleri çöz.')], { style: 'font-size:13px' }));
+    }
   }
 
   /* --- custom questions --- */

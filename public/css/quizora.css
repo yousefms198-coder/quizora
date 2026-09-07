@@ -5142,3 +5142,8 @@ html[dir="rtl"] .controller-container .controller-option { text-align: right; }
   text-underline-offset: 3px;
 }
 .forgot-link:hover { color: #bae6fd; }
+
+/* ---- weak-topic analytics panel ---- */
+.dash-exam.weak { border-color: rgba(239, 68, 68, 0.25); }
+.dash-exam-best.weak-bad { color: #f87171; }
+.dash-bar-fill.weak-fill { background: linear-gradient(90deg, #ef4444, #f59e0b); box-shadow: 0 0 12px rgba(239, 68, 68, 0.3); }

@@ -4532,7 +4532,7 @@ const EXAMS = Object.assign({}, EXAM_CATEGORIES_1, EXAM_CATEGORIES_2, EXAM_CATEG
 
 /* Merge extra question bank batches (fun + exam). Future batches:
    add question-bank-2.js, question-bank-3.js ... and register them here. */
-const QUESTION_BANK_BATCHES = ['./question-bank-1.js'];
+const QUESTION_BANK_BATCHES = ['./question-bank-1.js', './question-bank-2.js'];
 QUESTION_BANK_BATCHES.forEach(batchFile => {
   const batch = require(batchFile);
   Object.entries(batch.fun || {}).forEach(([key, qs]) => {
@@ -4542,6 +4542,22 @@ QUESTION_BANK_BATCHES.forEach(batchFile => {
     if (EXAMS[key] && Array.isArray(qs)) EXAMS[key].questions.push(...qs);
   });
 });
+
+/* ---- YKS math generator: correct-by-construction questions (see mathgen.js) ----
+   Blended 50/50 with the handwritten YKS bank so every game/practice gets a
+   balanced mix while players keep seeing fresh generated questions. */
+const MATH_GEN = require('./mathgen.js');
+const MATH_POOL = MATH_GEN.generate(500);
+
+function appendYksMath(pool, cats) {
+  if (!Array.isArray(cats) || !cats.includes('yks')) return pool;
+  const handCount = pool.filter(q => q.category === 'yks').length;
+  const genCount = Math.min(handCount, MATH_POOL.length);
+  const start = Math.floor(Math.random() * MATH_POOL.length);
+  const gen = [];
+  for (let i = 0; i < genCount; i++) gen.push({ ...MATH_POOL[(start + i) % MATH_POOL.length], category: 'yks' });
+  return pool.concat(gen);
+}
 
 function buildQuestions(categories, numQuestions, mode, customBank) {
   let pool = [];
@@ -4554,6 +4570,7 @@ function buildQuestions(categories, numQuestions, mode, customBank) {
         pool = pool.concat(bank[cat].questions.map(q => ({ ...q, category: cat })));
       }
     });
+    if (mode === 'exam') pool = appendYksMath(pool, categories);
   }
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -4698,7 +4715,7 @@ wss.on('connection', (ws) => {
           /* send the full question list, then jump the player to the current round */
           ws.send(JSON.stringify({
             type: 'game_started',
-            questions: room.questions.map(q => ({ q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q, options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options, category: q.category })),
+            questions: room.questions.map(q => ({ q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q, options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options, topic: q.topic || null, category: q.category, topic: q.topic || null })),
             totalQuestions: room.questions.length,
             mode: room.mode,
             currentQuestion: curQ ? { q: curQ.q, qAr: curQ.qAr || curQ.q, qTr: curQ.qTr || curQ.q, options: curQ.options, optionsAr: curQ.optionsAr || curQ.options, optionsTr: curQ.optionsTr || curQ.options, category: curQ.category, round: room.currentQ + 1 } : null,
@@ -4771,13 +4788,13 @@ wss.on('connection', (ws) => {
       broadcastAll(room, {
         type: 'game_started',
         questions: room.questions.map(q => ({
-          q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q, options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options, category: q.category,
+          q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q, options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options, topic: q.topic || null, category: q.category, topic: q.topic || null,
           roundNum: room.questions.indexOf(q) + 1
         })),
         totalQuestions: room.questions.length,
         mode: room.mode,
         currentQuestion: {
-          q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q, options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options, category: q.category,
+          q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q, options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options, topic: q.topic || null, category: q.category, topic: q.topic || null,
           round: 1
         },
         players: room.players,
@@ -5129,7 +5146,7 @@ function advanceQuestion(room) {
   broadcastAll(room, {
 type: 'new_question',
     currentQuestion: {
-      q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q, options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options, category: q.category,
+      q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q, options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options, topic: q.topic || null, category: q.category, topic: q.topic || null,
       round: room.currentQ + 1
     },
     scores: room.scores,
@@ -5240,6 +5257,7 @@ function cleanUser(u) {
     planInterval: u.planInterval && u.planInterval === 'yearly' ? 'yearly' : 'monthly',
     stats: u.stats || { tests: 0, scoreSum: 0, correctTot: 0, answerTot: 0 },
     examStats: u.examStats || {},
+    topicStats: u.topicStats || {},
   };
 }
 
@@ -5275,6 +5293,7 @@ app.post('/api/auth/register', (req, res) => {
     planInterval: 'monthly',
     customMonth: null,
     customQuestions: [],
+    topicStats: {},
   };
   usersDB[em] = user;
   saveUsers(usersDB);
@@ -5476,11 +5495,12 @@ app.post('/api/practice/start', (req, res) => {
   const n = freeExam ? Math.min(fullCap, FREE_EXAM_LIMIT) : fullCap;
   const thisMode = mode === 'report' ? 'report' : 'instant';
   const pool = cats.flatMap(c => EXAMS[c].questions.map(q => ({ ...q, category: c })));
-  for (let i = pool.length - 1; i > 0; i--) {
+  const mixedPool = appendYksMath(pool, cats);
+  for (let i = mixedPool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
+    [mixedPool[i], mixedPool[j]] = [mixedPool[j], mixedPool[i]];
   }
-  const picked = pool.slice(0, n);
+  const picked = mixedPool.slice(0, n);
   const testId = crypto.randomBytes(12).toString('hex');
   practiceTests.set(testId, {
     email: user.email,
@@ -5498,7 +5518,7 @@ app.post('/api/practice/start', (req, res) => {
     questions: picked.map((q, i) => ({
       index: i,
       q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q,
-      options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options,
+      options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options, topic: q.topic || null,
       category: q.category,
     })),
   });
@@ -5533,7 +5553,7 @@ app.post('/api/practice/deck', (req, res) => {
     cards: picked.map((q, i) => ({
       index: i,
       q: q.q, qAr: q.qAr || q.q, qTr: q.qTr || q.q,
-      options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options,
+      options: q.options, optionsAr: q.optionsAr || q.options, optionsTr: q.optionsTr || q.options, topic: q.topic || null,
       correct: q.correct,
       category: q.category,
     })),
@@ -5604,6 +5624,23 @@ app.post('/api/practice/finish', (req, res) => {
       es.best = Math.max(es.best || 0, pct);
       user.examStats[cat] = es;
     });
+    /* per-topic breakdown for the weak-topic analytics panel */
+    if (!user.topicStats) user.topicStats = {};
+    const perTopic = {};
+    t.questions.forEach((q, i) => {
+      const tp = q.topic || q.category;
+      const ok = typeof answers[i] === 'number' && answers[i] === q.correct;
+      perTopic[tp] = perTopic[tp] || { correct: 0, total: 0 };
+      perTopic[tp].total++;
+      if (ok) perTopic[tp].correct++;
+    });
+    Object.entries(perTopic).forEach(([tp, pc]) => {
+      const ts = user.topicStats[tp] || { correct: 0, tot: 0, last: null };
+      ts.tot = (ts.tot || 0) + pc.total;
+      ts.correct = (ts.correct || 0) + pc.correct;
+      ts.last = Math.round((pc.correct / pc.total) * 100);
+      user.topicStats[tp] = ts;
+    });
     saveUsers(usersDB);
     practiceTests.delete(t.testId);
   }
@@ -5626,6 +5663,7 @@ app.post('/api/billing/status', (req, res) => {
     customLimit: p.customMonthly,
     customUsed: used,
     customReset: key,
+    topicStats: user.topicStats || {},
     customQuestions: (user.customQuestions || []).map(q => ({ id: q.id, q: q.q, qAr: q.qAr || '', qTr: q.qTr || '', options: q.options, optionsAr: q.optionsAr || [], optionsTr: q.optionsTr || [], correct: q.correct, createdAt: q.createdAt })),
   });
 });

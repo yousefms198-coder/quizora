@@ -4589,6 +4589,8 @@ wss.on('connection', (ws) => {
         mode: msg.mode === 'exam' ? 'exam' : 'fun',
         selectedCategories: msg.categories || ['general', 'movies', 'family'],
         numQuestions: msg.numQuestions || 10,
+        questionLang: msg.questionLang === 'perplayer' ? 'perplayer' : 'shared',
+        roomLang: (msg.lang === 'ar' || msg.lang === 'tr') ? msg.lang : 'en',
         frozenTimers: {},
         activeDoubles: new Set(),
       };
@@ -4636,7 +4638,7 @@ wss.on('connection', (ws) => {
       const powerupTypes = ['freeze', 'double', 'steal'];
       room.powerups[name] = powerupTypes[room.players.length % powerupTypes.length];
 
-      ws.send(JSON.stringify({ type: 'joined', code, player, categories: room.selectedCategories, numQuestions: room.numQuestions, mode: room.mode, powerup: room.powerups[name] }));
+      ws.send(JSON.stringify({ type: 'joined', code, player, categories: room.selectedCategories, numQuestions: room.numQuestions, mode: room.mode, powerup: room.powerups[name], questionLang: room.questionLang, roomLang: room.roomLang }));
       broadcast(room, { type: 'player_joined', player, players: room.players }, ws.id);
       broadcast(room, { type: 'player_list', players: room.players });
     }
@@ -4667,6 +4669,8 @@ wss.on('connection', (ws) => {
         players: room.players,
         scores: room.scores,
         timerSeconds: room.timerSeconds,
+        questionLang: room.questionLang,
+        roomLang: room.roomLang,
         powerups: Object.fromEntries(room.players.map(p => [p.name, room.powerups[p.name]])),
       });
 
@@ -4730,6 +4734,8 @@ wss.on('connection', (ws) => {
       room.selectedCategories = msg.categories || room.selectedCategories;
       room.numQuestions = msg.numQuestions || room.numQuestions;
       room.timerSeconds = msg.timerSeconds !== undefined ? msg.timerSeconds : room.timerSeconds;
+      if (msg.questionLang !== undefined) room.questionLang = msg.questionLang === 'perplayer' ? 'perplayer' : 'shared';
+      if (msg.roomLang !== undefined && (msg.roomLang === 'ar' || msg.roomLang === 'tr' || msg.roomLang === 'en')) room.roomLang = msg.roomLang;
     }
 
     if (msg.type === 'use_powerup') {

@@ -4372,3 +4372,33 @@ input[type='email']:focus, textarea:focus {
   .tut-card { padding: 24px 16px 18px; }
   .tut-icon { width: 62px; height: 62px; font-size: 30px; margin-bottom: 12px; }
 }
+
+/* ================================================================
+   QUESTION LANGUAGE SELECTOR (create menu + lobby settings)
+================================================================ */
+.question-lang-box {
+  margin-top: 10px;
+  width: 100%;
+}
+.question-lang-box .lang-toggle {
+  width: 100%;
+  margin: 2px 0 0;
+}
+.question-lang-box .lang-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 12px;
+  padding: 8px 10px;
+}
+.question-lang-hint {
+  margin-top: 8px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #64748b;
+  min-height: 18px;
+}
+html[dir="rtl"] .question-lang-hint { text-align: right; }

@@ -14,6 +14,8 @@ let state = {
   mode: 'fun',
   selectedCategories: ['general', 'movies', 'family'],
   numQuestions: 10,
+  questionLang: 'shared',
+  roomLang: 'en',
   phase: 'lobby',
   showReveal: false,
   revealData: null,
@@ -104,6 +106,7 @@ function hIcon(name, cls) {
 
 function startCreate() {
   state.isHost = true;
+  state.roomLang = appLang;
   const sendCreate = () => {
     ws.send(JSON.stringify({
       type: 'create_room',
@@ -111,6 +114,8 @@ function startCreate() {
       categories: state.selectedCategories,
       numQuestions: state.numQuestions,
       timerSeconds: state.timerSeconds,
+      questionLang: state.questionLang,
+      lang: appLang,
     }));
   };
   if (ws && ws.readyState === WebSocket.OPEN) {
@@ -157,6 +162,14 @@ function render() {
     });
     try { window.scrollTo(0, 0); } catch {}
   }
+}
+
+function questionLq(q) {
+  const lang = state.questionLang === 'perplayer' ? appLang : state.roomLang;
+  return {
+    text: lang === 'ar' ? (q.qAr || q.q) : lang === 'tr' ? (q.qTr || q.q) : q.q,
+    options: q.options.map((o, i) => lang === 'ar' ? (q.optionsAr?.[i] || o) : lang === 'tr' ? (q.optionsTr?.[i] || o) : o)
+  };
 }
 
 function stateLoading() {
@@ -448,7 +461,7 @@ function renderSelectionGrid(container, sync) {
         if (sel) { if (state.selectedCategories.length > 1) state.selectedCategories = state.selectedCategories.filter(c => c !== key); }
         else state.selectedCategories.push(key);
         if (sync && ws && ws.readyState === WebSocket.OPEN && state.roomCode) {
-          ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds }));
+          ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang }));
         }
         render();
       }
@@ -471,7 +484,7 @@ function appendSettingsRow(panel) {
   qSel.onchange = e => {
     state.numQuestions = +e.target.value;
     if (ws && ws.readyState === WebSocket.OPEN && state.roomCode) {
-      ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds }));
+      ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang }));
     }
   };
   qBox.appendChild(qSel);
@@ -488,12 +501,38 @@ function appendSettingsRow(panel) {
   tSel.onchange = e => {
     state.timerSeconds = +e.target.value;
     if (ws && ws.readyState === WebSocket.OPEN && state.roomCode) {
-      ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds }));
+      ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang }));
     }
   };
   tBox.appendChild(tSel);
   settRow.appendChild(tBox);
   panel.appendChild(settRow);
+
+  /* --- Question language: same for all vs each player's own --- */
+  const langBox = h('div', 'setting-box glass question-lang-box');
+  langBox.appendChild(h('div', 'setting-label', [L('Question Language', 'لغة الأسئلة', 'Soru Dili')]));
+  const langToggle = h('div', 'lang-toggle');
+  [
+    ['shared', 'users', L('Same for all', 'لغة واحدة للجميع', 'Herkes için aynı')],
+    ['perplayer', 'globe', L('Each player’s own', 'لغة كل لاعب', 'Her oyuncunun kendi dili')]
+  ].forEach(([v, icon, label]) => {
+    const btn = h('button', `lang-btn${state.questionLang === v ? ' active' : ''}`, [hIcon(icon, 'ic ic-s'), ' ', label], {
+      onclick: () => {
+        sound.click();
+        state.questionLang = v;
+        if (ws && ws.readyState === WebSocket.OPEN && state.roomCode) {
+          ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang }));
+        }
+        render();
+      }
+    });
+    langToggle.appendChild(btn);
+  });
+  langBox.appendChild(langToggle);
+  langBox.appendChild(h('div', 'question-lang-hint', [state.questionLang === 'shared'
+    ? L('All players see the same questions, in your language.', 'سيرى جميع اللاعبين الأسئلة نفسها بلغتك.', 'Tüm oyuncular aynı soruları sizin dilinizde görür.')
+    : L('Each player sees questions in their own language.', 'سيرى كل لاعب الأسئلة بلغته الخاصة.', 'Her oyuncu soruları kendi dilinde görür.')]));
+  panel.appendChild(langBox);
 }
 
 /* ======================== LANDING / DASHBOARD ======================== */
@@ -735,7 +774,7 @@ async function injectHostJoinQr() {
 function renderGame() {
   const q = state.questions[state.currentQ];
   if (!q) return stateLoading();
-  const lq = Lq(q);
+  const lq = questionLq(q);
 
   const c = h('div', 'game-container');
 
@@ -978,7 +1017,7 @@ function showRevealOverlay(data) {
   overlay.appendChild(h('div', `reveal-verdict ${verdictClass}`, [verdictText]));
 
   const q = state.questions[state.currentQ];
-  if (q) overlay.appendChild(h('div', 'reveal-answer', [Lq(q).options[data.correctAnswer]]));
+  if (q) overlay.appendChild(h('div', 'reveal-answer', [questionLq(q).options[data.correctAnswer]]));
 
   const correctNames = data.correctPlayers?.join(', ');
   overlay.appendChild(h('div', 'reveal-points', [correctNames ? L(`${correctNames} got it right`, `${correctNames} أجابوا إجابة صحيحة`, `${correctNames} doğru bildi`) : L('Nobody got it right', 'لا أحد أجاب إجابة صحيحة', 'Kimse doğru bilmedi')]));
@@ -1269,7 +1308,7 @@ function renderPlayerWaiting() {
 function renderPlayerAnswer() {
   const q = state.questions[state.currentQ];
   if (!q) return stateLoading();
-  const lq = Lq(q);
+  const lq = questionLq(q);
 
   const c = h('div', 'controller-container');
 
@@ -1436,7 +1475,7 @@ function renderPlayerResult() {
   const q = state.questions[state.currentQ];
   if (last && last.answer !== null && last.answer !== undefined && q) {
     const letters = ['A', 'B', 'C', 'D'];
-    const optText = Lq(q).options[last.answer];
+    const optText = questionLq(q).options[last.answer];
     const pick = h('div', 'pr-pick glass', [
       h('span', `pr-pick-letter ol-${letters[last.answer].toLowerCase()}`, [letters[last.answer]]),
       h('span', 'pr-pick-text', [optText])
@@ -1749,6 +1788,8 @@ function handleHostMessage(msg) {
       state.players.forEach(p => { state.streaks[p.name] = 0; });
       state.timerSeconds = msg.timerSeconds;
       state.timeLeft = msg.timerSeconds;
+      state.questionLang = msg.questionLang === 'perplayer' ? 'perplayer' : 'shared';
+      state.roomLang = ['ar', 'tr', 'en'].includes(msg.roomLang) ? msg.roomLang : 'en';
       state.answered = {};
       state.showReveal = false;
       state.screen = 'game';
@@ -1866,6 +1907,8 @@ function handlePlayerMessage(msg) {
       state.playerName = msg.player.name;
       state.isHost = false;
       state.myPowerup = msg.powerup || null;
+      state.questionLang = msg.questionLang === 'perplayer' ? 'perplayer' : 'shared';
+      state.roomLang = ['ar', 'tr', 'en'].includes(msg.roomLang) ? msg.roomLang : 'en';
       state.screen = 'player_waiting';
       render();
       break;
@@ -1892,6 +1935,8 @@ function handlePlayerMessage(msg) {
       state.scores = {};
       state.timerSeconds = msg.timerSeconds;
       state.timeLeft = msg.timerSeconds;
+      state.questionLang = msg.questionLang === 'perplayer' ? 'perplayer' : 'shared';
+      state.roomLang = ['ar', 'tr', 'en'].includes(msg.roomLang) ? msg.roomLang : 'en';
       state.playerAnswer = null;
       state.lastAnswer = null;
       state.answered = {};

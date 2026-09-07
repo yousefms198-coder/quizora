@@ -490,29 +490,124 @@ html[dir="rtl"] body, html[dir="rtl"] .font-display { font-family: 'Cairo', syst
   opacity: 0;
 }
 
-.landing-badges {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  max-width: 360px;
+.landing-usecases {
   width: 100%;
-  margin-top: 40px;
-  animation: fadeUp 0.7s 0.8s ease forwards;
+  max-width: 760px;
+  margin-top: 44px;
+  animation: fadeUp 0.7s 0.85s ease forwards;
   opacity: 0;
 }
 
-.badge {
+.usecase-head {
+  font-size: clamp(1.35rem, 4vw, 1.9rem);
+  font-weight: 900;
+  letter-spacing: -0.01em;
   text-align: center;
-  padding: 14px 8px;
-  border-radius: 14px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #93c5fd;
-  border-color: rgba(59, 130, 246, 0.12);
-  transition: border-color 0.2s, background 0.2s;
+  margin-bottom: 22px;
+  color: #f1f5f9;
+  background: linear-gradient(120deg, #f0f9ff, #bae6fd 45%, #38bdf8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 40px rgba(56, 189, 248, 0.25);
 }
-.badge:hover { border-color: rgba(59, 130, 246, 0.3); background: rgba(59, 130, 246, 0.05); }
-.badge-icon { display: flex; align-items: center; justify-content: center; margin-bottom: 6px; color: #3b82f6; }
+
+.usecase-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  width: 100%;
+}
+
+.usecase-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 24px 18px 22px;
+  border-radius: 20px;
+  border-color: rgba(255, 255, 255, 0.08);
+  background: linear-gradient(170deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012));
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.22s ease,
+              box-shadow 0.22s ease,
+              background 0.22s ease;
+  animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  opacity: 0;
+}
+.usecase-card:hover {
+  transform: translateY(-4px);
+}
+.usecase-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  margin-bottom: 8px;
+  font-size: 20px;
+}
+.usecase-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #f1f5f9;
+  letter-spacing: -0.01em;
+}
+.usecase-text {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #94a3b8;
+  max-width: 220px;
+}
+
+/* Accent per use case */
+.uc-party .usecase-icon {
+  color: #f0abfc;
+  background: linear-gradient(160deg, rgba(217, 70, 239, 0.22), rgba(168, 85, 247, 0.1));
+  border: 1px solid rgba(217, 70, 239, 0.35);
+  box-shadow: 0 0 20px rgba(217, 70, 239, 0.18);
+}
+.uc-party:hover {
+  border-color: rgba(217, 70, 239, 0.4);
+  background: linear-gradient(170deg, rgba(217, 70, 239, 0.09), rgba(255, 255, 255, 0.02));
+  box-shadow: 0 12px 36px rgba(217, 70, 239, 0.16);
+}
+.uc-family .usecase-icon {
+  color: #5eead4;
+  background: linear-gradient(160deg, rgba(20, 184, 166, 0.22), rgba(13, 148, 136, 0.1));
+  border: 1px solid rgba(20, 184, 166, 0.35);
+  box-shadow: 0 0 20px rgba(20, 184, 166, 0.18);
+}
+.uc-family:hover {
+  border-color: rgba(20, 184, 166, 0.4);
+  background: linear-gradient(170deg, rgba(20, 184, 166, 0.09), rgba(255, 255, 255, 0.02));
+  box-shadow: 0 12px 36px rgba(20, 184, 166, 0.16);
+}
+.uc-exam .usecase-icon {
+  color: #7dd3fc;
+  background: linear-gradient(160deg, rgba(56, 189, 248, 0.22), rgba(59, 130, 246, 0.1));
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.18);
+}
+.uc-exam:hover {
+  border-color: rgba(56, 189, 248, 0.45);
+  background: linear-gradient(170deg, rgba(56, 189, 248, 0.1), rgba(255, 255, 255, 0.02));
+  box-shadow: 0 12px 36px rgba(56, 189, 248, 0.16);
+}
+
+@media (max-width: 640px) {
+  .landing-usecases { margin-top: 32px; }
+  .usecase-grid { grid-template-columns: 1fr; gap: 10px; }
+  .usecase-card { padding: 20px 16px 18px; }
+  .usecase-card { flex-direction: row; text-align: left; justify-content: flex-start; gap: 14px; }
+  .usecase-icon { width: 46px; height: 46px; margin-bottom: 0; flex-shrink: 0; }
+  .usecase-title { font-size: 16px; }
+  .usecase-text { max-width: none; font-size: 12px; }
+}html[dir="rtl"] .usecase-card,
+html[dir="rtl"] .usecase-grid { direction: rtl; }
+html[dir="rtl"] .usecase-card { text-align: right; }
 
 /* ===================== LOBBY ===================== */
 .lobby-container {
@@ -1991,7 +2086,6 @@ input[type='text'], input[type='email'], input[type='password'], select {
   .landing-title { margin-bottom: 8px; }
   .landing-tagline { margin-bottom: 24px; }
   .landing-cards { margin-bottom: 20px; }
-  .landing-badges { margin-top: 24px; }
 
   /* Score / room readouts big enough to read at a glance */
   .players-title { letter-spacing: normal; }
@@ -3860,18 +3954,6 @@ html[dir="rtl"] .cat-btn.selected::after { right: auto; left: 9px; }
 .corner-login { box-shadow: 0 4px 18px rgba(59, 130, 246, 0.35); }
 .corner-login:hover { box-shadow: 0 6px 24px rgba(59, 130, 246, 0.5); }
 
-/* ---------- Utility badges ---------- */
-.badge {
-  border-radius: 16px;
-  background: linear-gradient(160deg, rgba(59, 130, 246, 0.07), rgba(255, 255, 255, 0.015));
-  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-}
-.badge:hover {
-  border-color: rgba(59, 130, 246, 0.35);
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.12);
-  transform: translateY(-2px);
-}
-
 /* ---------- Landing on phones ---------- */
 @media (max-width: 640px) {
   .landing-container { padding-top: 70px; }
@@ -3971,7 +4053,7 @@ button, [role='button'], .act-card, .cat-btn, .mode-btn,
 .btn-primary:active, .btn-success:active, .start-btn:active,
 .btn-ghost:active, .back-btn:active, .mode-btn:active,
 .cat-btn:active, .lang-pill:active, .corner-login:active,
-.player-chip:active, .host-qb-btn:active, .badge:active,
+.player-chip:active, .host-qb-btn:active,
 .powerup-btn:active, .option-btn:active, .stat-card:active {
   transform: translateY(0) scale(0.96);
 }
@@ -3983,7 +4065,7 @@ button, [role='button'], .act-card, .cat-btn, .mode-btn,
   will-change: transform;
 }
 .btn-ghost, .back-btn, .mode-btn, .cat-btn, .lang-pill,
-.corner-login, .player-chip, .host-qb-btn, .badge, .powerup-btn {
+.corner-login, .player-chip, .host-qb-btn, .powerup-btn {
   transition: transform var(--motion-fast) var(--ease-press),
               background var(--motion-base) ease,
               border-color var(--motion-base) ease,
@@ -4082,7 +4164,7 @@ button, [role='button'], .act-card, .cat-btn, .mode-btn,
 .btn-primary:focus-visible, .btn-success:focus-visible, .btn-ghost:focus-visible,
 .back-btn:focus-visible, .start-btn:focus-visible, .mode-btn:focus-visible,
 .cat-btn:focus-visible, .lang-pill:focus-visible, .corner-login:focus-visible,
-.player-chip:focus-visible, .host-qb-btn:focus-visible, .badge:focus-visible,
+.player-chip:focus-visible, .host-qb-btn:focus-visible,
 .powerup-btn:focus-visible, .option-btn:focus-visible, .controller-option:focus-visible,
 .stat-card:focus-visible, select:focus-visible, textarea:focus-visible,
 input:not([type='radio']):not([type='checkbox']):focus-visible {

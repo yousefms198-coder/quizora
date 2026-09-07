@@ -549,15 +549,37 @@ function renderLanding() {
   appendSettingsRow(panel);
   c.appendChild(panel);
 
-  /* --- Utility badges --- */
-  const badges = h('div', 'landing-badges');
-  [['users', L('Friends & Family', 'أصدقاء وعائلة', 'Arkadaşlar ve Aile')], ['grad', L('Exam Prep', 'التحضير للامتحانات', 'Sınav Hazırlığı')], ['sparkle', L('Party Time', 'وقت الحفلات', 'Parti Zamanı')]].forEach(([icon, label]) => {
-    const b = h('div', 'badge glass');
-    b.appendChild(h('span', 'badge-icon', [hIcon(icon, 'ic ic-m')]));
-    b.appendChild(document.createTextNode(label));
-    badges.appendChild(b);
+  /* --- Use cases: made for every room --- */
+  const usecase = h('div', 'landing-usecases');
+  usecase.appendChild(h('h2', 'usecase-head font-display', [L('Made for every room', 'مصنوع لكل غرفة', 'Her odaya uygun')]));
+  const usecaseGrid = h('div', 'usecase-grid');
+  const useCases = [
+    {
+      cls: 'uc-party', icon: 'sparkle',
+      title: L('Party Time', 'وقت الحفلات', 'Parti Zamanı'),
+      text: L('Turn the living room into a full game show. Fast rounds, live ranking, pure chaos.', 'حوّل غرفة المعيشة إلى برنامج مسابقات متكامل. جولات سريعة وترتيب مباشر وفوضى ممتعة.', 'Oturma odanızı tam bir yarışma şovuna çevirin. Hızlı turlar, canlı sıralama, saf eğlence.')
+    },
+    {
+      cls: 'uc-family', icon: 'users',
+      title: L('Family & Friends', 'أصدقاء وعائلة', 'Arkadaşlar ve Aile'),
+      text: L('Easy to join, fun for every age. No complicated setup, just instant shared energy.', 'انضمام سهل ومتعة لجميع الأعمار. لا إعداد معقّد، فقط طاقة مشتركة فورية.', 'Kolay katılım, her yaşa uygun eğlence. Karmaşık kurulum yok, anında ortak enerji.')
+    },
+    {
+      cls: 'uc-exam', icon: 'grad',
+      title: L('Exam Prep', 'التحضير للامتحانات', 'Sınav Hazırlığı'),
+      text: L('Switch to Educational Mode and turn study sessions into focused, competitive review.', 'بدّل إلى الوضع التعليمي وحوّل جلسات الدراسة إلى مراجعة مركّزة وتنافسية.', 'Eğitim Moduna geçin ve ders çalışmayı odaklı, rekabetçi bir tekrara dönüştürün.')
+    }
+  ];
+  useCases.forEach((uc, i) => {
+    const card = h('div', `usecase-card glass ${uc.cls}`, [
+      h('div', 'usecase-icon', [hIcon(uc.icon, 'ic ic-m')]),
+      h('div', 'usecase-title font-display', [uc.title]),
+      h('div', 'usecase-text', [uc.text])
+    ], { style: `animation-delay:${0.9 + i * 0.12}s` });
+    usecaseGrid.appendChild(card);
   });
-  c.appendChild(badges);
+  usecase.appendChild(usecaseGrid);
+  c.appendChild(usecase);
   return c;
 }
 

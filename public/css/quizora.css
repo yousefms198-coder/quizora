@@ -5063,42 +5063,39 @@ html[dir="rtl"] .question-lang-hint { text-align: right; }
 
 /* ================================================================
    CONTROLLER FINAL ANTI-OVERLAP PASS
-   Phones: answers as a 2x2 grid of compact row tiles so the whole
-   controller always fits the screen (the earlier 1-column stacking
-   pushed ~800px of content into a ~640px viewport and everything
-   overlapped). Higher specificity wins over the scattered tile
-   rules above regardless of file position.
+   Answers as a 2x2 grid of compact row tiles at EVERY screen size
+   (the earlier 1-column stacking pushed ~800px of content into
+   short viewports and everything overlapped). Higher specificity
+   wins over the scattered tile rules above regardless of position.
    ================================================================ */
-@media (max-width: 700px) {
-  .controller-container .controller-options {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: none;
-    grid-auto-rows: minmax(64px, 1fr);
-    gap: 10px;
-    padding: 0 2px;
-  }
-  .controller-container .controller-option {
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 10px;
-    min-height: 64px;
-    padding: 10px 12px;
-    text-align: left;
-  }
-  html[dir="rtl"] .controller-container .controller-option { text-align: right; }
-  .controller-container .controller-option-letter {
-    width: 34px; height: 34px;
-    font-size: 14px;
-    margin-bottom: 0;
-    flex-shrink: 0;
-  }
-  .controller-container .controller-option-text {
-    font-size: 15px;
-    line-height: 1.25;
-    min-width: 0;
-    overflow-wrap: break-word;
-  }
+.controller-container .controller-options {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: none;
+  grid-auto-rows: minmax(64px, 1fr);
+  gap: 10px;
+  padding: 0 2px;
+}
+.controller-container .controller-option {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  min-height: 64px;
+  padding: 10px 12px;
+  text-align: left;
+}
+html[dir="rtl"] .controller-container .controller-option { text-align: right; }
+.controller-container .controller-option-letter {
+  width: 34px; height: 34px;
+  font-size: 14px;
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+.controller-container .controller-option-text {
+  font-size: 15px;
+  line-height: 1.25;
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 @media (max-width: 340px) {
   .controller-container .controller-option-text { font-size: 13.5px; }

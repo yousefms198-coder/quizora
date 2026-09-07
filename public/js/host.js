@@ -16,6 +16,7 @@ let state = {
   numQuestions: 10,
   questionLang: 'shared',
   roomLang: 'en',
+  roomLangTouched: false,
   phase: 'lobby',
   showReveal: false,
   revealData: null,
@@ -106,7 +107,7 @@ function hIcon(name, cls) {
 
 function startCreate() {
   state.isHost = true;
-  state.roomLang = appLang;
+  if (!state.roomLangTouched) state.roomLang = appLang;
   const sendCreate = () => {
     ws.send(JSON.stringify({
       type: 'create_room',
@@ -115,7 +116,7 @@ function startCreate() {
       numQuestions: state.numQuestions,
       timerSeconds: state.timerSeconds,
       questionLang: state.questionLang,
-      lang: appLang,
+      lang: state.roomLang,
     }));
   };
   if (ws && ws.readyState === WebSocket.OPEN) {
@@ -461,7 +462,7 @@ function renderSelectionGrid(container, sync) {
         if (sel) { if (state.selectedCategories.length > 1) state.selectedCategories = state.selectedCategories.filter(c => c !== key); }
         else state.selectedCategories.push(key);
         if (sync && ws && ws.readyState === WebSocket.OPEN && state.roomCode) {
-          ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang }));
+          ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang, lang: state.roomLang }));
         }
         render();
       }
@@ -484,7 +485,7 @@ function appendSettingsRow(panel) {
   qSel.onchange = e => {
     state.numQuestions = +e.target.value;
     if (ws && ws.readyState === WebSocket.OPEN && state.roomCode) {
-      ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang }));
+      ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang, lang: state.roomLang }));
     }
   };
   qBox.appendChild(qSel);
@@ -501,7 +502,7 @@ function appendSettingsRow(panel) {
   tSel.onchange = e => {
     state.timerSeconds = +e.target.value;
     if (ws && ws.readyState === WebSocket.OPEN && state.roomCode) {
-      ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang }));
+      ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang, lang: state.roomLang }));
     }
   };
   tBox.appendChild(tSel);
@@ -521,7 +522,7 @@ function appendSettingsRow(panel) {
         sound.click();
         state.questionLang = v;
         if (ws && ws.readyState === WebSocket.OPEN && state.roomCode) {
-          ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang }));
+          ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang, lang: state.roomLang }));
         }
         render();
       }
@@ -529,8 +530,33 @@ function appendSettingsRow(panel) {
     langToggle.appendChild(btn);
   });
   langBox.appendChild(langToggle);
+
+  const roomLangRow = h('div', 'lang-toggle question-room-lang');
+  const activeRoomLang = state.roomLangTouched ? state.roomLang : appLang;
+  const langOptions = [
+    ['en', 'EN'],
+    ['ar', 'عربية'],
+    ['tr', 'TR']
+  ];
+  langOptions.forEach(([v, label]) => {
+    const b = h('button', `lang-btn room-lang-btn${activeRoomLang === v ? ' active' : ''}`, [label], {
+      onclick: () => {
+        sound.click();
+        state.roomLang = v;
+        state.roomLangTouched = true;
+        if (ws && ws.readyState === WebSocket.OPEN && state.roomCode) {
+          ws.send(JSON.stringify({ type: 'update_settings', categories: state.selectedCategories, numQuestions: state.numQuestions, timerSeconds: state.timerSeconds, questionLang: state.questionLang, lang: state.roomLang }));
+        }
+        render();
+      }
+    });
+    roomLangRow.appendChild(b);
+  });
+  if (state.questionLang !== 'shared') roomLangRow.style.display = 'none';
+  langBox.appendChild(roomLangRow);
+
   langBox.appendChild(h('div', 'question-lang-hint', [state.questionLang === 'shared'
-    ? L('All players see the same questions, in your language.', 'سيرى جميع اللاعبين الأسئلة نفسها بلغتك.', 'Tüm oyuncular aynı soruları sizin dilinizde görür.')
+    ? L('Everyone sees questions in the selected language.', 'سيرى الجميع الأسئلة باللغة المحددة.', 'Herkes soruları seçilen dilde görür.')
     : L('Each player sees questions in their own language.', 'سيرى كل لاعب الأسئلة بلغته الخاصة.', 'Her oyuncu soruları kendi dilinde görür.')]));
   panel.appendChild(langBox);
 }

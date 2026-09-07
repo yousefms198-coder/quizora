@@ -4384,6 +4384,13 @@ input[type='email']:focus, textarea:focus {
   width: 100%;
   margin: 2px 0 0;
 }
+.question-lang-box .question-room-lang {
+  margin-top: 8px;
+}
+.question-lang-box .room-lang-btn {
+  flex: 0 0 auto;
+  min-width: 64px;
+}
 .question-lang-box .lang-btn {
   flex: 1;
   display: inline-flex;

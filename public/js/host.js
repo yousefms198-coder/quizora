@@ -155,6 +155,7 @@ function render() {
       void app.offsetWidth;
       app.classList.add('view-enter');
     });
+    try { window.scrollTo(0, 0); } catch {}
   }
 }
 
@@ -2770,6 +2771,8 @@ function buildPracticeReport(c) {
 
 /* ======================== HOST OR PLAYER? ======================== */
 function checkRoute() {
+  try { history.scrollRestoration = 'manual'; } catch {}
+  try { window.scrollTo(0, 0); } catch {}
   initLang();
   restoreSession();
   const path = window.location.pathname;

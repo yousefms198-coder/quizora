@@ -1,6 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&family=Cairo:wght@400;500;600;700;800;900&display=swap');
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html {
+  overflow-x: hidden;
+  overflow-x: clip;
+}
 body {
   overscroll-behavior: none;
   background: #0a0f1e;
@@ -8,6 +12,7 @@ body {
   font-family: 'Inter', 'Cairo', system-ui, sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
+  overflow-x: clip;
   position: relative;
 }
 body::before {

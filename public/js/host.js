@@ -85,8 +85,8 @@ function h(tag, cls, children, attrs) {
   });
   (Array.isArray(children) ? children : [children]).forEach(c => {
     if (c === null || c === undefined) return;
-    if (typeof c === 'string') e.appendChild(document.createTextNode(c));
-    else if (c instanceof Node) e.appendChild(c);
+    if (c instanceof Node) e.appendChild(c);
+    else e.appendChild(document.createTextNode(String(c)));
   });
   return e;
 }

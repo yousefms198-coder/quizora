@@ -176,6 +176,8 @@ function generate(count) {
   let i = 0;
   while (out.length < count) {
     const q = gens[i % gens.length]();
+    /* options as strings — every renderer in the app expects string options */
+    q.options = q.options.map(o => String(o));
     q.topic = 'matematik';
     const sig = q.q;
     if (!out.some(x => x.q === sig)) out.push(q);
